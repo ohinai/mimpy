@@ -13,7 +13,7 @@ res_mfd.set_compute_diagonality(True)
 res_mfd.set_m_e_construction_method(0)
 
 #Define the permeability function
-def K(p):
+def K(p, i, j, k):
     return np.eye(3)
 
 #The exact solution.
