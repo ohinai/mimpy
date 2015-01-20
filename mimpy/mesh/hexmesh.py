@@ -1,0 +1,697 @@
+
+import numpy as np
+import math
+import mesh
+import array 
+
+
+class HexMesh(mesh.Mesh):
+    
+    def nonplanar_normal(self, face):
+        for i in range(1):
+            v1 = self.get_point(face[i+1]) - self.get_point(face[i]) 
+            v2 = self.get_point(face[i]) - self.get_point(face[i-1]) 
+            normal = np.cross(v2, v1)
+            
+        return normal/np.linalg.norm(normal)
+
+    def nonplanar_face_centroid(self, face):
+        p1 = self.get_point(face[0])
+        p2 = self.get_point(face[1])
+        p3 = self.get_point(face[2])
+        p4 = self.get_point(face[3])
+        
+        centerPoint = .25 * (p1 + p2 + p3 + p4)
+        
+        return centerPoint
+    
+    def nonplanar_cell_centroid(self, cell):
+        centroid = np.zeros(3)
+        count = 0.
+        for face in cell:
+            for point in self.get_face(face):
+                count += 1.
+                centroid += self.get_point(point)
+                
+        centroid = centroid/count
+        return centroid
+
+    def nonplanar_area(self, face):
+        area = 0.
+
+        p1 = self.points[face[0]]
+        p2 = self.points[face[1]]
+        p3 = self.points[face[2]]
+        p4 = self.points[face[3]]
+        
+        centerPoint = .25 * (p1 + p2 + p3 + p4)
+        
+        a = np.linalg.norm(p1-p2)
+        b = np.linalg.norm(p2-centerPoint)
+        c = np.linalg.norm(centerPoint - p1)
+        s = (a + b + c)/2.
+
+        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
+
+        a = np.linalg.norm(p2-p3)
+        b = np.linalg.norm(p3-centerPoint)
+        c = np.linalg.norm(centerPoint - p2)
+        s = (a + b + c)/2.
+
+        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
+
+        a = np.linalg.norm(p3-p4)
+        b = np.linalg.norm(p4-centerPoint)
+        c = np.linalg.norm(centerPoint - p3)
+        s = (a + b + c)/2.
+
+        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
+
+        a = np.linalg.norm(p4-p1)
+        b = np.linalg.norm(p1-centerPoint)
+        c = np.linalg.norm(centerPoint - p4)
+        s = (a + b + c)/2.
+
+        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
+
+        return area 
+
+    def get_dim_x(self):
+        """
+        Return the dimension of the domain 
+        in the X direction. 
+        """
+        return self.dim_x
+
+    def get_dim_y(self):
+        """
+        Return the dimension of the domain 
+        in the Y direction. 
+        """
+        return self.dim_y
+
+    def get_dim_z(self):
+        """
+        Return the dimension of the domain 
+        in the Z direction. 
+        """
+        return self.dim_z
+
+    def build_faces(self, nk, nj, ni):
+        """ Function to build the mesh faces.  
+        """
+        count = 0
+        self.polygon_ijka_to_index = {}
+
+        for k in range(nk):
+            for j in range(nj):
+                for i in range(ni):
+                    if i < ni-1 and j < nj-1: 
+                        new_face = array.array('i', [self.ijk_to_index[(i,j,k)],
+                                                     self.ijk_to_index[(i+1,j,k)], 
+                                                     self.ijk_to_index[(i+1,j+1,k)], 
+                                                     self.ijk_to_index[(i,j+1,k)]])
+                        
+                        face_index = self.get_number_of_faces()
+                        self.add_face(new_face)
+                        self.set_face_normal(face_index, 
+                                             self.nonplanar_normal(new_face))
+                        self.set_face_area(face_index, 
+                                           self.nonplanar_area(new_face))
+                        self.set_face_real_centroid(face_index, 
+                                                    self.nonplanar_face_centroid(new_face))
+
+                        self.polygon_ijka_to_index[(i,j,k,0)] = face_index
+
+                        if k == 0:
+                            self.add_boundary_face(4, face_index, -1)
+                            self.set_face_quadrature_points(face_index, 
+                                                            [self.get_face_real_centroid(face_index)])
+                            self.set_face_quadrature_weights(face_index, 
+                                                             [self.get_face_area(face_index)])
+
+                        if k == nk-1:
+                            self.add_boundary_face(5, face_index, 1)
+                            self.set_face_quadrature_points(face_index, 
+                                                         [self.get_face_real_centroid(face_index)])
+                            self.set_face_quadrature_weights(face_index, 
+                                                          [self.get_face_area(face_index)])
+
+                        count += 1
+
+                    if k < nk-1 and i < ni-1:
+                        new_face = [self.ijk_to_index[(i,j,k)],
+                                    self.ijk_to_index[(i,j,k+1)], 
+                                    self.ijk_to_index[(i+1,j,k+1)], 
+                                    self.ijk_to_index[(i+1,j,k)]]
+                        
+                        face_index = self.get_number_of_faces()
+                        self.add_face(new_face)
+                        self.set_face_normal(face_index, 
+                                             self.nonplanar_normal(new_face))
+                        self.set_face_area(face_index, 
+                                           self.nonplanar_area(new_face))
+                        self.set_face_real_centroid(face_index, 
+                                                    self.nonplanar_face_centroid(new_face))
+                        
+                        self.polygon_ijka_to_index[(i,j,k,1)] = face_index
+
+                        if j == 0:
+                            self.add_boundary_face(2, face_index, -1)
+                            self.set_face_quadrature_points(face_index, 
+                                                         [self.get_face_real_centroid(face_index)])
+                            self.set_face_quadrature_weights(face_index,  
+                                                          [self.get_face_area(face_index)])
+                            
+                        if j == nj - 1:
+                            self.add_boundary_face(3, face_index, 1)
+                            self.set_face_quadrature_points(face_index, 
+                                                            [self.get_face_real_centroid(face_index)])
+                            self.set_face_quadrature_weights(face_index, 
+                                                             [self.get_face_area(face_index)])
+
+                        count += 1
+
+                    if j < nj-1 and k < nk-1:
+                        new_face = [self.ijk_to_index[(i,j,k)],
+                                    self.ijk_to_index[(i,j+1,k)], 
+                                    self.ijk_to_index[(i,j+1,k+1)], 
+                                    self.ijk_to_index[(i,j,k+1)]]
+
+                        face_index = self.get_number_of_faces()
+                        self.add_face(new_face)
+                        self.set_face_normal(face_index, 
+                                             self.nonplanar_normal(new_face))
+                        self.set_face_area(face_index, 
+                                           self.nonplanar_area(new_face))
+                        self.set_face_real_centroid(face_index, 
+                                                    self.nonplanar_face_centroid(new_face))
+
+                        self.polygon_ijka_to_index[(i,j,k,2)] = count
+
+                        if i == 0:
+                            self.add_boundary_face(0, count, -1)
+                            self.set_face_quadrature_points(count, 
+                                                            [self.get_face_real_centroid(count)])
+                            self.set_face_quadrature_weights(count, 
+                                                             [self.get_face_area(count)])
+
+                        if i == ni - 1:
+                            self.add_boundary_face(1, count, 1)
+                            self.set_face_quadrature_points(count, 
+                                                            [self.get_face_real_centroid(count)])
+                            self.set_face_quadrature_weights(count, 
+                                                             [self.get_face_area(count)])
+                            
+                        count += 1
+        
+    def build_faces_fast(self, nk, nj, ni):
+        """ Function to build the mesh faces.  
+        """
+        count = 0
+        self.polygon_ijka_to_index = {}
+
+
+        for k in range(nk):
+            for j in range(nj-1):
+                for i in range(ni-1):
+                    new_face = array.array('i', [self.ijk_to_index[(i,j,k)],
+                                                 self.ijk_to_index[(i+1,j,k)], 
+                                                 self.ijk_to_index[(i+1,j+1,k)], 
+                                                 self.ijk_to_index[(i,j+1,k)]])
+
+                    face_index = self.get_number_of_faces()
+                    self.add_face(new_face)
+                    self.set_face_normal(face_index, 
+                                         self.nonplanar_normal(new_face))
+                    self.set_face_area(face_index, 
+                                       self.nonplanar_area(new_face))
+                    self.set_face_real_centroid(face_index, 
+                                                self.nonplanar_face_centroid(new_face))
+
+                    self.polygon_ijka_to_index[(i,j,k,0)] = face_index
+
+                    if k == 0:
+                        self.add_boundary_face(4, face_index, -1)
+                        self.set_face_quadrature_points(face_index, 
+                                                        [self.get_face_real_centroid(face_index)])
+                        self.set_face_quadrature_weights(face_index, 
+                                                         [self.get_face_area(face_index)])
+
+                    elif k == nk-1:
+                        self.add_boundary_face(5, face_index, 1)
+                        self.set_face_quadrature_points(face_index, 
+                                                     [self.get_face_real_centroid(face_index)])
+                        self.set_face_quadrature_weights(face_index, 
+                                                      [self.get_face_area(face_index)])
+
+                    count += 1
+
+        for k in range(nk-1):
+            for j in range(nj):
+                for i in range(ni-1):
+                    new_face = [self.ijk_to_index[(i,j,k)],
+                                self.ijk_to_index[(i,j,k+1)], 
+                                self.ijk_to_index[(i+1,j,k+1)], 
+                                self.ijk_to_index[(i+1,j,k)]]
+
+                    face_index = self.get_number_of_faces()
+                    self.add_face(new_face)
+                    self.set_face_normal(face_index, 
+                                         self.nonplanar_normal(new_face))
+                    self.set_face_area(face_index, 
+                                       self.nonplanar_area(new_face))
+                    self.set_face_real_centroid(face_index, 
+                                                self.nonplanar_face_centroid(new_face))
+
+                    self.polygon_ijka_to_index[(i,j,k,1)] = face_index
+
+                    if j == 0:
+                        self.add_boundary_face(2, face_index, -1)
+                        self.set_face_quadrature_points(face_index, 
+                                                     [self.get_face_real_centroid(face_index)])
+                        self.set_face_quadrature_weights(face_index,  
+                                                      [self.get_face_area(face_index)])
+
+                    elif j == nj - 1:
+                        self.add_boundary_face(3, face_index, 1)
+                        self.set_face_quadrature_points(face_index, 
+                                                        [self.get_face_real_centroid(face_index)])
+                        self.set_face_quadrature_weights(face_index, 
+                                                         [self.get_face_area(face_index)])
+
+                    count += 1
+
+
+        for k in range(nk-1):
+            for j in range(nj-1):
+                for i in range(ni):
+                    new_face = [self.ijk_to_index[(i,j,k)],
+                                self.ijk_to_index[(i,j+1,k)], 
+                                self.ijk_to_index[(i,j+1,k+1)], 
+                                self.ijk_to_index[(i,j,k+1)]]
+
+                    face_index = self.get_number_of_faces()
+                    self.add_face(new_face)
+                    self.set_face_normal(face_index, 
+                                         self.nonplanar_normal(new_face))
+                    self.set_face_area(face_index, 
+                                       self.nonplanar_area(new_face))
+                    self.set_face_real_centroid(face_index, 
+                                                self.nonplanar_face_centroid(new_face))
+
+                    self.polygon_ijka_to_index[(i,j,k,2)] = count
+
+                    if i == 0:
+                        self.add_boundary_face(0, count, -1)
+                        self.set_face_quadrature_points(count, 
+                                                        [self.get_face_real_centroid(count)])
+                        self.set_face_quadrature_weights(count, 
+                                                         [self.get_face_area(count)])
+
+                    elif i == ni-1:
+                        self.add_boundary_face(1, count, 1)
+                        self.set_face_quadrature_points(count, 
+                                                        [self.get_face_real_centroid(count)])
+                        self.set_face_quadrature_weights(count, 
+                                                         [self.get_face_area(count)])
+
+                    count += 1
+
+
+    def build_faces_even_faster(self, nk, nj, ni):
+        """ Function to build the mesh faces.  
+        """
+        count = 0
+        self.polygon_ijka_to_index = {}
+
+        for j in range(nj-1):
+            for i in range(ni-1):
+                k = 0
+                new_face = array.array('i', [self.ijk_to_index[(i,j,k)],
+                                             self.ijk_to_index[(i+1,j,k)], 
+                                             self.ijk_to_index[(i+1,j+1,k)], 
+                                             self.ijk_to_index[(i,j+1,k)]])
+                
+                face_index = self.get_number_of_faces()
+                self.add_face(new_face)
+                self.set_face_normal(face_index, 
+                                     self.nonplanar_normal(new_face))
+                self.set_face_area(face_index, 
+                                   self.nonplanar_area(new_face))
+                self.set_face_real_centroid(face_index, 
+                                            self.nonplanar_face_centroid(new_face))
+                
+                self.polygon_ijka_to_index[(i,j,k,0)] = face_index
+                
+                self.add_boundary_face(4, face_index, -1)
+                self.set_face_quadrature_points(face_index, 
+                                                [self.get_face_real_centroid(face_index)])
+                self.set_face_quadrature_weights(face_index, 
+                                                 [self.get_face_area(face_index)])
+                    
+                count += 1
+                
+                k = nk-1
+                new_face = array.array('i', [self.ijk_to_index[(i,j,k)],
+                                             self.ijk_to_index[(i+1,j,k)], 
+                                             self.ijk_to_index[(i+1,j+1,k)], 
+                                             self.ijk_to_index[(i,j+1,k)]])
+                
+                face_index = self.get_number_of_faces()
+                self.add_face(new_face)
+                self.set_face_normal(face_index, 
+                                     self.nonplanar_normal(new_face))
+                self.set_face_area(face_index, 
+                                   self.nonplanar_area(new_face))
+                self.set_face_real_centroid(face_index, 
+                                            self.nonplanar_face_centroid(new_face))
+                
+                self.polygon_ijka_to_index[(i,j,k,0)] = face_index
+                
+                self.add_boundary_face(4, face_index, -1)
+                self.set_face_quadrature_points(face_index, 
+                                                [self.get_face_real_centroid(face_index)])
+                self.set_face_quadrature_weights(face_index, 
+                                                 [self.get_face_area(face_index)])
+ 
+                self.add_boundary_face(5, face_index, 1)
+                self.set_face_quadrature_points(face_index, 
+                                                [self.get_face_real_centroid(face_index)])
+                self.set_face_quadrature_weights(face_index, 
+                                                 [self.get_face_area(face_index)])
+
+                count += 1
+                    
+        for k in range(1, nk-1):
+            for j in range(nj-1):
+                for i in range(ni-1):
+                    new_face = array.array('i', [self.ijk_to_index[(i,j,k)],
+                                                 self.ijk_to_index[(i+1,j,k)], 
+                                                 self.ijk_to_index[(i+1,j+1,k)], 
+                                                 self.ijk_to_index[(i,j+1,k)]])
+
+                    face_index = self.get_number_of_faces()
+                    self.add_face(new_face)
+                    self.set_face_normal(face_index, 
+                                         self.nonplanar_normal(new_face))
+                    self.set_face_area(face_index, 
+                                       self.nonplanar_area(new_face))
+                    self.set_face_real_centroid(face_index, 
+                                                self.nonplanar_face_centroid(new_face))
+
+                    self.polygon_ijka_to_index[(i,j,k,0)] = face_index
+
+                    count += 1
+
+        for k in range(nk-1):
+            for i in range(ni-1):
+                j = 0
+                new_face = [self.ijk_to_index[(i,j,k)],
+                            self.ijk_to_index[(i,j,k+1)], 
+                            self.ijk_to_index[(i+1,j,k+1)], 
+                            self.ijk_to_index[(i+1,j,k)]]
+
+                face_index = self.get_number_of_faces()
+                self.add_face(new_face)
+                self.set_face_normal(face_index, 
+                                     self.nonplanar_normal(new_face))
+                self.set_face_area(face_index, 
+                                   self.nonplanar_area(new_face))
+                self.set_face_real_centroid(face_index, 
+                                            self.nonplanar_face_centroid(new_face))
+
+                self.polygon_ijka_to_index[(i,j,k,1)] = face_index
+
+                self.add_boundary_face(2, face_index, -1)
+                self.set_face_quadrature_points(face_index, 
+                                                [self.get_face_real_centroid(face_index)])
+                self.set_face_quadrature_weights(face_index,  
+                                                 [self.get_face_area(face_index)])
+
+                count += 1
+
+                j = nj-1
+
+                new_face = [self.ijk_to_index[(i,j,k)],
+                            self.ijk_to_index[(i,j,k+1)], 
+                            self.ijk_to_index[(i+1,j,k+1)], 
+                            self.ijk_to_index[(i+1,j,k)]]
+
+                face_index = self.get_number_of_faces()
+                self.add_face(new_face)
+                self.set_face_normal(face_index, 
+                                     self.nonplanar_normal(new_face))
+                self.set_face_area(face_index, 
+                                   self.nonplanar_area(new_face))
+                self.set_face_real_centroid(face_index, 
+                                            self.nonplanar_face_centroid(new_face))
+
+                self.polygon_ijka_to_index[(i,j,k,1)] = face_index
+
+                self.add_boundary_face(3, face_index, 1)
+                self.set_face_quadrature_points(face_index, 
+                                                [self.get_face_real_centroid(face_index)])
+                self.set_face_quadrature_weights(face_index, 
+                                                 [self.get_face_area(face_index)])
+
+                count += 1
+
+        for k in range(nk-1):
+            for j in range(1, nj-1):
+                for i in range(ni-1):
+                    new_face = [self.ijk_to_index[(i,j,k)],
+                                self.ijk_to_index[(i,j,k+1)], 
+                                self.ijk_to_index[(i+1,j,k+1)], 
+                                self.ijk_to_index[(i+1,j,k)]]
+
+                    face_index = self.get_number_of_faces()
+                    self.add_face(new_face)
+                    self.set_face_normal(face_index, 
+                                         self.nonplanar_normal(new_face))
+                    self.set_face_area(face_index, 
+                                       self.nonplanar_area(new_face))
+                    self.set_face_real_centroid(face_index, 
+                                                self.nonplanar_face_centroid(new_face))
+
+                    self.polygon_ijka_to_index[(i,j,k,1)] = face_index
+
+                    count += 1
+
+
+        for k in range(nk-1):
+            for j in range(nj-1):
+                i = 0
+                new_face = [self.ijk_to_index[(i,j,k)],
+                            self.ijk_to_index[(i,j+1,k)], 
+                            self.ijk_to_index[(i,j+1,k+1)], 
+                            self.ijk_to_index[(i,j,k+1)]]
+                
+                face_index = self.get_number_of_faces()
+                self.add_face(new_face)
+                self.set_face_normal(face_index, 
+                                     self.nonplanar_normal(new_face))
+                self.set_face_area(face_index, 
+                                   self.nonplanar_area(new_face))
+                self.set_face_real_centroid(face_index, 
+                                            self.nonplanar_face_centroid(new_face))
+                
+                self.polygon_ijka_to_index[(i,j,k,2)] = count
+                
+                self.add_boundary_face(0, count, -1)
+                self.set_face_quadrature_points(count, 
+                                                [self.get_face_real_centroid(count)])
+                self.set_face_quadrature_weights(count, 
+                                                 [self.get_face_area(count)])
+                    
+                count += 1
+
+                i = ni-1
+                new_face = [self.ijk_to_index[(i,j,k)],
+                            self.ijk_to_index[(i,j+1,k)], 
+                            self.ijk_to_index[(i,j+1,k+1)], 
+                            self.ijk_to_index[(i,j,k+1)]]
+                
+                face_index = self.get_number_of_faces()
+                self.add_face(new_face)
+                self.set_face_normal(face_index, 
+                                     self.nonplanar_normal(new_face))
+                self.set_face_area(face_index, 
+                                   self.nonplanar_area(new_face))
+                self.set_face_real_centroid(face_index, 
+                                            self.nonplanar_face_centroid(new_face))
+                
+                self.polygon_ijka_to_index[(i,j,k,2)] = count
+                    
+                self.add_boundary_face(1, count, 1)
+                self.set_face_quadrature_points(count, 
+                                                [self.get_face_real_centroid(count)])
+                self.set_face_quadrature_weights(count, 
+                                                 [self.get_face_area(count)])
+
+                count += 1
+
+        for k in range(nk-1):
+            for j in range(nj-1):
+                for i in range(1, ni-1):
+                    new_face = [self.ijk_to_index[(i,j,k)],
+                                self.ijk_to_index[(i,j+1,k)], 
+                                self.ijk_to_index[(i,j+1,k+1)], 
+                                self.ijk_to_index[(i,j,k+1)]]
+
+                    face_index = self.get_number_of_faces()
+                    self.add_face(new_face)
+                    self.set_face_normal(face_index, 
+                                         self.nonplanar_normal(new_face))
+                    self.set_face_area(face_index, 
+                                       self.nonplanar_area(new_face))
+                    self.set_face_real_centroid(face_index, 
+                                                self.nonplanar_face_centroid(new_face))
+
+                    self.polygon_ijka_to_index[(i,j,k,2)] = count
+
+                    count += 1
+
+    def build_mesh(self, ni, nj, nk, K, 
+                   dim_x, dim_y, dim_z, 
+                   modification_function = lambda x, i, j, k: x):
+        
+        self.dim = 3
+        self.vtk_cells = []
+
+        # Needs to be moved to an __init__ function. 
+        self.dim_x = dim_x
+        self.dim_y = dim_y
+        self.dim_z = dim_z
+
+        self.cell_to_ijk = {}
+
+        dx = dim_x/(ni-1.)
+        dy = dim_y/(nj-1.)
+        dk = dim_z/(nk-1.)
+        
+        self.ijk_to_index = {}
+        self.set_boundary_markers([0, 1, 2, 3, 4, 5], 
+                                  ['BottomX', 'TopX', 
+                                   'BottomY', 'TopY',
+                                   "BottomZ,", "TopZ",])
+
+        count = 0
+	## adding points:
+        for k in range(nk):
+            for j in range(nj):
+                for i in range(ni):   
+                    self.add_point(modification_function(np.array([float(i)*dx,
+                                                                   float(j)*dy, 
+                                                                   float(k)*dk]), 
+                                                         i, j, k))
+                    self.ijk_to_index[(i,j, k)] = count
+                    count +=1 
+
+        self.build_faces(nk, nj, ni)
+
+	### adding cells:
+        for k in range(nk-1):
+            for j in range(nj-1):
+                for i in range(ni-1):
+
+                    new_cell = array.array('i', [self.polygon_ijka_to_index[(i,j,k, 0)],
+                                                 self.polygon_ijka_to_index[(i,j,k, 1)],
+                                                 self.polygon_ijka_to_index[(i,j,k, 2)],
+                                                 self.polygon_ijka_to_index[(i+1,j,k, 2)],
+                                                 self.polygon_ijka_to_index[(i,j+1,k, 1)],
+                                                 self.polygon_ijka_to_index[(i,j,k+1, 0)]])
+                    
+                    cell_index = self.add_cell(new_cell,
+                                               array.array('i', [-1, -1, -1, 1, 1, 1]))
+
+                    
+                    self.cell_to_ijk[cell_index] = (i, j, k)
+                    
+                    self.vtk_cells.append(array.array('i', [self.ijk_to_index[i, j, k], 
+                                                            self.ijk_to_index[i+1, j, k], 
+                                                            self.ijk_to_index[i+1, j+1, k], 
+                                                            self.ijk_to_index[i, j+1, k], 
+                                                            
+                                                            self.ijk_to_index[i, j, k+1], 
+                                                            self.ijk_to_index[i+1, j, k+1], 
+                                                            self.ijk_to_index[i+1, j+1, k+1], 
+                                                            self.ijk_to_index[i, j+1, k+1],]))
+
+        for cell_index in range(len(self.cells)):
+            centroid = self.nonplanar_cell_centroid(self.get_cell(cell_index))
+            (volume, _ ) = self.find_volume_centroid(cell_index)
+            
+            self.set_cell_volume(cell_index, volume)
+            self.set_cell_real_centroid(cell_index, centroid)
+            self.set_cell_quadrature_points(cell_index, [centroid])
+            self.set_cell_quadrature_weights(cell_index, [volume])
+                             
+        for cell_index in range(self.get_number_of_cells()):
+            
+            (i, j, k) = self.cell_to_ijk[cell_index]
+
+            [cx, cy, cz] = self.get_cell_real_centroid(cell_index)
+            k_e = K(np.array([cx, cy, cz]), i, j, k)
+
+            self.set_cell_k(cell_index, k_e)
+
+    def output_vector_field_gnuplot(self, filename, vectorMagnitude):
+        """ For plotting vectors in a 2D plane using gnuplot. 
+        The plane is assumed to be x-y. Plot using command:
+        plot "filename.dat" using 1:2:3:4 with vectors. 
+        """
+        output = open(filename +  ".dat", "w")
+        
+        for face in range(self.get_number_of_faces()):
+            if not self.is_boundary_face(face, [0, 1, 2, 3, 4, 5]):
+                center = self.get_face_real_centroid(face)
+                normal = self.get_face_normal(face)
+
+                print >>output, center[0], center[1], 
+                print >>output, normal[0] * vectorMagnitude[face], 
+                print >>output, normal[1] * vectorMagnitude[face], 
+                print >>output, " "
+
+    def output_vtk_mesh_hex(self, filename, CellValues = [], CellValueLabels = []):
+        output = open(filename + ".vtk", 'w')
+        print >>output, "# vtk DataFile Version 2.0"
+        print >>output, "#unstructured mesh"
+        print >>output, "ASCII"
+        print >>output, "DATASET UNSTRUCTURED_GRID"
+
+        print >>output, "POINTS", self.get_number_of_points(), "float"
+        
+        for p in self.points:
+            print >>output, p[0], p[1], p[2]
+
+        print >>output, "CELLS", self.get_number_of_cells(), 9 * self.get_number_of_cells()
+        
+        for cell in self.vtk_cells:
+            print >> output, 8, " ".join(map(str, cell))
+
+        print >>output, "CELL_TYPES", self.get_number_of_cells()
+
+        for cell in self.vtk_cells:
+            print >>output, 12
+
+        if CellValues:
+            print >>output, "CELL_DATA", self.get_number_of_cells()
+            for (entry, entryname) in zip(CellValues, CellValueLabels):
+                print >>output, "SCALARS", entryname, "double 1"
+                print >>output, "LOOKUP_TABLE default" 
+                for value in entry:
+                    print >>output, value
+            
+        
+"""
+        print >> output, "POLYGONS", self.get_number_of_faces(), self.get_number_of_faces() * 5
+        
+        for face in self.faces:
+            print >>output, "4", face[0], face[1], face[2], face[3]
+"""        
+
+
+
+
+
