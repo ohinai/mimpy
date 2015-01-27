@@ -15,6 +15,132 @@ try:
 except ImportError:
     print "matplotlib not installed."
 
+class variable_array():
+    """ The class is an efficient reprenstation of variable 
+    lenght two dimensional arrays. It can represent 
+    basic data types such as ints and floats and allows 
+    lengths on entries. That is:
+
+    a[0] = [1, 2, 3, 4,]
+    a[1] = [1, 2, 3, 4, 5, 6, 7]
+
+    Internally, the data is stored is a 1-d array, with a 
+    separate array indicating the offset and data lenth:
+
+    data = [1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7]
+    offset = [[0, 4], [5, 7]]
+    
+    The structure allows the user to modify the entries 
+    as well as extend the data as needed. 
+    
+    """
+    def __init__(self, dtype=float, size=(1,1), dim = 1):
+        
+        self.pointer_capacity = size[0]
+        self.data_capacity  = size[1]
+        self.dim = dim
+
+        self.dtype = dtype
+        self.pointers = np.empty(shape=(self.pointer_capacity, 2), dtype=int)
+        if self.dim==1:
+            self.data = np.empty(shape = (self.data_capacity), dtype=self.dtype)
+        else:
+            self.data = np.empty(shape = (self.data_capacity, self.dim), dtype=self.dtype)
+
+        self.number_of_entries = 0
+        self.next_data_pos = 0        
+
+    def set_pointer_capacity(self, capacity):
+        """ Sets the maximum number of entries in 
+        the data structure. 
+        """
+        self.pointer_capacity = capacity
+        self.pointers.resize((self.pointer_capacity, 2), refcheck = False)
+        
+    def set_data_capacity(self, capacity):
+        """ Sets the maximum number of entries in 
+        the data structure. 
+        """
+        self.data_capacity = capacity
+        if self.dim == 1:
+            self.data.resize((self.data_capacity), refcheck=False)
+        else:
+            self.data.resize((self.data_capacity, self.dim), refcheck=False)
+    
+    def add_entry(self, data):
+        """ Adds new data to end of the list. 
+        """    
+        if self.number_of_entries<len(self.pointers):
+            self.pointers[self.number_of_entries, 0] = self.next_data_pos 
+            self.pointers[self.number_of_entries, 1] = len(data)
+        else:
+            self.pointers.resize((len(self.pointers)+len(self.pointers)/2+2, 2), refcheck=False)
+            self.pointers[self.number_of_entries, 0] = self.next_data_pos 
+            self.pointers[self.number_of_entries, 1] = len(data)
+
+        if len(self.data) > self.next_data_pos+len(data):
+            self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
+        else:
+            if self.dim == 1:
+                self.data.resize(len(self.data)+len(self.data)/2+len(data), 
+                                 refcheck=False)
+            else:
+                self.data.resize((len(self.data)+len(self.data)/2+len(data), self.dim), 
+                                 refcheck=False)
+            self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
+        
+        self.next_data_pos = len(data)+self.next_data_pos
+        self.number_of_entries +=1
+
+        return self.number_of_entries-1
+
+    def get_entry(self, index):
+        """ Return entry. 
+        """
+        if index>self.number_of_entries:
+            raise IndexError("No entry with index " +str(index))
+        (pos,  length) = self.pointers[index]
+        return self.data[pos:pos+length]
+
+    def __getitem__(self, index):
+        """Overloaded get index function. 
+        """
+        return self.get_entry(index)
+
+    def __setitem__(self, index, value):
+        """ Overloaded setting function. 
+        """
+        self.set_entry(index, value)
+
+    def __len__(self):
+        """ Returns number of entries. 
+        """
+        return self.number_of_entries
+
+    def set_entry(self, index, data):
+        """ Changes existing entry to new data. If new 
+        The new entry can be larger than old, but might cause 
+        wasted memory. 
+        """ 
+        (pos, length) = self.pointers[index]
+        if length<=len(data):
+            self.data[pos:pos+len(data)] = data
+            self.pointers[index, 1] = len(data)
+        else:
+            if len(self.data) > self.next_data_pos+len(data):
+                self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
+            else:
+                if self.dim == 1:
+                    self.data.resize(len(self.data)+len(self.data)/2+len(data), refcheck=False)
+                else:
+                    self.data.resize((len(self.data)+len(self.data)/2+len(data), self.dim), refcheck=False)
+                    self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
+            
+            self.pointers[index, 0] = self.next_data_pos
+            self.pointers[index, 1] = len(data)
+            self.next_data_pos += len(data)
+            
+
 class Mesh:
     """ The *Mesh* class is the basic intereface for accessing 
     the data needed from a mesh to build an MFD discretization. 
@@ -33,30 +159,31 @@ class Mesh:
     hexahedral mesh, a sublcass HexMesh inherits
     from Mesh, and adds the appropriate functionality. 
     """
-    def __init__(self):
+    def __init__(self, mesh_size = 1000):
         # List of points used to construct mesh faces. 
         # Each point coordinate is prepresented by 
-        # a Numpy array. 
-        self.points = []
+        # a Numpy array.
+        self.points = np.empty(shape=(0, 3))
+        self.number_of_points = 0 
 
         # List of mesh faces, each face is represented by the 
         # a list of points. In 2D, it's a list of pairs of poitns. 
         # In 3D, it's an ordered list of points that make up the 
         # polygon.         
-        self.faces = []
+        self.faces = variable_array(dtype=int)
 
         # Face normals. 
-        self.face_normals = []
+        self.face_normals = np.empty(shape=(0, 3))
 
         # Area of mesh face. 
-        self.face_areas = []
+        self.face_areas = np.empty(shape=(0))
 
         # The centroid of face. 
-        self.face_real_centroids = []
+        self.face_real_centroids = np.empty(shape=(0, 3))
 
         # Dict that maps faces to the cells 
         # they are in. 
-        self.face_to_cell = {}
+        self.face_to_cell = np.empty(shape=(0, 2), dtype=int)
         
         # Dict from cell to a list of faces 
         # in the cell that are also neumann faces. 
@@ -67,7 +194,7 @@ class Mesh:
         # A point on the plane of the face that is used 
         # to build the MFD matrix R. This point does 
         # not have to be on the face itself. 
-        self.face_shifted_centroids = []
+        self.face_shifted_centroids = np.empty(shape=(0, 3))
 
         self.has_face_shifted_centroid = False
         self.has_cell_shifted_centroid = False
@@ -86,36 +213,34 @@ class Mesh:
         
         # List of cells. Each cell is made up of a list
         # of faces.         
-        self.cells = []
+        self.cells = variable_array(dtype=int)
 
         # For each cell, a list of bools indicating 
         # whether the normal in self.face_normals
         # is in or out of the cell. 
-        self.cell_normal_orientation  = []
+        self.cell_normal_orientation  = variable_array()
 
         # Cell Volumes. 
-        self.cell_volume = []
+        self.cell_volume = np.empty(shape=(0, 3))
 
         # List of cell centroids. 
-        self.cell_real_centroid = []
+        self.cell_real_centroid = np.empty(shape=(0, 3))
 
         # Points used inside the cell used
         # to build the MFD matrix R. 
-        self.cell_shifted_centroid = []
+        self.cell_shifted_centroid = np.empty(shape=(0, 3))
         
-        self.cell_quadrature_points = {}
-        self.cell_quadrature_weights = {}
+        self.cell_quadrature_points = variable_array(dim=3)
+        self.cell_quadrature_weights = variable_array()
         
-        self.cell_k = []
-        self.cell_k_inv = []
+        self.cell_k = np.empty(shape=(0, 9))
 
         # Tags cells depending on which domain 
         # they belong to (for fractures and 
         # multi-domain problems)
-        self.cell_domain = []
+        self.cell_domain = np.empty(shape=(0), dtype=int)
 
-        # Dimesion of the mesh. 
-        self.dim = 2
+        self.dim = 3
 
         # For 2D meshes, optional polygon representation of cells. 
         self.two_d_polygons = []
@@ -155,7 +280,7 @@ class Mesh:
         self.forcing_function_pointers = {}
 
         # list: [F1, F2, F3, ....]
-        self.cell_forcing_function = []
+        self.cell_forcing_function = np.empty(shape=(0), dtype=float)
 
         # Lowest order term coef
         # List: [alpha1, alpha2, ...]
@@ -179,8 +304,14 @@ class Mesh:
         and appends the point to the end of the point list. 
         Returns the index of the new point.
         """
-        self.points.append(new_point)
-        return len(self.points)-1
+        if self.number_of_points<len(self.points):
+            self.points[self.number_of_points] = new_point
+            self.number_of_points += 1
+        else:
+            self.points.resize((len(self.points)+len(self.points)/2+1, 3), refcheck=False)
+            self.points[self.number_of_points] = new_point
+            self.number_of_points += 1
+        return self.number_of_points-1
     
     def get_point(self, point_index):
         """ Takes a point index and returns 
@@ -191,7 +322,13 @@ class Mesh:
     def get_number_of_points(self):
         """ Returns the total number of points. 
         """
-        return len(self.points)
+        return self.number_of_points
+
+    def memory_extension(self, size):
+        """ Function for finding size of memory 
+        extension jumps. 
+        """
+        return size+size/2+1
 
     def add_face(self, list_of_points):
         """ Takes a list of point indices, and 
@@ -202,17 +339,36 @@ class Mesh:
         face is represnted by two points. 
         Returns the index of the new face. 
         """
-        self.faces.append(list_of_points)
-        self.face_normals.append(None)
-        self.face_areas.append(None)
-        self.face_real_centroids.append(None)
+        new_face_index = self.faces.add_entry(list_of_points)
+        
+        if len(self.face_normals)-1 < new_face_index:
+            new_size = self.memory_extension(len(self.face_normals))
+            self.face_normals.resize((new_size, 3), refcheck=False)
+            
+        if len(self.face_areas)-1 < new_face_index:
+            new_size = self.memory_extension(len(self.face_areas))
+            self.face_areas.resize(new_size, refcheck=False)
+                                     
+        if len(self.face_real_centroids)-1 < new_face_index:
+            new_size = self.memory_extension(len(self.face_real_centroids))
+            self.face_real_centroids.resize((new_size, 3), refcheck=False)
 
-        self.face_to_cell[len(self.faces)-1] = []
+        #if len(self.face_real_centroids)-1<new_face_index:
+        #    new_size = self.memory_extension(len(self.face_real_centroids))
+        #    self.face_real_centroids.resize((new_size, 3))
+            
+
+        if len(self.face_to_cell)-1<new_face_index:
+            new_size = self.memory_extension(len(self.face_to_cell))
+            self.face_to_cell.resize((new_size, 2))
+            self.face_to_cell[new_face_index:, :] = -1
 
         if self.has_face_shifted_centroid:
-            self.face_shifted_centroids.append(None)
+            if len(self.face_shifted_centroids)-1<new_face_index:
+                new_size = self.memory_extension(len(self.face_shifted_centroids))
+                self.face_shifted_centroids.resize((new_size, 3))
 
-        return len(self.faces)-1
+        return new_face_index
 
     def set_face(self, face_index, points):
         """ Sets a new set of points for a given face_index.
@@ -249,7 +405,7 @@ class Mesh:
         in the mesh. This corresponds to the 
         number of velocity degrees of freedom.  
         """
-        return len(self.faces)
+        return self.faces.number_of_entries
     
     def get_number_of_cell_faces(self, cell_index):
         """ Returns the number of faces for cell_index
@@ -310,6 +466,7 @@ class Mesh:
         """ Initialize cell data structure 
         for known number of cells. 
         """
+        raise Exception("Function initialize_cells not defined yet")
         for cell_index in range(number_of_cells):
             self.cells.append([])
             self.cell_normal_orientation.append([])
@@ -338,12 +495,7 @@ class Mesh:
         
     def add_cell(self, 
                  list_of_faces, 
-                 list_of_orientations, 
-                 forcing_function = 0., 
-                 quadrature_points = None, 
-                 quadrature_weights = None, 
-                 cell_volume = None, 
-                 cell_k = None, cell_domain = 0):
+                 list_of_orientations): 
         """ Adds a new cell to the mesh. A cell is represented 
         by a list of face indices. The function also 
         takes in a list of orientations of the same length
@@ -352,19 +504,40 @@ class Mesh:
         points out, -1 means it points in to the cell. 
         Returns the index of the new cell. 
         """
-        self.cells.append(list_of_faces)
-        self.cell_normal_orientation.append(list_of_orientations)
-        self.cell_forcing_function.append(forcing_function)
-        self.cell_volume.append(cell_volume)
-        self.cell_k.append(cell_k)
+        new_cell_index = self.cells.add_entry(list_of_faces)
+        self.cell_normal_orientation.add_entry(list_of_orientations)
 
+        if len(self.cell_forcing_function)-1<new_cell_index:
+            new_size = self.memory_extension(len(self.cell_forcing_function))
+            self.cell_forcing_function.resize(new_size, refcheck=False)
+
+        if len(self.cell_volume)-1<new_cell_index:
+            new_size = self.memory_extension(len(self.cell_volume))
+            self.cell_volume.resize(new_size, refcheck=False)
+
+        if len(self.cell_k)-1<new_cell_index:
+            new_size = self.memory_extension(len(self.cell_k))
+            self.cell_k.resize((new_size, 9), refcheck=False)
+    
         for face_index in list_of_faces:
-            self.face_to_cell[face_index].append(len(self.cells)-1)
+            if self.face_to_cell[face_index][0] == -1:
+                self.face_to_cell[face_index][0] = new_cell_index
+            else:
+                self.face_to_cell[face_index][1] = new_cell_index
 
-        self.cell_domain.append(cell_domain)
+        if len(self.cell_domain)-1<new_cell_index:
+            new_size = self.memory_extension(len(self.cell_domain))
+            self.cell_domain.resize(new_size, refcheck=False)
 
-        self.cell_real_centroid.append(None)
-
+        
+        if len(self.cell_real_centroid)-1<new_cell_index:
+            new_size = self.memory_extension(len(self.cell_real_centroid))
+            self.cell_real_centroid.resize((new_size, 3))
+        
+        self.cell_quadrature_points.add_entry(np.array([0., 0., 0.]))
+        self.cell_quadrature_weights.add_entry(np.array([0., 0., 0.]))
+            
+        
         if self.has_two_d_polygons:
             self.two_d_polygons.append(None)
             
@@ -372,9 +545,11 @@ class Mesh:
             self.cell_alpha.append(None)
         
         if self.has_cell_shifted_centroid: 
-            self.cell_shifted_centroid.append(None)
+            if len(self.cell_shifted_centroid)-1<new_cell_index:
+                new_size = self.memory_extension(len(self.cell_shifted_centroid))
+                self.cell_shifted_centroid.resize((new_size, 3))
         
-        return len(self.cells)-1
+        return new_cell_index
 
     def get_cell(self, cell_index):
         """ Given a cell_index, it returns the list of faces 
@@ -406,12 +581,12 @@ class Mesh:
     def get_all_cell_real_centroids(self):
         """ Returns list of all cell centroids.
         """
-        return self.cell_real_centroid
+        return self.cell_real_centroid[:self.get_number_of_cells()]
 
     def get_all_cell_shifted_centroids(self):
         """ Returns list of all cell centroids.
         """
-        return self.cell_shifted_centroid
+        return self.cell_shifted_centroid[:self.get_number_of_cells()]
 
     def initialize_cell_shifted_centroid(self, number_of_cells = None):
         """ Informs Mesh that the shifted cell centroid data structure 
@@ -421,6 +596,7 @@ class Mesh:
         using number_of_cells. The add_cell method 
         will add an extra entry for the shifted centroids. 
         """
+        raise Exception("Function initialize_cells_shifted_centorid not defined yet")
         if number_of_cells is None:
             self.cell_shifted_centroid = [None]*self.get_number_of_cells()
         else:
@@ -434,6 +610,7 @@ class Mesh:
         using number_of_faces. The add_face method 
         will add an extra entry for the shifted centroids. 
         """
+        raise Exception("Function initialize_face_shifted_centorid not defined yet")
         if number_of_faces is None:
             self.face_shifted_centroids = [None]*self.get_number_of_faces()
         else:
@@ -488,13 +665,13 @@ class Mesh:
         """ Set cell permeability tensor K 
         (Numpy matrix) for cell_index. 
         """
-        self.cell_k[cell_index] = k
+        self.cell_k[cell_index] = k.reshape((1, 9))
 
     def get_cell_k(self, cell_index):
         """ Return permeability tensor k 
         (Numpy matrix) for cell_index.  
         """
-        return self.cell_k[cell_index]
+        return self.cell_k[cell_index].reshape((3,3))
 
     def get_all_k(self):
         """ Returns a list of all cell 
@@ -722,7 +899,7 @@ class Mesh:
         used for calculating velocity error against 
         a known solution. 
         """
-        self.face_quadrature_points[face_index] = points
+        self.face_quadrature_points[face_index] = np.array(points)
 
     def get_face_quadrature_points(self, face_index):
         """ Returns the quadrature points for face_index. 
@@ -1350,11 +1527,11 @@ class Mesh:
             
             if face_orientation > 0:
                 points = self.get_face(face_index)
-                next_points = points[1:]+points[:1]
+                next_points = list(points[1:])+list(points[:1])
             else:
                 next_points = self.get_face(face_index)
-                points = next_points[1:]+next_points[:1]
-            
+                points = list(next_points[1:])+list(next_points[:1])
+
             for (point_index, next_point_index) in zip(points, next_points):
                 a0 = self.get_point(point_index)[A]
                 b0 = self.get_point(point_index)[B]

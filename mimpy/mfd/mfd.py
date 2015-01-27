@@ -354,7 +354,6 @@ class MFD():
             
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
-
         return m_e
         
     def build_m(self, save_update_info = False, k_unity = False):
