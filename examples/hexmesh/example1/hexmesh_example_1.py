@@ -1,5 +1,4 @@
 
-
 import mimpy.mesh.hexmesh as hexmesh
 import mimpy.mfd.mfd as mfd
 import numpy as np
@@ -47,8 +46,6 @@ res_mesh.apply_forcing_from_function(f)
 #Connect the MFD instance to the new mesh. 
 res_mfd.set_mesh(res_mesh)
 
-
-1/0
 #Build the LHS and RHS. 
 res_mfd.build_lhs()
 res_mfd.build_rhs()
