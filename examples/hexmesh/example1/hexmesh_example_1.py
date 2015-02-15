@@ -1,8 +1,4 @@
 
-import sys
-
-# Include relative path for mimpy library. 
-sys.path.append("../../../")
 
 import mimpy.mesh.hexmesh as hexmesh
 import mimpy.mfd.mfd as mfd
@@ -32,8 +28,9 @@ res_mesh = hexmesh.HexMesh()
 def mod_function(p, i, j, k):
     return p
 
-#Construct  an 10x10x10 mesh for a 1x1x1 domain. 
-res_mesh.build_mesh(11, 11, 11, K, 1., 1., 1., mod_function)
+
+print "building..."
+res_mesh.build_mesh(5, 5, 5, K, 1., 1., 1., mod_function)
 
 #Apply Dirichlet boundary conditions to all 6 faces. 
 res_mesh.apply_dirichlet_from_function(0, lambda p:u(p))
@@ -43,16 +40,18 @@ res_mesh.apply_dirichlet_from_function(3, lambda p:u(p))
 res_mesh.apply_dirichlet_from_function(4, lambda p:u(p))
 res_mesh.apply_dirichlet_from_function(5, lambda p:u(p))
 
+print "forcing..."
 #Apply the forcing function f. 
 res_mesh.apply_forcing_from_function(f)
  
 #Connect the MFD instance to the new mesh. 
 res_mfd.set_mesh(res_mesh)
 
+
+1/0
 #Build the LHS and RHS. 
 res_mfd.build_lhs()
 res_mfd.build_rhs()
-
 
 #Solve the linear system. 
 res_mfd.solve()
