@@ -1,9 +1,4 @@
 
-import sys
-
-# Include relative path for mimpy library. 
-sys.path.append("../../../")
-
 import mimpy.mesh.hexmesh as hexmesh
 import mimpy.mfd.mfd as mfd
 import numpy as np
