@@ -34,14 +34,14 @@ class variable_array():
     as well as extend the data as needed. 
     
     """
-    def __init__(self, dtype=float, size=(1,1), dim = 1):
+    def __init__(self, dtype=np.dtype('f'), size=(1,1), dim = 1):
         
         self.pointer_capacity = size[0]
         self.data_capacity  = size[1]
         self.dim = dim
 
         self.dtype = dtype
-        self.pointers = np.empty(shape=(self.pointer_capacity, 2), dtype=int)
+        self.pointers = np.empty(shape=(self.pointer_capacity, 2), dtype=np.dtype("i"))
         if self.dim==1:
             self.data = np.empty(shape = (self.data_capacity), dtype=self.dtype)
         else:
@@ -163,27 +163,27 @@ class Mesh:
         # List of points used to construct mesh faces. 
         # Each point coordinate is prepresented by 
         # a Numpy array.
-        self.points = np.empty(shape=(0, 3))
+        self.points = np.empty(shape=(0, 3), dtype=np.dtype('f'))
         self.number_of_points = 0 
 
         # List of mesh faces, each face is represented by the 
         # a list of points. In 2D, it's a list of pairs of poitns. 
         # In 3D, it's an ordered list of points that make up the 
         # polygon.         
-        self.faces = variable_array(dtype=int)
+        self.faces = variable_array(dtype=np.dtype('i'))
 
         # Face normals. 
         self.face_normals = np.empty(shape=(0, 3))
 
         # Area of mesh face. 
-        self.face_areas = np.empty(shape=(0))
+        self.face_areas = np.empty(shape=(0), dtype=np.dtype('f'))
 
         # The centroid of face. 
         self.face_real_centroids = np.empty(shape=(0, 3))
 
         # Dict that maps faces to the cells 
         # they are in. 
-        self.face_to_cell = np.empty(shape=(0, 2), dtype=int)
+        self.face_to_cell = np.empty(shape=(0, 2), dtype=np.dtype('i'))
         
         # Dict from cell to a list of faces 
         # in the cell that are also neumann faces. 
