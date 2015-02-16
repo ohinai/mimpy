@@ -4,6 +4,7 @@
 
 try:
     from setuptools import setup
+    from Cython.Build import cythonize
 except ImportError:
     from distutils.core import setup
 
@@ -31,7 +32,7 @@ setup(
     author_email='ohinai@gmail.com',
     url='https://github.com/ohinai/mimpy',
     packages=[
-        'mimpy',
+        'mimpy', "mimpy.mesh", "mimpy.mfd", "mimpy.singlephase", 
     ],
     package_dir={'mimpy':
                  'mimpy'},
@@ -52,6 +53,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
+    ext_modules = (cythonize("mimpy/mesh/*.pyx")), 
     test_suite='tests',
     tests_require=test_requirements
 )
