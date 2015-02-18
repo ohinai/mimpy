@@ -1,8 +1,7 @@
-"""
-mesh module. 
+""" Mesh module.
 """
 import numpy as np
-import os 
+import os
 import array
 import math
 
@@ -16,86 +15,97 @@ except ImportError:
     print "matplotlib not installed."
 
 class variable_array():
-    """ The class is an efficient reprenstation of variable 
-    lenght two dimensional arrays. It can represent 
-    basic data types such as ints and floats and allows 
+    """ The class is an efficient reprenstation of variable
+    lenght two dimensional arrays. It can represent
+    basic data types such as ints and floats and allows
     lengths on entries. That is:
 
     a[0] = [1, 2, 3, 4,]
     a[1] = [1, 2, 3, 4, 5, 6, 7]
 
-    Internally, the data is stored is a 1-d array, with a 
+    Internally, the data is stored is a 1-d array, with a
     separate array indicating the offset and data lenth:
 
     data = [1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7]
     offset = [[0, 4], [5, 7]]
-    
-    The structure allows the user to modify the entries 
-    as well as extend the data as needed. 
-    
+
+    The structure allows the user to modify the entries
+    as well as extend the data as needed.
     """
     def __init__(self, dtype=np.dtype('f'), size=(1,1), dim = 1):
-        
         self.pointer_capacity = size[0]
         self.data_capacity  = size[1]
         self.dim = dim
 
         self.dtype = dtype
-        self.pointers = np.empty(shape=(self.pointer_capacity, 2), dtype=np.dtype("i"))
+        self.pointers = np.empty(shape=(self.pointer_capacity, 2),
+                                 dtype=np.dtype("i"))
         if self.dim==1:
-            self.data = np.empty(shape = (self.data_capacity), dtype=self.dtype)
+            self.data = np.empty(shape = (self.data_capacity),
+                                 dtype=self.dtype)
         else:
-            self.data = np.empty(shape = (self.data_capacity, self.dim), dtype=self.dtype)
+            self.data = np.empty(shape = (self.data_capacity, self.dim),
+                                 dtype=self.dtype)
 
         self.number_of_entries = 0
-        self.next_data_pos = 0        
+        self.next_data_pos = 0
 
     def set_pointer_capacity(self, capacity):
-        """ Sets the maximum number of entries in 
-        the data structure. 
+        """ Sets the maximum number of entries in
+        the data structure.
         """
         self.pointer_capacity = capacity
         self.pointers.resize((self.pointer_capacity, 2), refcheck = False)
-        
+
     def set_data_capacity(self, capacity):
-        """ Sets the maximum number of entries in 
-        the data structure. 
+        """ Sets the maximum number of entries in
+        the data structure.
         """
         self.data_capacity = capacity
         if self.dim == 1:
             self.data.resize((self.data_capacity), refcheck=False)
         else:
             self.data.resize((self.data_capacity, self.dim), refcheck=False)
-    
+
+    def new_size(self, size, minimum = 10):
+        """ Calculates the new size of the array
+        given the old in case there is a need
+        for extending the array.
+        """
+        return max(size+size/2+2, minimum)
+
     def add_entry(self, data):
-        """ Adds new data to end of the list. 
-        """    
+        """ Adds new data to end of the list.
+        """
         if self.number_of_entries<len(self.pointers):
-            self.pointers[self.number_of_entries, 0] = self.next_data_pos 
+            self.pointers[self.number_of_entries, 0] = self.next_data_pos
             self.pointers[self.number_of_entries, 1] = len(data)
         else:
-            self.pointers.resize((len(self.pointers)+len(self.pointers)/2+2, 2), refcheck=False)
-            self.pointers[self.number_of_entries, 0] = self.next_data_pos 
+            self.pointers.resize((self.new_size(len(self.pointers),len(data)), 2),
+                                 refcheck=False)
+            self.pointers[self.number_of_entries, 0] = self.next_data_pos
             self.pointers[self.number_of_entries, 1] = len(data)
 
         if len(self.data) > self.next_data_pos+len(data):
             self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
         else:
             if self.dim == 1:
-                self.data.resize(len(self.data)+len(self.data)/2+len(data), 
+                self.data.resize(self.new_size(len(self.data)),
                                  refcheck=False)
             else:
-                self.data.resize((len(self.data)+len(self.data)/2+len(data), self.dim), 
+                self.data.resize(self.new_size((len(self.data)), self.dim),
                                  refcheck=False)
+            print data 
+            print self.data
             self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
-        
+
         self.next_data_pos = len(data)+self.next_data_pos
         self.number_of_entries +=1
 
         return self.number_of_entries-1
 
     def get_entry(self, index):
-        """ Return entry. 
+        """ Return entry.
         """
         if index>self.number_of_entries:
             raise IndexError("No entry with index " +str(index))
@@ -103,102 +113,105 @@ class variable_array():
         return self.data[pos:pos+length]
 
     def __getitem__(self, index):
-        """Overloaded get index function. 
+        """Overloaded get index function.
         """
         return self.get_entry(index)
 
     def __setitem__(self, index, value):
-        """ Overloaded setting function. 
+        """ Overloaded setting function.
         """
         self.set_entry(index, value)
 
     def __len__(self):
-        """ Returns number of entries. 
+        """ Returns number of entries.
         """
         return self.number_of_entries
 
     def set_entry(self, index, data):
-        """ Changes existing entry to new data. If new 
-        The new entry can be larger than old, but might cause 
-        wasted memory. 
-        """ 
+        """ Changes existing entry to new data. If new
+        The new entry can be larger than old, but might cause
+        wasted memory.
+        """
         (pos, length) = self.pointers[index]
         if length<=len(data):
             self.data[pos:pos+len(data)] = data
             self.pointers[index, 1] = len(data)
         else:
             if len(self.data) > self.next_data_pos+len(data):
-                self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
+                self.data[self.next_data_pos:
+                              self.next_data_pos+len(data)] = data
             else:
                 if self.dim == 1:
-                    self.data.resize(len(self.data)+len(self.data)/2+len(data), refcheck=False)
+                    self.data.resize(self.new_size(len(self.data)),
+                                     refcheck=False)
                 else:
-                    self.data.resize((len(self.data)+len(self.data)/2+len(data), self.dim), refcheck=False)
+                    self.data.resize(self.new_size((len(self.data)), self.dim),
+                                     refcheck=False)
                     self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
-            
+
             self.pointers[index, 0] = self.next_data_pos
             self.pointers[index, 1] = len(data)
             self.next_data_pos += len(data)
-            
+
 
 class Mesh:
-    """ The *Mesh* class is the basic intereface for accessing 
-    the data needed from a mesh to build an MFD discretization. 
+    """ The *Mesh* class is the basic intereface for accessing
+    the data needed from a mesh to build an MFD discretization.
     When correctly populated, an instance of Mesh
     would lead to a correctly constructed saddle-point
-    system using the MFD class. It stores basic information 
-    about the geometry of the mesh as well cell and face 
-    properties. The class is generic enough to represent 
-    both 2 and 3 dimensional meshes. The class also 
-    contains basic functions for plotting and 
-    visualization. 
+    system using the MFD class. It stores basic information
+    about the geometry of the mesh as well cell and face
+    properties. The class is generic enough to represent
+    both 2 and 3 dimensional meshes. The class also
+    contains basic functions for plotting and
+    visualization.
 
-    The Mesh class is not intended to be used on its own, 
-    rather it should be subclassed for a specific type of 
-    mesh. For example, when building a 3 dimensional 
+    The Mesh class is not intended to be used on its own,
+    rather it should be subclassed for a specific type of
+    mesh. For example, when building a 3 dimensional
     hexahedral mesh, a sublcass HexMesh inherits
-    from Mesh, and adds the appropriate functionality. 
+    from Mesh, and adds the appropriate functionality.
     """
     def __init__(self, mesh_size = 1000):
-        # List of points used to construct mesh faces. 
-        # Each point coordinate is prepresented by 
+        # List of points used to construct mesh faces.
+        # Each point coordinate is prepresented by
         # a Numpy array.
         self.points = np.empty(shape=(0, 3), dtype=np.dtype('f'))
-        self.number_of_points = 0 
+        self.number_of_points = 0
 
-        # List of mesh faces, each face is represented by the 
-        # a list of points. In 2D, it's a list of pairs of poitns. 
-        # In 3D, it's an ordered list of points that make up the 
-        # polygon.         
+        # List of mesh faces, each face is represented by the
+        # a list of points. In 2D, it's a list of pairs of poitns.
+        # In 3D, it's an ordered list of points that make up the
+        # polygon.
         self.faces = variable_array(dtype=np.dtype('i'))
 
-        # Face normals. 
+        # Face normals.
         self.face_normals = np.empty(shape=(0, 3))
 
-        # Area of mesh face. 
+        # Area of mesh face.
         self.face_areas = np.empty(shape=(0), dtype=np.dtype('f'))
 
-        # The centroid of face. 
+        # The centroid of face.
         self.face_real_centroids = np.empty(shape=(0, 3))
 
-        # Dict that maps faces to the cells 
-        # they are in. 
+        # Dict that maps faces to the cells
+        # they are in.
         self.face_to_cell = np.empty(shape=(0, 2), dtype=np.dtype('i'))
-        
-        # Dict from cell to a list of faces 
-        # in the cell that are also neumann faces. 
-        # Used for incroporating the boundary 
-        # conditions when building m and div_t. 
+
+        # Dict from cell to a list of faces
+        # in the cell that are also neumann faces.
+        # Used for incroporating the boundary
+        # conditions when building m and div_t.
         self.cell_faces_neumann = {}
 
-        # A point on the plane of the face that is used 
-        # to build the MFD matrix R. This point does 
-        # not have to be on the face itself. 
+        # A point on the plane of the face that is used
+        # to build the MFD matrix R. This point does
+        # not have to be on the face itself.
         self.face_shifted_centroids = np.empty(shape=(0, 3))
 
         self.has_face_shifted_centroid = False
         self.has_cell_shifted_centroid = False
-        
+
         self.has_two_d_polygons = False
         self.has_alpha = False
 
@@ -208,41 +221,41 @@ class Mesh:
         self.boundary_markers = []
         self.boundary_descriptions = []
 
-        # Hash from face marker => [[face index, face normal orientation]] 
+        # Hash from face marker => [[face index, face normal orientation]]
         self.boundary_faces = {}
-        
+
         # List of cells. Each cell is made up of a list
-        # of faces.         
+        # of faces.
         self.cells = variable_array(dtype=int)
 
-        # For each cell, a list of bools indicating 
+        # For each cell, a list of bools indicating
         # whether the normal in self.face_normals
-        # is in or out of the cell. 
+        # is in or out of the cell.
         self.cell_normal_orientation  = variable_array()
 
-        # Cell Volumes. 
+        # Cell Volumes.
         self.cell_volume = np.empty(shape=(0, 3))
 
-        # List of cell centroids. 
+        # List of cell centroids.
         self.cell_real_centroid = np.empty(shape=(0, 3))
 
         # Points used inside the cell used
-        # to build the MFD matrix R. 
+        # to build the MFD matrix R.
         self.cell_shifted_centroid = np.empty(shape=(0, 3))
-        
-        self.cell_quadrature_points = variable_array(dim=3)
-        self.cell_quadrature_weights = variable_array()
-        
+
+        self.cell_quadrature_points = {} #variable_array(dim=3)
+        self.cell_quadrature_weights = {} #variable_array()
+
         self.cell_k = np.empty(shape=(0, 9))
 
-        # Tags cells depending on which domain 
-        # they belong to (for fractures and 
+        # Tags cells depending on which domain
+        # they belong to (for fractures and
         # multi-domain problems)
         self.cell_domain = np.empty(shape=(0), dtype=int)
 
         self.dim = 3
 
-        # For 2D meshes, optional polygon representation of cells. 
+        # For 2D meshes, optional polygon representation of cells.
         self.two_d_polygons = []
 
         # dict: {face_index: Dirichlet value, ... }
@@ -252,31 +265,31 @@ class Mesh:
         self.neumann_boundary_values = {}
 
         # dict: {face_index: (cell_index, face_orientation), ...}
-        # Allows Dirichlet boundaries to be set implicitly 
-        # based on pressure of cells. 
+        # Allows Dirichlet boundaries to be set implicitly
+        # based on pressure of cells.
         self.dirichlet_boundary_pointers = {}
 
         # dict: {face_index: [face_index_1, face_index_2, ...], ...}
-        # Allows Neumann boundaries to be set implicitly 
-        # based on fluxes at other faces. 
+        # Allows Neumann boundaries to be set implicitly
+        # based on fluxes at other faces.
         self.neumann_boundary_pointers = {}
 
         # dict: {face_index: (lagrange_index, orientation)}
-        # Allows dirichlet boundaries to point to 
-        # lagrange multipliers for domain decomposition. 
-        # A lagrange multiplier is a face identicial 
-        # to the one pointing to it, but not associated 
-        # with any cells.  
+        # Allows dirichlet boundaries to point to
+        # lagrange multipliers for domain decomposition.
+        # A lagrange multiplier is a face identicial
+        # to the one pointing to it, but not associated
+        # with any cells.
         self.face_to_lagrange_pointer = {}
 
         # dict: lagrange_index: [(face_index_1, orientation), ...], ...}
-        # Points a lagrange multiplier to faces associated 
-        # with it. Is treated like a forcing function. 
+        # Points a lagrange multiplier to faces associated
+        # with it. Is treated like a forcing function.
         self.lagrange_to_face_pointers = {}
 
         # dict: {cell_index: [(face_index_1, orientation), ...], ...}
         # Allows source terms to be set implicitly
-        # based on fluxes at other faces. 
+        # based on fluxes at other faces.
         self.forcing_function_pointers = {}
 
         # list: [F1, F2, F3, ....]
@@ -286,22 +299,13 @@ class Mesh:
         # List: [alpha1, alpha2, ...]
         self.cell_alpha = []
         self.is_using_alpha_list = False
-        
-        # Rate wells cell location
-        self.rate_wells = []
-        self.rate_wells_rate = []
-        self.rate_wells_name = []
 
         self.gravity_vector = None
-        self.fluid_density = None
-        self.gravity_acceleration = None
-        
-        self.use_gravity = False
 
     def add_point(self, new_point):
-        """ Takes a Numpy array 
-        representing the cartesian point coodrinates, 
-        and appends the point to the end of the point list. 
+        """ Takes a Numpy array
+        representing the cartesian point coodrinates,
+        and appends the point to the end of the point list.
         Returns the index of the new point.
         """
         if self.number_of_points<len(self.points):
@@ -312,51 +316,46 @@ class Mesh:
             self.points[self.number_of_points] = new_point
             self.number_of_points += 1
         return self.number_of_points-1
-    
+
     def get_point(self, point_index):
-        """ Takes a point index and returns 
-        a Numpy array of point coodrinates. 
+        """ Takes a point index and returns
+        a Numpy array of point coodrinates.
         """
         return self.points[point_index]
-    
+
     def get_number_of_points(self):
-        """ Returns the total number of points. 
+        """ Returns the total number of points.
         """
         return self.number_of_points
 
     def memory_extension(self, size):
-        """ Function for finding size of memory 
-        extension jumps. 
+        """ Function for finding size of memory
+        extension jumps.
         """
         return size+size/2+1
 
     def add_face(self, list_of_points):
-        """ Takes a list of point indices, and 
-        appends them to the list of faces 
-        in the mesh. The point indices must 
-        be oriented in a clockwise direction 
-        relative to the face normal. In 2D, a 
-        face is represnted by two points. 
-        Returns the index of the new face. 
+        """ Takes a list of point indices, and
+        appends them to the list of faces
+        in the mesh. The point indices must
+        be oriented in a clockwise direction
+        relative to the face normal. In 2D, a
+        face is represnted by two points.
+        Returns the index of the new face.
         """
         new_face_index = self.faces.add_entry(list_of_points)
-        
+
         if len(self.face_normals)-1 < new_face_index:
             new_size = self.memory_extension(len(self.face_normals))
             self.face_normals.resize((new_size, 3), refcheck=False)
-            
+
         if len(self.face_areas)-1 < new_face_index:
             new_size = self.memory_extension(len(self.face_areas))
             self.face_areas.resize(new_size, refcheck=False)
-                                     
+
         if len(self.face_real_centroids)-1 < new_face_index:
             new_size = self.memory_extension(len(self.face_real_centroids))
             self.face_real_centroids.resize((new_size, 3), refcheck=False)
-
-        #if len(self.face_real_centroids)-1<new_face_index:
-        #    new_size = self.memory_extension(len(self.face_real_centroids))
-        #    self.face_real_centroids.resize((new_size, 3))
-            
 
         if len(self.face_to_cell)-1<new_face_index:
             new_size = self.memory_extension(len(self.face_to_cell))
@@ -376,45 +375,45 @@ class Mesh:
         self.faces[face_index] = points
 
     def duplicate_face(self, face_index):
-        """ Creates new face with all the properties 
-        of the face_index, and adds the face to the 
-        bottom of the face list. The function 
-        returns the new face index. 
+        """ Creates new face with all the properties
+        of the face_index, and adds the face to the
+        bottom of the face list. The function
+        returns the new face index.
         """
         # Proper duplication requires duplicating 
-        # all the properties fo the face. 
-        new_index = self.add_face(self.get_face(face_index)) 
+        # all the properties fo the face.
+        new_index = self.add_face(self.get_face(face_index))
         self.set_face_area(new_index, self.get_face_area(face_index))
         return new_index
-    
+
     def get_face(self, face_index):
-        """ Given a face index, returns the 
-        list of point indices that make 
-        up the face. 
+        """ Given a face index, returns the
+        list of point indices that make
+        up the face.
         """
         return self.faces[face_index]
 
     def get_number_of_face_points(self, face_index):
-        """ Returns the number of points that make 
-        up a given face. 
+        """ Returns the number of points that make
+        up a given face.
         """
         return len(self.faces[face_index])
 
     def get_number_of_faces(self):
-        """ Returns the total number of faces 
-        in the mesh. This corresponds to the 
-        number of velocity degrees of freedom.  
+        """ Returns the total number of faces
+        in the mesh. This corresponds to the
+        number of velocity degrees of freedom.
         """
         return self.faces.number_of_entries
-    
+
     def get_number_of_cell_faces(self, cell_index):
         """ Returns the number of faces for cell_index
         """
         return len(self.cells[cell_index])
 
     def get_cell_faces_neumann(self, cell_index):
-        """ Returns all the faces in cell_index that 
-        are also neumann faces. 
+        """ Returns all the faces in cell_index that
+        are also neumann faces.
         """
         if self.cell_faces_neumann.has_key(cell_index):
             return self.cell_faces_neumann[cell_index]
@@ -422,16 +421,16 @@ class Mesh:
             return []
 
     def is_line_seg_intersect_face(self, face_index, p1, p2):
-        """ Returns True if the line segment 
-        intersects with a face. 
+        """ Returns True if the line segment
+        intersects with a face.
         """
         vector = p2 - p1
         vector /= np.linalg.norm(vector)
-        
-        d = np.dot((self.get_face_real_centroid(face_index) - p1), 
+
+        d = np.dot((self.get_face_real_centroid(face_index) - p1),
                    self.get_face_normal(face_index))
         denom = np.dot(vector, self.get_face_normal(face_index))
-                
+
         if abs(denom) < 1e-10:
             pass
         else:
@@ -440,31 +439,30 @@ class Mesh:
 
             if d<= length+1.e-8 and  d> 0.+1.e-8:
                 intersection_point = d*vector+p1
-                
+
                 direction = np.zeros(len(self.get_face(face_index)))
 
                 normal = self.get_face_normal(face_index)
                 current_point = self.get_point(self.get_face(face_index)[-1])
                 for (local_index, next_point_index) in enumerate(self.get_face(face_index)):
                     next_point = self.get_point(next_point_index)
-                    
                     face_vec = next_point - current_point
                     check_vec = current_point - intersection_point
-                    
+
                     direction[local_index] = np.dot(np.cross(face_vec, check_vec), normal)
                     current_point = next_point
 
                 if (direction>0.).all():
                     return True
                 elif (direction<0.).all():
-                    return True 
+                    return True
                 else:
                     return False
 
 
     def initialize_cells(self, number_of_cells):
-        """ Initialize cell data structure 
-        for known number of cells. 
+        """ Initialize cell data structure
+        for known number of cells.
         """
         raise Exception("Function initialize_cells not defined yet")
         for cell_index in range(number_of_cells):
@@ -481,7 +479,7 @@ class Mesh:
                 self.cell_alpha.append(None)
 
     def set_cell_faces(self, cell_index, faces):
-        """ Sets the cell faces. 
+        """ Sets the cell faces.
         """
         self.cells[cell_index] = faces
         for face_index in faces:
@@ -489,20 +487,20 @@ class Mesh:
                 self.face_to_cell[face_index].append(cell_index)
 
     def set_cell_orientation(self, cell_index, orientation):
-        """ Sets the cell orientation. 
+        """ Sets the cell orientation.
         """
         self.cell_normal_orientation[cell_index] = orientation
-        
-    def add_cell(self, 
-                 list_of_faces, 
-                 list_of_orientations): 
-        """ Adds a new cell to the mesh. A cell is represented 
-        by a list of face indices. The function also 
+
+    def add_cell(self,
+                 list_of_faces,
+                 list_of_orientations):
+        """ Adds a new cell to the mesh. A cell is represented
+        by a list of face indices. The function also
         takes in a list of orientations of the same length
-        as the list_of_faces. These represent the direction 
-        of the face normal relative to the cell: 1 means it 
-        points out, -1 means it points in to the cell. 
-        Returns the index of the new cell. 
+        as the list_of_faces. These represent the direction
+        of the face normal relative to the cell: 1 means it
+        points out, -1 means it points in to the cell.
+        Returns the index of the new cell.
         """
         new_cell_index = self.cells.add_entry(list_of_faces)
         self.cell_normal_orientation.add_entry(list_of_orientations)
@@ -518,7 +516,7 @@ class Mesh:
         if len(self.cell_k)-1<new_cell_index:
             new_size = self.memory_extension(len(self.cell_k))
             self.cell_k.resize((new_size, 9), refcheck=False)
-    
+
         for face_index in list_of_faces:
             if self.face_to_cell[face_index][0] == -1:
                 self.face_to_cell[face_index][0] = new_cell_index
@@ -529,39 +527,37 @@ class Mesh:
             new_size = self.memory_extension(len(self.cell_domain))
             self.cell_domain.resize(new_size, refcheck=False)
 
-        
         if len(self.cell_real_centroid)-1<new_cell_index:
             new_size = self.memory_extension(len(self.cell_real_centroid))
             self.cell_real_centroid.resize((new_size, 3))
-        
-        self.cell_quadrature_points.add_entry(np.array([0., 0., 0.]))
-        self.cell_quadrature_weights.add_entry(np.array([0., 0., 0.]))
-            
-        
+
+        #self.cell_quadrature_points.add_entry(np.array([0., 0., 0.]))
+        #self.cell_quadrature_weights.add_entry(np.array([0., 0., 0.]))
+
         if self.has_two_d_polygons:
             self.two_d_polygons.append(None)
-            
+
         if self.has_alpha:
             self.cell_alpha.append(None)
-        
-        if self.has_cell_shifted_centroid: 
+
+        if self.has_cell_shifted_centroid:
             if len(self.cell_shifted_centroid)-1<new_cell_index:
                 new_size = self.memory_extension(len(self.cell_shifted_centroid))
                 self.cell_shifted_centroid.resize((new_size, 3))
-        
+
         return new_cell_index
 
     def get_cell(self, cell_index):
-        """ Given a cell_index, it returns the list of faces 
-        that make up that cell. 
+        """ Given a cell_index, it returns the list of faces
+        that make up that cell.
         """
         return self.cells[cell_index]
 
     def get_number_of_cells(self):
-        """ Returns total number of cells in mesh. 
+        """ Returns total number of cells in mesh.
         """
         return len(self.cells)
-    
+
     def get_cell_normal_orientation(self, cell_index):
         """ Given a cell index, returns a list of face
         orientations for that cell.
@@ -569,10 +565,10 @@ class Mesh:
         return self.cell_normal_orientation[cell_index]
 
     def set_cell_real_centroid(self, cell_index, centroid):
-        """ Sets the array of the cell centroid. 
+        """ Sets the array of the cell centroid.
         """
         self.cell_real_centroid[cell_index] = centroid
-    
+
     def get_cell_real_centroid(self, cell_index):
         """ Returns array of the cell centroid
         """
@@ -589,12 +585,12 @@ class Mesh:
         return self.cell_shifted_centroid[:self.get_number_of_cells()]
 
     def initialize_cell_shifted_centroid(self, number_of_cells = None):
-        """ Informs Mesh that the shifted cell centroid data structure 
+        """ Informs Mesh that the shifted cell centroid data structure
         will be utilized. This is necessary since shifted cell
-        centroids are an optional data structure. 
-        If already known, the number of cells can be initialized 
-        using number_of_cells. The add_cell method 
-        will add an extra entry for the shifted centroids. 
+        centroids are an optional data structure.
+        If already known, the number of cells can be initialized
+        using number_of_cells. The add_cell method
+        will add an extra entry for the shifted centroids.
         """
         raise Exception("Function initialize_cells_shifted_centorid not defined yet")
         if number_of_cells is None:
@@ -603,12 +599,12 @@ class Mesh:
             self.cell_shifted_centroid = [None]*number_of_cells
 
     def initialize_face_shifted_centroid(self, number_of_faces = None):
-        """ Informs Mesh that the shifted face centroid data structure 
+        """ Informs Mesh that the shifted face centroid data structure
         will be utilized. This is necessary since shifted face
-        centroids are an optional data structure. 
-        If already known, the number of face can be initialized 
-        using number_of_faces. The add_face method 
-        will add an extra entry for the shifted centroids. 
+        centroids are an optional data structure.
+        If already known, the number of face can be initialized
+        using number_of_faces. The add_face method
+        will add an extra entry for the shifted centroids.
         """
         raise Exception("Function initialize_face_shifted_centorid not defined yet")
         if number_of_faces is None:
@@ -617,32 +613,32 @@ class Mesh:
             self.face_shifted_centroids = [None]*number_of_faces
 
     def set_cell_shifted_centroid(self, cell_index, centroid):
-        """ Sets the shifted centroid. Since the shifted centroid 
-        is a optional, 
+        """ Sets the shifted centroid. Since the shifted centroid
+        is a optional,
         """
         self.cell_shifted_centroid[cell_index] = centroid
 
     def use_face_shifted_centroid(self):
-        """ Informs the MFD class to use the shifted centriod 
-        rather than the real face centroid. 
+        """ Informs the MFD class to use the shifted centriod
+        rather than the real face centroid.
         """
         self.has_face_shifted_centroid = True
 
     def is_using_face_shifted_centroid(self):
-        """ Returns True if MFD is to use the shifted 
-        face centroids, False otherwise. 
+        """ Returns True if MFD is to use the shifted
+        face centroids, False otherwise.
         """
         return self.has_face_shifted_centroid
 
     def use_cell_shifted_centroid(self):
-        """ Informs the MFD class to use the shifted centriod 
-        rather than the real cell centroid. 
+        """ Informs the MFD class to use the shifted centriod
+        rather than the real cell centroid.
         """
         self.has_cell_shifted_centroid = True
     
     def is_using_cell_shifted_centroid(self):
-        """ Returns True if MFD is to use the shifted 
-        cell centroids, False otherwise. 
+        """ Returns True if MFD is to use the shifted
+        cell centroids, False otherwise.
         """
         return self.has_cell_shifted_centroid
 
@@ -650,210 +646,206 @@ class Mesh:
         """ Returns the shifted cell centroid for cell_index
         """
         return self.cell_shifted_centroid[cell_index]
-    
+
     def set_cell_volume(self, cell_index, volume):
-        """ Sets cell volume for cell_index. 
+        """ Sets cell volume for cell_index.
         """
         self.cell_volume[cell_index]  = volume
 
     def get_cell_volume(self, cell_index):
-        """ Returns cell volume for cell_index. 
+        """ Returns cell volume for cell_index.
         """
         return self.cell_volume[cell_index]
 
     def set_cell_k(self, cell_index, k):
-        """ Set cell permeability tensor K 
-        (Numpy matrix) for cell_index. 
+        """ Set cell permeability tensor K
+        (Numpy matrix) for cell_index.
         """
         self.cell_k[cell_index] = k.reshape((1, 9))
 
     def get_cell_k(self, cell_index):
-        """ Return permeability tensor k 
-        (Numpy matrix) for cell_index.  
+        """ Return permeability tensor k
+        (Numpy matrix) for cell_index.
         """
         return self.cell_k[cell_index].reshape((3,3))
 
     def get_all_k(self):
-        """ Returns a list of all cell 
-        permeability tensors. 
+        """ Returns a list of all cell
+        permeability tensors.
         """
         return self.cell_k
 
     def use_two_d_polygons(self):
-        """ This function must be called in order to 
-        set polygon representations 
-        of cells in 2D meshes. 
-        
-        2D polygons represents the 
-        cell as set of the point indices 
-        that make up a cell. This data structure 
-        is useful when computing the area of the cell 
-        as well as for visualization purposes. 
-        However, it is no necessary for construction 
-        of in the MFD class. 
-        """        
+        """ This function must be called in order to
+        set polygon representations
+        of cells in 2D meshes.
+
+        2D polygons represents the
+        cell as set of the point indices
+        that make up a cell. This data structure
+        is useful when computing the area of the cell
+        as well as for visualization purposes.
+        However, it is no necessary for construction
+        of in the MFD class.
+        """
         self.has_two_d_polygons = True
-        
+
     def set_two_d_polygon(self, cell_index, polygon):
-        """ Set the 2D polygon for cell_index. 
+        """ Set the 2D polygon for cell_index.
         polygon = [p_1, p_2, ... p_n]
         """
         self.two_d_polygons[cell_index] = polygon
-        
+
     def get_2d_polygon(self, cell_index):
-        """ Returns the 2D polygon for 
-        cell_index. 
+        """ Returns the 2D polygon for
+        cell_index.
         """
         return self.two_d_polygons[cell_index]
 
     def use_alpha(self):
-        """ Activates the ability to set the 
-        alpha parameter for each cell. 
+        """ Activates the ability to set the
+        alpha parameter for each cell.
         """
-        self.has_alpha = True 
-        
+        self.has_alpha = True
+
     def set_alpha_by_cell(self, alpha, cell_index):
-        """ Set alpha (float) for cell_index. 
+        """ Set alpha (float) for cell_index.
         """
         self.cell_alpha[cell_index] = alpha
-        
+
     def get_alpha_by_cell(self, cell_index):
-        """ Returns alpha (float) for cell_index. 
+        """ Returns alpha (float) for cell_index.
         """
         return self.cell_alpha[cell_index]
-    
+
     def set_cell_forcing_function(self, cell_index, forcing_value):
-        """ Sets total forcing q (float) for cell_index        
+        """ Sets total forcing q (float) for cell_index. 
         """
         self.cell_forcing_function[cell_index] = forcing_value
 
     def get_cell_forcing_function(self, cell_index):
-        """ Returns total forcing (float) for cell_index. 
+        """ Returns total forcing (float) for cell_index.
         """
         return self.cell_forcing_function[cell_index]
 
     def set_face_real_centroid(self, face_index, centroid):
-        """ Sets face centroid for face_index. 
+        """ Sets face centroid for face_index.
         """
         self.face_real_centroids[face_index] = centroid
 
     def get_face_real_centroid(self, face_index):
-        """ Returns face centroid. 
+        """ Returns face centroid.
         """
         return self.face_real_centroids[face_index]
 
     def set_face_shifted_centroid(self, face_index, centroid):
-        """ Sets face shifted centroid. 
+        """ Sets face shifted centroid.
         """
         self.face_shifted_centroids[face_index] = centroid
 
     def get_face_shifted_centroid(self, face_index):
-        """ Return face shifted centroid coordinates. 
+        """ Return face shifted centroid coordinates.
         """
         return self.face_shifted_centroids[face_index]
 
     def set_face_area(self, face_index, area):
-        """ Sets face area (float) for face_index. 
+        """ Sets face area (float) for face_index.
         """
         self.face_areas[face_index] = area
 
     def get_face_area(self, face_index):
-        """ Return area of face. 
+        """ Return area of face.
         """
         return self.face_areas[face_index]
-    
+
     def set_face_normal(self, face_index, normal):
-        """ Set face normal (array) to face_index. 
+        """ Set face normal (array) to face_index.
         """
         self.face_normals[face_index] = normal
 
     def get_face_normal(self, face_index):
-        """ Return face normal for face_index. 
+        """ Return face normal for face_index.
         """
         return self.face_normals[face_index]
 
     def set_boundary_markers(self, boundary_markers, boundary_descriptions):
-        """ Initialize the mesh boundary labeling. Each marker 
-        can represent a single boundary face or a group 
-        of faces. 
+        """ Initialize the mesh boundary labeling. Each marker
+        can represent a single boundary face or a group
+        of faces.
 
-        boundary_markers: List of integers. 
-        boundary_descriptions: List of strings describing 
-        the face groups. 
-        
+        boundary_markers: List of integers.
+        boundary_descriptions: List of strings describing
+        the face groups.
         """
         self.boundary_markers = boundary_markers
         self.boundary_descriptions = boundary_descriptions
 
         for marker in boundary_markers:
             self.boundary_faces[marker] = []
-    
+
     def add_boundary_marker(self, boundary_marker, boundary_description):
-        """ Add a new boundary marker. 
+        """ Add a new boundary marker.
         """
         self.boundary_markers.append(boundary_marker)
         self.boundary_descriptions.append(boundary_description)
-        
         self.boundary_faces[boundary_marker] = []
 
     def create_new_boundary_marker(self, boundary_description):
-        """ Creates new boundary marker and assures 
-        that the index is unique. Returns the 
-        index of the new boundary marker. 
+        """ Creates new boundary marker and assures
+        that the index is unique. Returns the
+        index of the new boundary marker.
         """
         new_index = len(self.boundary_markers)
         self.boundary_markers.append(new_index)
         self.boundary_descriptions.append(boundary_description)
-        
         self.boundary_faces[new_index] = []
         return new_index
-        
 
     def has_boundary_marker(self, boundary_marker):
-        """ Returns true if boundary_marker exists. 
+        """ Returns true if boundary_marker exists.
         """
         return boundary_marker in self.boundary_markers
 
     def get_boundary_markers(self):
-        """ Returns a list of all boundary markers. 
+        """ Returns a list of all boundary markers.
         """
         return self.boundary_markers
 
     def get_boundary_discription(self, boundary_marker):
-        """ Returns the boundary discription for 
-        boundary_marker. 
+        """ Returns the boundary discription for
+        boundary_marker.
         """
         return self.boundary_descriptions[boundary_marker]
 
-    def add_boundary_face(self, 
-                          boundary_marker, 
-                          face_index, 
+    def add_boundary_face(self,
+                          boundary_marker,
+                          face_index,
                           face_orientation):
-        """ Assign face_index to a certain boundary_marker grouping. 
+        """ Assign face_index to a certain boundary_marker grouping.
         the face_orientation indicated whether the normal of that
         face points in (-1) or out (1) of the cell the face
         belongs to. 
-        
+
         A face should never be associated with more than one marker. 
         """
-        self.boundary_faces[boundary_marker].append([face_index, 
+        self.boundary_faces[boundary_marker].append([face_index,
                                                      face_orientation])
 
-    def set_boundary_faces(self, boundary_marker, 
+    def set_boundary_faces(self, boundary_marker,
                            face_orientation_list):
-        """ Takes a boundary_marker index, and sets the entire list 
-        of tuples for that boundary marker. 
+        """ Takes a boundary_marker index, and sets the entire list
+        of tuples for that boundary marker.
         """
         self.boundary_faces[boundary_marker] = face_orientation_list
-        
+
     def get_boundary_faces_by_marker(self, boundary_marker):
-        """ Returns a list of all the faces associated with a boundary_marker. 
+        """ Returns a list of all the faces associated with a boundary_marker.
         """
         return self.boundary_faces[boundary_marker]
 
     def is_boundary_face(self, face_index, markers):
-        """ Returns True if face_index belongs to 
-        any of the markers. 
+        """ Returns True if face_index belongs to
+        any of the markers.
         """
         for boundary_marker in markers:
             for face in self.boundary_faces[boundary_marker]:
@@ -863,17 +855,16 @@ class Mesh:
         return False
 
     def find_boundary_marker(self, face_index, markers):
-        """ Returns the boundary marker containing 
-        face_index. 
+        """ Returns the boundary marker containing
+        face_index.
         """
         for boundary_marker in markers:
             for face in self.boundary_faces[boundary_marker]:
                 if face_index == face[0]:
                     return boundary_marker
-        
 
     def set_boundary_face_orientation(self, face_index, new_orientation):
-        """ Set orientation for face_index. 
+        """ Set orientation for face_index.
         """
         for bm in self.boundary_markers:
             for face in self.boundary_faces[bm]:
@@ -881,9 +872,9 @@ class Mesh:
                     face[1] = new_orientation
 
     def get_number_of_boundary_faces(self):
-        """ Returns number of faces on the boundary 
-        of the domain. 
-        """        
+        """ Returns number of faces on the boundary
+        of the domain.
+        """
         number_of_boundary_faces = 0
         for boundary_marker in self.boundary_markers:
             number_of_boundary_faces += len(self.boundary_faces[boundary_marker])
@@ -891,272 +882,274 @@ class Mesh:
         return number_of_boundary_faces
 
     def set_face_quadrature_points(self, face_index, points):
-        """ Sets quadrature points for face_index. The points are 
-        a list of coordinates (numpy arrays). The points 
-        are used to compute boundary integrals for 
-        computing Neumann and Dirichlet boundary conditions 
-        from functional forms. In addition, it can be 
-        used for calculating velocity error against 
-        a known solution. 
+        """ Sets quadrature points for face_index. The points are
+        a list of coordinates (numpy arrays). The points
+        are used to compute boundary integrals for
+        computing Neumann and Dirichlet boundary conditions
+        from functional forms. In addition, it can be
+        used for calculating velocity error against
+        a known solution.
         """
         self.face_quadrature_points[face_index] = np.array(points)
 
     def get_face_quadrature_points(self, face_index):
-        """ Returns the quadrature points for face_index. 
+        """ Returns the quadrature points for face_index.
         """
         return self.face_quadrature_points[face_index]
 
     def set_face_quadrature_weights(self, face_index, weights):
-        """ Sets the weights associated with the corresponding 
-        quadrature points for face_index. 
-        weights = list of floats. 
+        """ Sets the weights associated with the corresponding
+        quadrature points for face_index.
+        weights = list of floats.
         """
         self.face_quadrature_weights[face_index] = weights
 
     def get_face_quadrature_weights(self, face_index):
-        """ Returns list of quadrature weights for 
-        face_index. 
+        """ Returns list of quadrature weights for
+        face_index.
         """
         return self.face_quadrature_weights[face_index]
 
     def has_face_quadrature(self, face_index):
-        """
-        Returns True if face_index has associated 
-        quadrature points and weights. 
+        """ Returns True if face_index has associated 
+        quadrature points and weights.
         """
         return self.face_quadrature_points.has_key(face_index)
 
     def has_cell_quadrature(self, cell_index):
-        """ Returns True if cell_index has associated 
-        quadrature points and weights. 
+        """ Returns True if cell_index has associated
+        quadrature points and weights.
         """
         return self.cell_quadrature_points.has_key(cell_index)
 
     def set_cell_quadrature_points(self, cell_index, points):
-        """ Sets quadrature points for cell_index. The points are 
+        """ Sets quadrature points for cell_index. The points are
         a list of coordinates (numpy arrays). Quadrature
-        is used to compute volume integrals for 
-        integrating the forcing function over the volume 
-        of the cell. In addition, it can be used to 
-        compute the pressure error against known solutions. 
+        is used to compute volume integrals for
+        integrating the forcing function over the volume
+        of the cell. In addition, it can be used to
+        compute the pressure error against known solutions.
         """
         self.cell_quadrature_points[cell_index] = points
 
     def get_cell_quadrature_points(self, cell_index):
-        """ Returns the quadrature points for cell_index. 
+        """ Returns the quadrature points for cell_index.
         """
         return self.cell_quadrature_points[cell_index]
 
     def set_cell_quadrature_weights(self, cell_index, weights):
-        """ Sets quadraturs weights for cell_index. The points are 
+        """ Sets quadraturs weights for cell_index. The points are
         a list of coordinates (numpy arrays). Quadrature
-        is used to compute volume integrals for 
-        integrating the forcing function over the volume 
-        of the cell. In addition, it can be used to 
-        compute the pressure error against known solutions. 
+        is used to compute volume integrals for
+        integrating the forcing function over the volume
+        of the cell. In addition, it can be used to
+        compute the pressure error against known solutions.
         """
         self.cell_quadrature_weights[cell_index] = weights
 
 
     def get_cell_quadrature_weights(self, cell_index):
-        """ Returns the quadrature weights for cell_index. 
+        """ Returns the quadrature weights for cell_index.
         """
         return self.cell_quadrature_weights[cell_index]
 
-    def set_dirichlet_by_face(self, 
-                              face_index, 
-                              face_orientation, 
+    def set_dirichlet_by_face(self,
+                              face_index,
+                              face_orientation,
                               value):
-        """ Directly sets Dirichlet value to face_index. 
-        The input *value* corresponding to the 
-        integral of the pressure over the face. 
-        """        
+        """ Directly sets Dirichlet value to face_index.
+        The input *value* corresponding to the
+        integral of the pressure over the face.
+        """
         self.dirichlet_boundary_values[face_index] = value * \
             self.get_face_area(face_index)*face_orientation
 
-    def set_neumann_by_face(self, 
-                              face_index, 
-                              face_orientation, 
+    def set_neumann_by_face(self,
+                              face_index,
+                              face_orientation,
                               value):
-        """ Directly sets Neumann value to face_index. 
-        The input *value* corresponding to the 
-        integral of the pressure over the face. 
-        """        
-        self.neumann_boundary_values[face_index] = value 
-#        self.dirichlet_boundary_values[face_index] = value * \
-#            self.get_face_area(face_index)*face_orientation
+        """ Directly sets Neumann value to face_index.
+        The input *value* corresponding to the
+        integral of the pressure over the face.
+        """
+        self.neumann_boundary_values[face_index] = value
 
         cell_index = self.face_to_cell[face_index][0]
-        
+
         local_face_index = self.get_cell(cell_index).index(face_index)
-        
+
         if self.cell_faces_neumann.has_key(cell_index):
             self.cell_faces_neumann[cell_index].append(face_index)
         else:
             self.cell_faces_neumann[cell_index] = [face_index]
 
-
-    def set_dirichlet_face_pointer(self, 
-                                   face_index, 
-                                   face_orientation, 
+    def set_dirichlet_face_pointer(self,
+                                   face_index,
+                                   face_orientation,
                                    cell_index):
-        """ Sets the value of a Dirichlet boundary to 
-        value of cell pressure for cell_index. 
-        This approach is used for coupling fractures 
-        with a reservoir. 
+        """ Sets the value of a Dirichlet boundary to
+        value of cell pressure for cell_index.
+        This approach is used for coupling fractures
+        with a reservoir.
         """
-        # The function adds a zero entry to the 
-        # dirichlet_boundary_values dict. This 
-        # allows the MFD code to build the matrix 
-        # correctly, and doesn't effect the right-hand 
-        # side of the problem. 
+        # The function adds a zero entry to the
+        # dirichlet_boundary_values dict. This
+        # allows the MFD code to build the matrix
+        # correctly, and doesn't effect the right-hand
+        # side of the problem.
         self.dirichlet_boundary_values[face_index] = 0.
         self.dirichlet_boundary_pointers[face_index] = (cell_index, face_orientation)
 
     def get_dirichlet_pointer_faces(self):
-        """ Returns all the faces with Dirichlet 
-        values set by pointing to a cell. 
+        """ Returns all the faces with Dirichlet
+        values set by pointing to a cell.
         """
         return self.dirichlet_boundary_pointers.keys()
 
-    def set_face_to_lagrange_pointer(self, face_index, face_orientation, lagrange_index):
-        """ Sets face to dirichlet type boundary pointing to 
+    def set_face_to_lagrange_pointer(self,
+                                     face_index,
+                                     face_orientation,
+                                     lagrange_index):
+        """ Sets face to dirichlet type boundary pointing to
         lagrange multiplier.
-        """        
-        # The function adds a zero entry to the 
-        # dirichlet_boundary_values dict. This 
-        # allows the MFD code to build the matrix 
-        # correctly, and doesn't effect the right-hand 
-        # side of the problem. 
+        """
+        # The function adds a zero entry to the
+        # dirichlet_boundary_values dict. This
+        # allows the MFD code to build the matrix
+        # correctly, and doesn't effect the right-hand
+        # side of the problem.
         self.dirichlet_boundary_values[face_index] = 0.
         self.face_to_lagrange_pointer[face_index] = (lagrange_index, face_orientation)
 
     def get_all_face_to_lagrange_pointers(self):
-        """ Returns all face indices that are 
-        pointing to a lagrange multiplier. 
+        """ Returns all face indices that are
+        pointing to a lagrange multiplier.
         """
         return self.face_to_lagrange_pointer.keys()
-    
+
     def get_face_to_lagrange_pointer(self, face_index):
-        """ Returns the lagrange multiplier index 
-        and the face normal orientation. 
+        """ Returns the lagrange multiplier index
+        and the face normal orientation.
         """
         return self.face_to_lagrange_pointer[face_index]
-    
-    def set_lagrange_to_face_pointers(self, lagrange_index, face_indices, orientations):
-        """ Sets the lagrange multiplier to the source faces 
-        in order to impose zero flux across the boundary. 
+
+    def set_lagrange_to_face_pointers(self,
+                                      lagrange_index,
+                                      face_indices,
+                                      orientations):
+        """ Sets the lagrange multiplier to the source faces
+        in order to impose zero flux across the boundary.
         """
-        self.lagrange_to_face_pointers[lagrange_index] = zip(face_indices, orientations)
-        
+        self.lagrange_to_face_pointers[lagrange_index] = \
+            zip(face_indices, orientations)
+
     def get_all_lagrange_to_face_pointers(self):
-        """ Returns all lagrange face indices that 
-        point to fluxes. 
+        """ Returns all lagrange face indices that
+        point to fluxes.
         """
         return self.lagrange_to_face_pointers.keys()
 
     def get_lagrange_to_face_pointers(self, lagrange_index):
         """ Returns the faces the lagrange_index face
-        points too. 
+        points too.
         """
         return self.lagrange_to_face_pointers[lagrange_index]
 
     def get_dirichlet_pointer_for_face(self, face_index):
-        """ Returns the cell_index for 
-        which the Dirichlet boundary will be set 
-        implicitly. 
+        """ Returns the cell_index for
+        which the Dirichlet boundary will be set
+        implicitly.
         """
         return self.dirichlet_boundary_pointers[face_index]
-    
-    def set_neumann_boundary_pointer_to_face(self, face_index, 
-                                             face_orientation, 
-                                             pointer_index, 
+
+    def set_neumann_boundary_pointer_to_face(self, face_index,
+                                             face_orientation,
+                                             pointer_index,
                                              pointer_orientation):
 	""" Sets a neumann boundary as a pointer to another
-	face in the domain.  
+	face in the domain.
 	"""
         self.neumann_boundary_values[face_index] = 0.
-        self.neumann_boundary_pointers[face_index] = (pointer_index, -face_orientation*pointer_orientation)
+        self.neumann_boundary_pointers[face_index] = \
+            (pointer_index, -face_orientation*pointer_orientation)
 
     def get_neumann_pointer_faces(self):
-	""" Returns all the faces with Neumann 
-        values set by pointing to a cell. 
+	""" Returns all the faces with Neumann
+        values set by pointing to a cell.
 	"""
         return self.neumann_boundary_pointers.keys()
 
     def get_neumann_pointer_for_face(self, face_index):
-        """ Returns the face_index  for 
-        which the Neumann boundary will be set 
-        implicitly. 
+        """ Returns the face_index  for
+        which the Neumann boundary will be set
+        implicitly.
         """
         return self.neumann_boundary_pointers[face_index]
 
-    def set_forcing_pointer(self, 
-                            cell_index, 
+    def set_forcing_pointer(self,
+                            cell_index,
                             face_indices,
                             face_orientations):
         """ Sets the value of the forcing function implicity
-        as the sum of the fluxes from list of 
-        faces. 
-        This approach is used for coupling fractures 
-        with a reservoir. 
-        """   
-        # The function adds a zero entry to the 
-        # cell_forcing_function dict. This 
-        # allows the MFD code to build the matrix 
-        # correctly, and doesn't effect the right-hand 
-        # side of the problem. 
+        as the sum of the fluxes from list of
+        faces.
+        This approach is used for coupling fractures
+        with a reservoir.
+        """
+        # The function adds a zero entry to the
+        # cell_forcing_function dict. This
+        # allows the MFD code to build the matrix
+        # correctly, and doesn't effect the right-hand
+        # side of the problem.
         # If the forcing function is set later on
-        # (in case of well for example), it 
-        # becomes additive to the source term 
-        # for that cell. 
+        # (in case of well for example), it
+        # becomes additive to the source term
+        # for that cell.
         self.cell_forcing_function[cell_index] = 0.
         self.forcing_function_pointers[cell_index] = zip(face_indices, face_orientations)
 
     def get_forcing_pointer_cells(self):
-        """ Returns cell indices with forcing function 
-        poitners. 
+        """ Returns cell indices with forcing function
+        poitners.
         """
         return self.forcing_function_pointers.keys()
 
     def get_forcing_pointers_for_cell(self, cell_index):
-        """ Returns list of pointers (face_indices) 
-        for cell_index
+        """ Returns list of pointers (face_indices)
+        for cell_index. 
         """
         return self.forcing_function_pointers[cell_index]
-    
+
     def reset_dirichlet_boundaries(self):
-        """
-        Resets all Dirichlet bounday data. 
+        """ Resets all Dirichlet bounday data.
         """
         self.dirichlet_boundary_values = {}
-        
+
     def reset_neumann_boundaries(self):
+        """ Resets all Neumann bounday data.
         """
-        Resets all Neumann bounday data. 
-        """        
         self.neumann_boundary_values = {}
 
     def set_cell_domain(self, cell_index, domain):
-        """ Sets cell domain identifier 
+        """ Sets cell domain identifier
         for cell_index.
         """
         self.cell_domain[cell_index] = domain
 
     def get_cell_domain(self, cell_index):
-        """ Returns cell domain identifier 
-        for cell_index
+        """ Returns cell domain identifier
+        for cell_index. 
         """
         return self.cell_domain[cell_index]
 
     def get_cell_domain_all(self):
-        """ Returns list containing 
-        all cell_domain tags. 
+        """ Returns list containing
+        all cell_domain tags.
         """
         return self.cell_domain
-    
+
     def get_cells_in_domain(self, domain):
-        """ Returns all cells with domain tag. 
+        """ Returns all cells with domain tag.
         """
         cells_in_domain = []
         for cell_index in range(self.get_number_of_cells()):
@@ -1165,28 +1158,27 @@ class Mesh:
         return cells_in_domain
 
     def apply_forcing_from_function(self, forcing_function):
-        """ Sets forcing function for entire problem based on 
-        a functional representation forcing_function. 
-        The forcing_function takes a Numpy array 
-        representing a point coordinate and returns 
-        the value of the forcing function at that point. 
-        The cell_quadrature_points and cell_quadrature_weights 
-        are used to approximate the integral 
-        of forcing_function over the volume of the cell. 
+        """ Sets forcing function for entire problem based on
+        a functional representation forcing_function.
+        The forcing_function takes a Numpy array
+        representing a point coordinate and returns
+        the value of the forcing function at that point.
+        The cell_quadrature_points and cell_quadrature_weights
+        are used to approximate the integral
+        of forcing_function over the volume of the cell.
         """
         for cell_index in range(self.get_number_of_cells()):
-            for [quad_point, quad_weight] in \
-                    zip(self.get_cell_quadrature_points(cell_index), 
-                        self.get_cell_quadrature_weights(cell_index)):
-                    self.cell_forcing_function[cell_index] += (forcing_function(quad_point)* 
-                                                               quad_weight)
+            current_quad_points = self.get_cell_quadrature_points(cell_index)
+            current_quad_weights = self.get_cell_quadrature_weights(cell_index)
+            for [quad_point, quad_weight] in zip(current_quad_points, current_quad_weights):
+                self.cell_forcing_function[cell_index] += \
+                    (forcing_function(quad_point)*quad_weight)
 
     def apply_forcing_from_grad(self, grad_p, forcing_function):
-        """ Computes the source term for a cell from the 
-        exact representation of the gradient integrated over the 
-        boundaries of the cell. 
+        """ Computes the source term for a cell from the
+        exact representation of the gradient integrated over the
+        boundaries of the cell.
         """
-        
         for cell_index in range(self.get_number_of_cells()):
             for (face_index, orientation) in \
                     zip(self.get_cell(cell_index), self.get_cell_normal_orientation(cell_index)):
@@ -1196,32 +1188,26 @@ class Mesh:
                     orientation
                 self.cell_forcing_function[cell_index] += exact_flux
 
-#            for [quad_point, quad_weight] in \
-    #                    zip(self.get_cell_quadrature_points(cell_index), 
-    #                        self.get_cell_quadrature_weights(cell_index)):
-    #                    temp += (forcing_function(quad_point)* 
-    #                                                               quad_weight)
-
     def apply_neumann_from_function(self, boundary_marker, grad_u):
         """ Sets the Neumann boundary values for the
-        entire problem based on 
+        entire problem based on
         a functional representation grad_u. All
         boundary faces associated with
-        boundary_marker will be set as Neumann 
-        The function grad_u takes a Numpy array 
-        representing a point coordinate on the 
-        face and returns 
-        the vector of the Neumann condition at that point. 
-        The face_quadrature_points and face_quadrature_weights 
-        are used to approximate the 
-        normal compontant of grad_u integrated 
-        over the face. 
+        boundary_marker will be set as Neumann
+        The function grad_u takes a Numpy array
+        representing a point coordinate on the
+        face and returns
+        the vector of the Neumann condition at that point.
+        The face_quadrature_points and face_quadrature_weights
+        are used to approximate the
+        normal compontant of grad_u integrated
+        over the face.
         """
         for [boundary_index, boundary_orientation] in \
                 self.get_boundary_faces_by_marker(boundary_marker):
             neumann_value = 0.
             for (quad_points, quad_weights) in \
-                    zip(self.get_face_quadrature_points(boundary_index), 
+                    zip(self.get_face_quadrature_points(boundary_index),
                         self.get_face_quadrature_weights(boundary_index)):
                     neumann_value += \
                         (np.dot(grad_u(quad_points),\
@@ -1238,27 +1224,25 @@ class Mesh:
             else:
                 self.cell_faces_neumann[cell_index] = [boundary_index]
 
-    def apply_dirichlet_from_function(self, boundary_marker, p_function): 
+    def apply_dirichlet_from_function(self, boundary_marker, p_function):
         """ Sets the Dirichlet boundary values for the
-        entire problem based on 
+        entire problem based on
         a functional representation p_function. All
         boundary faces associated with
-        boundary_marker will be set as Dirichlet. 
-        The p_function takes a Numpy array 
-        representing a point coordinate on the 
+        boundary_marker will be set as Dirichlet.
+        The p_function takes a Numpy array
+        representing a point coordinate on the
         face and returns the scalar value of
-        the Dirichlet condition at that point. 
-        The face_quadrature_points and face_quadrature_weights 
-        are used to approximate the 
-        the integral of p_function over the face. 
+        the Dirichlet condition at that point.
+        The face_quadrature_points and face_quadrature_weights
+        are used to approximate the
+        the integral of p_function over the face.
         """
         for (boundary_index, boundary_orientation) \
                 in self.get_boundary_faces_by_marker(boundary_marker):
-
             quad_sum = 0.
-            
             for (quad_points, quad_weights) \
-                    in zip(self.get_face_quadrature_points(boundary_index), 
+                    in zip(self.get_face_quadrature_points(boundary_index),
                            self.get_face_quadrature_weights(boundary_index)):
 
                     quad_sum += quad_weights * p_function(quad_points)
@@ -1267,91 +1251,47 @@ class Mesh:
                 quad_sum*boundary_orientation
 
     def apply_neumann_from_list(self, boundary_index, grad_u_values):
-        """ Not implemented yet. 
+        """ Not implemented yet.
         """
         pass
 
-
     def get_dirichlet_boundary_values(self):
-        """ Returns a list of all faces designated as 
-        Dirichlet boundaries and their values. 
+        """ Returns a list of all faces designated as
+        Dirichlet boundaries and their values.
         """
         return self.dirichlet_boundary_values.iteritems()
 
     def get_dirichlet_boundary_value_by_face(self, face_index):
-        """ Return pressure value at face_index
+        """ Return pressure value at face_index.
         """
         return self.dirichlet_boundary_values[face_index]
 
     def get_number_of_dirichlet_faces(self):
-        """ Returns the number of Dirichlet boundary faces. 
+        """ Returns the number of Dirichlet boundary faces.
         """
         return len(self.dirichlet_boundary_values)
-    
+
     def get_neumann_boundary_values(self):
-        """ Returns a list of all faces designated as 
-        Neumann boundaries and their values. 
+        """ Returns a list of all faces designated as
+        Neumann boundaries and their values.
         """
         return self.neumann_boundary_values.iteritems()
 
-    def add_rate_well(self, injection_rate, cell_index, well_name):
-        """ Adds rate specified well at the center of cell_index.
-        Returns the index of the new rate well. 
-        """
-        pass 
-
-    def add_point_rate_well(self, injection_rate, cell_index, well_name):
-        """ Adds rate specified point source at the center of cell_index.
-        Returns the index of the new rate well. 
-        """
-        self.rate_wells_cell_index.append(cell_index)
-        self.rate_wells_rate.append(injection_rate)
-        self.rate_wells_name.append(well_name)
-        return len(self.rate_wells)-1
-
     def set_gravity_vector(self, gravity_vector):
-        """ Set vector indicating gravity acceleration direction. 
+        """ Set vector indicating gravity acceleration direction.
         """
         self.gravity_vector = gravity_vector
-        
+
     def get_gravity_vector(self):
         """ Returns gravity vector (down direction)
         """
         return self.gravity_vector
 
-    def set_fluid_density(self, fluid_density):
-        """ Set fluid density used for gravity computations. 
-        This density will not factor into \frac{K\rho}{\mu}, 
-        that still must be set directly by the model or 
-        by factoring it into K. 
-        """
-        self.fluid_density = fluid_density
-        
-    def get_fluid_density(self):
-        """ Returns the fluid density. 
-        """
-        return self.fluid_density
-
-    def set_gravity_acceleration(self, gravity_acceleration):
-        """ Sets the gravity acceleration constant. 
-        """
-        self.gravity_acceleration = gravity_acceleration
-
     def get_gravity_acceleration(self):
-        """ Returns the gravity acceleration constant. 
+        """ Returns the gravity acceleration constant.
         """
         return self.gravity_acceleration
 
-    def set_use_gravity(self,  setting):
-        """ Toggles whether gravity is added by MFD. 
-        """
-        self.use_gravity = setting
-
-    def is_using_gravity(self):
-        """ Rerturns whether model is to use
-        gravity. 
-        """
-        return self.use_gravity
 
     def find_face_normal(self, face_index):
         """ Finds the face normal based on 
@@ -2073,9 +2013,6 @@ class Mesh:
                             lagrange_faces.append(face_index)
 
         
-        print "lagrange_faces"
-        print lagrange_faces
-        
         for face_index in lagrange_faces:
             (cell1, cell2) = self.face_to_cell[face_index]
             if cell1 in cells:
@@ -2132,7 +2069,6 @@ class Mesh:
             for local_edge_index in range(len(self.get_face(face))):
                 non_connected_edges[-1].append(local_edge_index)
 
-        print  "faces", faces
         for local_face_index in range(len(faces)):
             current_face_points = list(self.get_face(faces[local_face_index]))
             current_face_points.append(current_face_points[0])
@@ -2175,8 +2111,6 @@ class Mesh:
                             if local_point_index_2 in non_connected_edges[local_face_index_2]:
                                 non_connected_edges[local_face_index_2].remove(local_point_index_2)
 
-        print connections
-                    
         ##Find edges that have more than two connections
         multiple_connection_indices = []
         multiple_connection_groups = []
@@ -2359,7 +2293,6 @@ class Mesh:
 
             connection += [faces_for_point_1, faces_for_point_2]
         
-        print "connections line 1966", connections
         ## Loop through all the connections, and find out which 
         ## faces are to contribute to the normal calculation. 
         for connection in subface_connections:
@@ -2430,13 +2363,11 @@ class Mesh:
                                  self.nonplanar_normal(self.get_face(new_face_index)))
 
             self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(self.get_face(new_face_index)))
+
             if self.has_face_shifted_centroid:
                 self.set_face_shifted_centroid(new_face_index, centroid)
-                                            #self.nonplanar_face_centroid(self.get_face(new_face_index)))
 
             self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(self.get_face(new_face_index)))
 
             face_to_walls[connection[0]].append((new_face_index, 1))
             face_to_walls[connection[1]].append((new_face_index, -1))
@@ -2521,15 +2452,11 @@ class Mesh:
             self.set_face_normal(new_face_index, 
                                  self.nonplanar_normal(self.get_face(new_face_index)))
             self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(self.get_face(new_face_index)))
             
             if self.has_face_shifted_centroid:
                 self.set_face_shifted_centroid(new_face_index, centroid)
-                                            #self.nonplanar_face_centroid(self.get_face(new_face_index)))
             
-                
             self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(self.get_face(new_face_index)))
 
             face_to_walls[connection[0]].append((new_face_index, 1))
             face_to_walls[connection[1]].append((new_face_index, -1))
@@ -2596,9 +2523,6 @@ class Mesh:
 
                 
             new_faces.append(new_face_index)
-
-#        self.output_vtk_faces("new_faces", new_faces)                
-#        1/0
 
         for (local_face_index, face) in enumerate(non_connected_edges):
             for point1 in face:
@@ -2650,11 +2574,6 @@ class Mesh:
                 if mid_points[local_face_index][point1] != -1:
                     new_face_points.append(mid_points[local_face_index][point1])
 
-                #new_face_points = [point_1_index, 
-                #                   point_2_index, 
-                #                   point_3_index, 
-                #                   point_4_index,]
-
                 new_face_index =self.add_face(new_face_points)
                 normal = self.nonplanar_normal(new_face_points)
                 self.set_face_normal(new_face_index, normal)
@@ -2665,24 +2584,19 @@ class Mesh:
                                             
                 if self.has_face_shifted_centroid:
                     self.set_face_shifted_centroid(new_face_index, centroid)
-                                                   #self.nonplanar_face_centroid(new_face_points))
                 
                 self.set_face_area(new_face_index, area)
-                                   #self.nonplanar_area(new_face_points))
                 
                 current_fracture_boundary = fracture_boundary_marker
                 for b_case in boundary_locations:
                     condition = b_case[0]
                     if condition(centroid):
-                        print "ADDING FRAC BOUNDARY", 
                         current_fracture_boundary = b_case[1]
                 
                 if np.dot(normal, centroid -self.get_face_real_centroid(global_face_index))>  0.:
                     self.add_boundary_face(current_fracture_boundary, new_face_index, 1)
-                    print "ONE"
                 else:
                     self.add_boundary_face(current_fracture_boundary, new_face_index, -1)
-                    print "TWO"
 
                 self.set_face_quadrature_points(new_face_index, 
                                                 [self.get_face_real_centroid(new_face_index)])
@@ -2705,14 +2619,11 @@ class Mesh:
             self.set_face_normal(new_face_index, 
                                  self.nonplanar_normal(new_face_points))
             self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(new_face_points))
+
             if self.has_face_shifted_centroid:
                 self.set_face_shifted_centroid(new_face_index, centroid)
-                                               #self.nonplanar_face_centroid(new_face_points))
                 
             self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(new_face_points))
-
             self.set_face_quadrature_points(new_face_index, 
                                             [self.get_face_real_centroid(new_face_index)])
             self.set_face_quadrature_weights(new_face_index, 
@@ -2732,17 +2643,14 @@ class Mesh:
                                  self.nonplanar_normal(new_face_points))
 
             self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(new_face_points))
+
             if self.has_face_shifted_centroid:
                 self.set_face_shifted_centroid(new_face_index, centroid)
-                                               #self.nonplanar_face_centroid(new_face_points))
+
 
             self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(new_face_points))
             self.set_face_quadrature_points(new_face_index, [centroid])
-                                            #[self.get_face_real_centroid(new_face_index)])
             self.set_face_quadrature_weights(new_face_index, [area])
-                                             #[self.get_face_area(new_face_index)])
 
             new_faces.append(new_face_index)
         
@@ -2775,8 +2683,7 @@ class Mesh:
                 self.face_to_cell[top_res_face_index].remove(bottom_cell)
                 self.set_cell_faces(bottom_cell, new_cell_faces)
             else:
-                print "single cell face..."
-                1/0
+                raise("Face on boundary encountered")
                 
             new_cell_index = self.add_cell(array.array('i', [x[0] for x in face_to_walls[face]]), 
                                            array.array('i', [x[1] for x in face_to_walls[face]]))
@@ -2803,713 +2710,6 @@ class Mesh:
 
         self.apply_neumann_from_function(fracture_boundary_marker, lambda x:np.zeros(3))
         self.output_vtk_faces("new_faces", new_faces)
-            
-
-
-
-    def build_frac_from_faces_single(self, faces, boundary_locations = []):
-        """ Takes a list of face indices, and 
-        extrudes them into cells. In this version of the function, 
-        a single fracture cell is created. 
-        """
-        boundary_markers = self.get_boundary_markers()
-        ## All fracture boundaries share the same marker. 
-        assert(len(boundary_markers)+1 not in boundary_markers)
-        fracture_boundary_marker = len(boundary_markers)+1
-        self.add_boundary_marker(fracture_boundary_marker, "fracture_boundaries")
-
-        connections = []
-        non_connected_edges = []        
-        for face in faces:
-            non_connected_edges.append([])
-            for local_edge_index in range(len(self.get_face(face))):
-                non_connected_edges[-1].append(local_edge_index)
-
-        for local_face_index in range(len(faces)):
-            current_face_points = list(self.get_face(faces[local_face_index]))
-            current_face_points.append(current_face_points[0])
-            for local_point_index in range(len(current_face_points)-1):
-                point_1 = self.get_point(current_face_points[local_point_index])
-                point_2 = self.get_point(current_face_points[local_point_index+1])
-                for local_face_index_2 in range(local_face_index+1, len(faces)):
-                    current_face_points_2 = list(self.get_face(faces[local_face_index_2]))
-                    current_face_points_2.append(current_face_points_2[0])
-
-                    for local_point_index_2 in range(len(current_face_points_2)-1):
-                        point_1_2 = self.get_point(current_face_points_2[local_point_index_2])
-                        point_2_2 = self.get_point(current_face_points_2[local_point_index_2+1])
-
-                        if np.linalg.norm(abs(point_1-point_1_2)+abs(point_2-point_2_2))< 1.e-12:
-                            connections.append([local_face_index, 
-                                                local_face_index_2, 
-                                                local_point_index,
-                                                local_point_index+1,
-                                                local_point_index_2, 
-                                                local_point_index_2+1, 
-                                                1])
-
-                            if local_point_index in non_connected_edges[local_face_index]:
-                                non_connected_edges[local_face_index].remove(local_point_index)
-                            if local_point_index_2 in non_connected_edges[local_face_index_2]:
-                                non_connected_edges[local_face_index_2].remove(local_point_index_2)
-
-                        if np.linalg.norm(abs(point_2-point_1_2)+abs(point_1-point_2_2))< 1.e-12:
-                            connections.append([local_face_index, 
-                                                local_face_index_2, 
-                                                local_point_index,
-                                                local_point_index+1,
-                                                local_point_index_2,
-                                                local_point_index_2+1,
-                                                0])
-                            
-                            if local_point_index in non_connected_edges[local_face_index]:
-                                non_connected_edges[local_face_index].remove(local_point_index)
-                            if local_point_index_2 in non_connected_edges[local_face_index_2]:
-                                non_connected_edges[local_face_index_2].remove(local_point_index_2)
-
-                    
-        ##Find edges that have more than two connections
-        multiple_connection_indices = []
-        multiple_connection_groups = []
-        
-        for (connection_index, connection) in enumerate(connections):
-
-            first_face = self.get_face(faces[connection[0]])
-            point1 = self.get_point(first_face[connection[2]])
-            point2 = self.get_point(first_face[connection[3]%len(first_face)])
-            
-            multiple_connection_groups.append([])
-            for remote_connection_index in range(connection_index+1, len(connections)):
-                if remote_connection_index not in multiple_connection_indices:
-                    remote_connection = connections[remote_connection_index]
-
-                    first_face_remote = self.get_face(faces[remote_connection[0]])
-                    point1_remote = self.get_point(first_face_remote[remote_connection[2]])
-                    point2_remote = self.get_point(first_face_remote[remote_connection[3]%len(first_face_remote)])
-                    if np.linalg.norm(abs(point1-point1_remote)+abs(point2-point2_remote))< 1.e-10 or\
-                         np.linalg.norm(abs(point2-point1_remote)+abs(point1-point2_remote))< 1.e-10:
-                        if len(multiple_connection_groups[-1]) == 0:
-                            multiple_connection_groups[-1].append(connection_index) 
-                            multiple_connection_groups[-1].append(remote_connection_index)
-                            multiple_connection_indices.append(connection_index)
-                            multiple_connection_indices.append(remote_connection_index)
-                        else:
-                            multiple_connection_groups[-1].append(remote_connection_index)
-                            multiple_connection_indices.append(remote_connection_index)
-
-        multiple_connection_groups = filter(lambda x:len(x)>0, multiple_connection_groups)
-
-        new_multiple_connection_groups = []
-        ## Switch from connection index to actual connections
-        for group in multiple_connection_groups:
-            new_multiple_connection_groups.append([])
-            for connection_index in group:
-                new_multiple_connection_groups[-1].append(list(connections[connection_index]))
-                
-        multiple_connection_groups = new_multiple_connection_groups
-        connections_without_multiple = []
-
-        for connection_index in range(len(connections)):
-            if connection_index not in multiple_connection_indices:
-                connections_without_multiple.append(connections[connection_index])
-
-        subface_connections = []
-        ## For multiple connections, the joining faces must be divided 
-        ## to two, a top and a bottom face. 
-        for group in multiple_connection_groups:
-            done_faces = []
-            for connection in group:
-                current_face = connection[0]
-                full_face = self.get_face(faces[current_face])
-                point1 = self.get_point(full_face[connection[2]])
-                point2 = self.get_point(full_face[connection[3]%len(full_face)])
-                current_centroid = self.get_face_real_centroid(faces[current_face])
-                home_vector = current_centroid-(point1+point2)/2.
-                home_vector /= np.linalg.norm(home_vector)
-                norm1 = self.get_face_normal(faces[current_face])
-                max_top_angle = -999 
-                max_top_connection_index =  None
-                max_bot_angle = -999
-                max_bot_connection_index = None
-                for (connection_index, connection2) in enumerate(group):
-                    if connection2[0] == current_face:
-                        full_face_2 = self.get_face(faces[connection2[1]])
-                        point1_2 = self.get_point(full_face_2[connection2[4]])
-                        point2_2 = self.get_point(full_face_2[connection2[5]%len(full_face_2)])
-                        centroid_2 = self.get_face_real_centroid(faces[connection2[1]])
-                        current_vector = centroid_2-(point1_2+point2_2)/2.
-                        current_vector /= np.linalg.norm(current_vector)
-                        top_angle = np.dot(home_vector, current_vector)
-                        if np.dot(current_vector, norm1) > 0.:
-                            bottom_angle = -top_angle
-                            top_angle += 2
-                        else:
-                            bottom_angle = top_angle+2
-                            top_angle = -top_angle  
-
-                        if top_angle > max_top_angle:
-                            max_top_angle = top_angle
-                            max_top_connection_index = connection_index
-                        
-                        if bottom_angle > max_bot_angle:
-                            max_bot_angle = bottom_angle
-                            max_bot_connection_index = connection_index
-
-                face2_top = group[max_top_connection_index][1]
-                face2_bot = group[max_bot_connection_index][1]
-
-                if ((current_face, 'TOP')) not in done_faces:
-                    subface_connections.append(group[max_top_connection_index]+['TOP'])
-                    done_faces.append((current_face, 'TOP')) 
-                    if group[max_top_connection_index][6]==0:
-                        done_faces.append((face2_top, 'TOP')) 
-                    else:
-                        done_faces.append((face2_top, 'BOT')) 
-
-                if ((current_face, 'BOT')) not in done_faces:
-                    subface_connections.append(group[max_bot_connection_index]+['BOT'])        
-                    done_faces.append((current_face, 'BOT'))
-                    if group[max_bot_connection_index][6]==0:
-                        done_faces.append((face2_bot, 'BOT'))
-                    else:
-                        done_faces.append((face2_bot, 'TOP')) 
-
-        connections = connections_without_multiple
-
-        ## Loop through all the connections, and find out which 
-        ## faces are to contribute to the normal calculation. 
-        for connection in connections:
-            ## The two faces already there 
-            face_1 = connection[0]
-            face_2 = connection[1]
-            faces_for_point_1 = set([(connection[0], 0), 
-                                     (connection[1], connection[6])])
-            faces_for_point_2 = set([(connection[0], 0), 
-                                     (connection[1], connection[6])])
-            ## Loop through all the connections, and find overlap 
-            ## between the local point indices. 
-            for remote_connection in connections:
-                if remote_connection[0] == face_1 and \
-                        remote_connection[1] == face_2:
-                    pass
-                else:
-
-                    if remote_connection[0] == face_1:
-                        if connection[2] in remote_connection[2:4]:
-                            faces_for_point_1.add((remote_connection[1], 
-                                                   remote_connection[6]))
-
-                        if connection[3] in remote_connection[2:4]:
-                            faces_for_point_2.add((remote_connection[1],
-                                                   remote_connection[6]))
-
-                    if remote_connection[1] == face_1:
-                        if connection[2] in remote_connection[4:6]:
-                            faces_for_point_1.add((remote_connection[0], 
-                                                   remote_connection[6]))
-
-                        if connection[3] in remote_connection[4:6]:
-                            faces_for_point_2.add((remote_connection[0], 
-                                                   remote_connection[6]))
-
-                    if remote_connection[0] == face_2:
-                        if connection[4] in remote_connection[2:4]:
-                            if connection[6] == 1:
-                                faces_for_point_1.add((remote_connection[1], 
-                                                       remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_2.add((remote_connection[1], 
-                                                       remote_connection[6]^connection[6]))
-
-                        if connection[5] in remote_connection[2:4]:
-                            if connection[6] == 1:
-                                faces_for_point_2.add((remote_connection[0], 
-                                                       remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_1.add((remote_connection[0], 
-                                                       remote_connection[6]^connection[6]))
-
-                    if remote_connection[1] == face_2:
-                        if connection[4] in remote_connection[4:6]:
-                            if connection[6] == 1:
-                                faces_for_point_1.add((remote_connection[1], 
-                                                       remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_2.add((remote_connection[1], 
-                                                       remote_connection[6]^connection[6]))
-
-                        if connection[5] in remote_connection[4:6]:
-                            if connection[6] == 1:
-                                faces_for_point_2.add((remote_connection[0], 
-                                                       remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_1.add((remote_connection[0], 
-                                                       remote_connection[6]^connection[6]))
-
-            connection += [faces_for_point_1, faces_for_point_2]
-        
-        ## Loop through all the connections, and find out which 
-        ## faces are to contribute to the normal calculation. 
-        for connection in subface_connections:
-            ## The two faces already there 
-            face_1 = connection[0]
-            face_2 = connection[1]
-            faces_for_point_1 = set([(connection[0], 0), 
-                                     (connection[1], connection[6])])
-            faces_for_point_2 = set([(connection[0], 0), 
-                                     (connection[1], connection[6])])
-
-            connection += [faces_for_point_1, faces_for_point_2]
-
-        # Build the faces. 
-        new_faces = []
-        ## Maps the cells to the walls that make them. 
-        ## The cells are identified by the index of the 
-        ## generating face. 
-        face_to_walls = {}
-        top_points = []
-        bot_points = []
-        mid_points = []
-        temp_out = open("tempfaces", 'w')
-        for face in range(len(faces)):
-            face_to_walls[face] = []
-            top_points.append([-1]*len(self.get_face(faces[face])))
-            bot_points.append([-1]*len(self.get_face(faces[face])))
-            mid_points.append([-1]*len(self.get_face(faces[face])))
-                
-        for connection in connections:
-            norm1 = np.zeros(3)
-            for (local_face_index, orientation) in connection[7]:
-                if orientation == 0: 
-                    norm1+= self.get_face_normal(faces[local_face_index])
-                else:
-                    norm1-= self.get_face_normal(faces[local_face_index])
-
-            norm2 = np.zeros(3)
-            for (local_face_index, orientation) in connection[8]:
-                if orientation == 0: 
-                    norm2+= self.get_face_normal(faces[local_face_index])
-                else:
-                    norm2-= self.get_face_normal(faces[local_face_index])
-            
-            norm1 /= np.linalg.norm(norm1)
-            norm2 /= np.linalg.norm(norm2)
-
-            width = .1
-            full_face = self.get_face(faces[connection[0]])
-            point1 = -width*norm1+self.get_point(full_face[connection[2]])
-            point2 = -width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
-            point3 = width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
-            point4 = width*norm1+self.get_point(full_face[connection[2]])
-            
-            point_1_index = self.add_point(point1)
-            point_2_index = self.add_point(point2)
-            point_3_index = self.add_point(point3)
-            point_4_index = self.add_point(point4)
-            """
-            new_face_index =self.add_face([point_1_index, 
-                                           point_2_index, 
-                                           point_3_index, 
-                                           point_4_index,])
-            
-            (area, centroid) =  self.find_face_centroid(new_face_index)
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(self.get_face(new_face_index)))
-
-            self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(self.get_face(new_face_index)))
-            if self.has_face_shifted_centroid:
-                self.set_face_shifted_centroid(new_face_index, centroid)
-                                            #self.nonplanar_face_centroid(self.get_face(new_face_index)))
-
-            self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(self.get_face(new_face_index)))
-
-            face_to_walls[connection[0]].append((new_face_index, 1))
-            face_to_walls[connection[1]].append((new_face_index, -1))
-            """
-
-            top_points[connection[0]][connection[2]]=point_4_index
-            top_points[connection[0]][connection[3]%
-                                      len(self.get_face(faces[connection[0]]))]=point_3_index
-
-            bot_points[connection[0]][connection[2]]=point_1_index
-            bot_points[connection[0]][connection[3]%
-                                      len(self.get_face(faces[connection[0]]))]=point_2_index
-
-            if connection[6] == 0:
-                top_points[connection[1]][connection[5]%
-                                      len(self.get_face(faces[connection[1]]))]=point_4_index
-                top_points[connection[1]][connection[4]]=point_3_index
-                
-                bot_points[connection[1]][connection[5]%
-                                          len(self.get_face(faces[connection[1]]))]=point_1_index
-                bot_points[connection[1]][connection[4]]=point_2_index
-
-            else:
-                bot_points[connection[1]][connection[4]]=point_4_index
-                bot_points[connection[1]][connection[5]%
-                                      len(self.get_face(faces[connection[1]]))]=point_3_index
-                
-                top_points[connection[1]][connection[4]]=point_1_index
-                top_points[connection[1]][connection[5]%
-                                      len(self.get_face(faces[connection[1]]))]=point_2_index
-
-            #new_faces.append(new_face_index)
-
-                
-        ## Build the subfaces. 
-        for connection in subface_connections:
-            norm1 = np.zeros(3)
-            for (local_face_index, orientation) in connection[8]:
-                if orientation == 0: 
-                    norm1+= self.get_face_normal(faces[local_face_index])
-                else:
-                    norm1-= self.get_face_normal(faces[local_face_index])
-
-            norm2 = np.zeros(3)
-            for (local_face_index, orientation) in connection[8]:
-                if orientation == 0: 
-                    norm2+= self.get_face_normal(faces[local_face_index])
-                else:
-                    norm2-= self.get_face_normal(faces[local_face_index])
-            
-            norm1 /= np.linalg.norm(norm1)
-            norm2 /= np.linalg.norm(norm2)
-
-            width = .1
-
-            if connection[7] == 'TOP':
-                full_face = self.get_face(faces[connection[0]])
-                point1 = self.get_point(full_face[connection[2]])
-                point2 = self.get_point(full_face[connection[3]%len(full_face)])
-                point3 = width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
-                point4 = width*norm1+self.get_point(full_face[connection[2]])
-
-            elif connection[7] == 'BOT':
-                full_face = self.get_face(faces[connection[0]])
-                point1 = -width*norm1+self.get_point(self.get_face(faces[connection[0]])[connection[2]]) 
-                point2 = -width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
-                point3 = self.get_point(full_face[connection[3]%len(full_face)])
-                point4 = self.get_point(full_face[connection[2]])
-
-            point_1_index = self.add_point(point1)
-            point_2_index = self.add_point(point2)
-            point_3_index = self.add_point(point3)
-            point_4_index = self.add_point(point4)
-                
-            new_face_index =self.add_face([point_1_index, 
-                                           point_2_index, 
-                                           point_3_index, 
-                                           point_4_index,])
-
-            (area, centroid) =  self.find_face_centroid(new_face_index)
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(self.get_face(new_face_index)))
-            self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(self.get_face(new_face_index)))
-            
-            if self.has_face_shifted_centroid:
-                self.set_face_shifted_centroid(new_face_index, centroid)
-                                            #self.nonplanar_face_centroid(self.get_face(new_face_index)))
-            
-                
-            self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(self.get_face(new_face_index)))
-
-            face_to_walls[connection[0]].append((new_face_index, 1))
-            face_to_walls[connection[1]].append((new_face_index, -1))
-
-            if connection[7] == 'TOP':
-                mid_points[connection[0]][connection[2]]=point_1_index
-                mid_points[connection[0]][connection[3]%
-                                          len(self.get_face(faces[connection[0]]))]=point_2_index
-
-                top_points[connection[0]][connection[3]%
-                                          len(self.get_face(faces[connection[0]]))]=point_3_index
-                top_points[connection[0]][connection[2]]=point_4_index
-
-
-            elif connection[7] == 'BOT':
-                bot_points[connection[0]][connection[2]]=point_1_index
-                bot_points[connection[0]][connection[3]%
-                                          len(self.get_face(faces[connection[0]]))]=point_2_index
-
-                mid_points[connection[0]][connection[2]]=point_4_index
-                mid_points[connection[0]][connection[3]%
-                                          len(self.get_face(faces[connection[0]]))]=point_3_index
-
-            if connection[7] == 'TOP':
-                if connection[6] == 0:
-                    top_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_4_index
-                    top_points[connection[1]][connection[4]%
-                                              len(self.get_face(faces[connection[1]]))]=point_3_index
-                    
-                    mid_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_1_index
-                    mid_points[connection[1]][connection[4]%
-                                              len(self.get_face(faces[connection[1]]))]=point_2_index
-                    
-                else:
-                    bot_points[connection[1]][connection[4]]=point_4_index
-                    bot_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_3_index
-                    
-                    mid_points[connection[1]][connection[4]]=point_1_index
-                    mid_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_2_index
-
-            if connection[7] == 'BOT':
-                if connection[6] == 0:
-                    mid_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_4_index
-                    mid_points[connection[1]][connection[4]]=point_3_index
-                    
-                    bot_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_1_index
-                    bot_points[connection[1]][connection[4]]=point_2_index
-                    
-                else:
-                    mid_points[connection[1]][connection[4]]=point_4_index
-                    mid_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_3_index
-                    
-                    top_points[connection[1]][connection[4]%
-                                              len(self.get_face(faces[connection[1]]))]=point_1_index
-                    top_points[connection[1]][connection[5]%
-                                              len(self.get_face(faces[connection[1]]))]=point_2_index
-
-                
-            new_faces.append(new_face_index)
-
-#        self.output_vtk_faces("new_faces", new_faces)                
-#        1/0
-            
-        ## Adds the bundary faces. 
-        for (local_face_index, face) in enumerate(non_connected_edges):
-            for point1 in face:
-                global_face_index = faces[local_face_index]
-                point2 = (point1+1)%len(self.get_face(global_face_index))
-                
-                new_face_points = []
-                norm = self.get_face_normal(global_face_index)
-                width = .1
-                if bot_points[local_face_index][point1] == -1:
-                    new_point = -width*norm+self.get_point(self.get_face(global_face_index)[point1])
-                    point_1_index = self.add_point(new_point)
-                    bot_points[local_face_index][point1] = point_1_index
-                else:
-                    point_1_index = bot_points[local_face_index][point1]
-
-                new_face_points.append(point_1_index)
-
-                if bot_points[local_face_index][point2] == -1:
-                    new_point = -width*norm+self.get_point(self.get_face(global_face_index)[point2])
-                    point_2_index = self.add_point(new_point)
-                    bot_points[local_face_index][point2] = point_2_index
-                else:
-                    point_2_index = bot_points[local_face_index][point2]
-                    
-                new_face_points.append(point_2_index)
-
-                if mid_points[local_face_index][point2] != -1:
-                    new_face_points.append(mid_points[local_face_index][point2])
-                
-                if top_points[local_face_index][point2] == -1:
-                    new_point = width*norm+self.get_point(self.get_face(global_face_index)[point2])
-                    point_3_index = self.add_point(new_point)
-                    top_points[local_face_index][point2] = point_3_index
-                else:
-                    point_3_index = top_points[local_face_index][point2]
-
-                new_face_points.append(point_3_index)
-
-                if top_points[local_face_index][point1] == -1:
-                    new_point = width*norm+self.get_point(self.get_face(global_face_index)[point1])
-                    point_4_index = self.add_point(new_point)
-                    top_points[local_face_index][point1] = point_4_index
-                else:
-                    point_4_index = top_points[local_face_index][point1]
-
-                new_face_points.append(point_4_index)
-
-                if mid_points[local_face_index][point1] != -1:
-                    new_face_points.append(mid_points[local_face_index][point1])
-
-                #new_face_points = [point_1_index,
-                #                   point_2_index,
-                #                   point_3_index,
-                #                   point_4_index,]
-
-                new_face_index =self.add_face(new_face_points)
-                normal = self.nonplanar_normal(new_face_points)
-                self.set_face_normal(new_face_index, normal)
-                                     
-                (area, centroid) =  self.find_face_centroid(new_face_index)
-                centroid = self.nonplanar_face_centroid(new_face_points)
-                self.set_face_real_centroid(new_face_index, centroid)
-                                            
-                if self.has_face_shifted_centroid:
-                    self.set_face_shifted_centroid(new_face_index, centroid)
-                                                   #self.nonplanar_face_centroid(new_face_points))
-                
-                self.set_face_area(new_face_index, area)
-                                   #self.nonplanar_area(new_face_points))
-                
-                current_fracture_boundary = fracture_boundary_marker
-                for b_case in boundary_locations:
-                    condition = b_case[0]
-                    if condition(centroid):
-                        print "ADDING FRAC BOUNDARY", 
-                        current_fracture_boundary = b_case[1]
-                
-                if np.dot(normal, centroid -self.get_face_real_centroid(global_face_index))>  0.:
-                    self.add_boundary_face(current_fracture_boundary, new_face_index, 1)
-                else:
-                    self.add_boundary_face(current_fracture_boundary, new_face_index, -1)
-
-                self.set_face_quadrature_points(new_face_index, 
-                                                [self.get_face_real_centroid(new_face_index)])
-                self.set_face_quadrature_weights(new_face_index, 
-                                                 [self.get_face_area(new_face_index)])
-
-                face_to_walls[local_face_index].append((new_face_index, 1))
-
-                new_faces.append(new_face_index)
-
-
-        ## Adds the top and bottom faces. 
-        for local_face_index in range(len(faces)):
-            new_face_points = top_points[local_face_index]
-            new_face_index = self.add_face(new_face_points)
-            face_to_walls[local_face_index].append((new_face_index, 1))
-            self.add_boundary_face(fracture_boundary_marker, new_face_index, 1)
-
-            (area, centroid) =  self.find_face_centroid(new_face_index)
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(new_face_points))
-            self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(new_face_points))
-            if self.has_face_shifted_centroid:
-                self.set_face_shifted_centroid(new_face_index, centroid)
-                                               #self.nonplanar_face_centroid(new_face_points))
-                
-            self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(new_face_points))
-
-            self.set_face_quadrature_points(new_face_index, 
-                                            [self.get_face_real_centroid(new_face_index)])
-            self.set_face_quadrature_weights(new_face_index, 
-                                             [self.get_face_area(new_face_index)])
-
-            #new_faces.append(new_face_index)
-
-            new_face_points = bot_points[local_face_index]
-            new_face_index = self.add_face(new_face_points)
-            face_to_walls[local_face_index].append((new_face_index, -1))
-
-            self.add_boundary_face(fracture_boundary_marker, new_face_index, 1)
-
-            (area, centroid) =  self.find_face_centroid(new_face_index)
-
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(new_face_points))
-
-            self.set_face_real_centroid(new_face_index, centroid)
-                                        #self.nonplanar_face_centroid(new_face_points))
-            if self.has_face_shifted_centroid:
-                self.set_face_shifted_centroid(new_face_index, centroid)
-                                               #self.nonplanar_face_centroid(new_face_points))
-
-            self.set_face_area(new_face_index, area)
-                               #self.nonplanar_area(new_face_points))
-            self.set_face_quadrature_points(new_face_index, [centroid])
-                                            #[self.get_face_real_centroid(new_face_index)])
-            self.set_face_quadrature_weights(new_face_index, [area])
-                                             #[self.get_face_area(new_face_index)])
-
-            #new_faces.append(new_face_index)
-        
-        # Duplicate reservoir face for interior dirichlet boundary. 
-        faces_for_cell = []
-        normal_orientation_for_cell = []
-        new_cell_index = self.add_cell(array.array('i', []), 
-                                       array.array('i', []))
-
-        forcing_pointer_faces = []
-        forcing_pointer_orientations = []
-        for face in face_to_walls:
-            top_res_face_index = faces[face]
-
-            if len(self.face_to_cell[top_res_face_index]) == 2:
-                bot_res_face_index = self.add_face(list(self.get_face(top_res_face_index)))
-                self.set_face_area(bot_res_face_index, self.get_face_area(top_res_face_index))
-                self.set_face_normal(bot_res_face_index, self.get_face_normal(top_res_face_index))
-                self.set_face_real_centroid(bot_res_face_index, 
-                                            self.get_face_real_centroid(top_res_face_index))
-                if self.has_face_shifted_centroid:
-                    self.set_face_shifted_centroid(bot_res_face_index, 
-                                                   self.get_face_real_centroid(top_res_face_index))
-
-                bottom_cell = self.face_to_cell[top_res_face_index][1]
-
-                new_cell_faces = array.array('i', self.get_cell(bottom_cell))
-                local_face_index_in_cell = new_cell_faces.index(top_res_face_index)
-
-                new_cell_faces[local_face_index_in_cell] = bot_res_face_index
-
-                top_cell_index = self.face_to_cell[top_res_face_index][0]
-                local_top_face_index_in_cell = self.get_cell(top_cell_index).index(top_res_face_index)
-                top_res_face_orientation =\
-                    self.get_cell_normal_orientation(top_cell_index)[local_top_face_index_in_cell]
-                                
-                self.face_to_cell[top_res_face_index].remove(bottom_cell)
-                self.set_cell_faces(bottom_cell, new_cell_faces)
-            else:
-                print "single cell face..."
-                1/0
-                
-                
-            forcing_pointer_faces += [top_res_face_index, bot_res_face_index] 
-            forcing_pointer_orientations += [top_res_face_orientation, -top_res_face_orientation]
-
-            self.set_dirichlet_face_pointer(top_res_face_index, 
-                                            top_res_face_orientation, 
-                                            new_cell_index) 
-            self.set_dirichlet_face_pointer(bot_res_face_index, 
-                                            -top_res_face_orientation, 
-                                            new_cell_index)
-            
-            faces_for_cell += [x[0] for x in face_to_walls[face]]
-            normal_orientation_for_cell += [x[1] for x in face_to_walls[face]]
-
-        self.output_vtk_faces("cell_faces", faces_for_cell)
-        
-        self.set_cell_faces(new_cell_index, array.array('i', faces_for_cell))
-        self.set_cell_orientation(new_cell_index, array.array('i', normal_orientation_for_cell))
-
-        self.set_forcing_pointer(new_cell_index, 
-                                 forcing_pointer_faces, 
-                                 forcing_pointer_orientations)
-
-        
-        self.set_cell_domain(new_cell_index, 1)
-        
-        (volume, centroid) = self.find_volume_centroid(new_cell_index)
-        self.set_cell_volume(new_cell_index, volume)
-        self.set_cell_real_centroid(new_cell_index, centroid)
-        if self.has_cell_shifted_centroid:
-            self.set_cell_shifted_centroid(new_cell_index, centroid)
-            
-        self.set_cell_k(new_cell_index, np.eye(3)*1.e-1)
-
-        print "volume = ", volume
-        print "cetnroid =", centroid
-
-        self.apply_neumann_from_function(fracture_boundary_marker, lambda x:np.zeros(3))
-        self.output_vtk_faces("new_faces", new_faces)
-
 
     def build_mesh(self):
         """ Base class function for constructing the mesh. 

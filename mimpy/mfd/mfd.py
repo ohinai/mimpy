@@ -1,7 +1,7 @@
 
 import numpy as np
 import sys
-import copy 
+import copy
 import array 
 
 from scipy import sparse, diag
@@ -48,9 +48,6 @@ class MFD():
         # List indicating orthogonality of cells.  
         self.diagonality_index_list = None
 
-        # 0 => U = R^TR(R^TN)^(-1)
-        # 1 => U = trace(k^(-1))|E|
-        # 2 => U = 1/(dim^2 * #faces) \sum_{e\in \partial E} (x_e - x_E)^T K^{-1} (x_e - x_E)
         self.m_e_construction_method = 0
 
         # Data needed for updating matrix Mx
@@ -650,13 +647,10 @@ class MFD():
         self.lhs = PETSc.Mat()
 
         self.lhs.create(PETSc.COMM_WORLD)
-        #self.lhs.setSizes([self.mesh.get_number_of_faces()+self.mesh.get_number_of_cells(), 
-        #                   self.mesh.get_number_of_faces()+self.mesh.get_number_of_cells()])
         self.lhs.createAIJWithArrays(size=lhs_csr.shape, csr=(lhs_csr.indptr, 
                                                                lhs_csr.indices, 
                                                                lhs_csr.data))
 
-        print "got here?" 
         self.lhs.setUp()
         
         self.lhs.assemblyBegin()
@@ -678,7 +672,6 @@ class MFD():
                 last_percent+= percentage_inc
 
             self.lhs[m_info[1][index], m_info[2][index]] = m_info[0][index]
-            #self.lhs[m_info[1][index], m_info[2][index]]
 
         del m_info
 
@@ -760,8 +753,6 @@ class MFD():
         self.build_rhs_neumann()
         self.build_rhs_dirichlet()
         self.build_rhs_forcing()
-        if self.mesh.is_using_gravity():
-            self.add_gravity()
         return self.rhs
 
     def add_gravity(self):
@@ -856,7 +847,6 @@ class MFD():
 
                 error_flux_denominator += (self.mesh.get_cell_volume(cell_index)* 
                                            (exact_flux)**2)
-##            error_flux_denominator = 1.e5
 
             error_flux[cell_index] = np.sqrt(error_flux_numerator/error_flux_denominator)
         return error_flux
@@ -1037,23 +1027,11 @@ class MFD():
 
         current_p = np.zeros(self.mesh.get_number_of_cells())
 
-        #precond = sparse.dia_matrix((1./self.m.diagonal(),np.array([0.]) ), 
-        #                            shape = (self.mesh.get_number_of_faces(), 
-        #                                     self.mesh.get_number_of_faces()))
         
         def apply_lhs(x):
-            print "APPLY"
-            #return_value = -self.div.dot(linalg.cg(self.m, self.div_t.dot(x), 
-            #                               M=precond, tol=1.e-10)[0])
-            #return return_value
             return -self.div.dot(self.cg_inner(self.m.dot, 
                                          self.div_t.dot(x), 
                                          tol=1.e-16))
-        
-#        A = linalg.LinearOperator((self.mesh.get_number_of_cells(), 
-#                                   self.mesh.get_number_of_cells()), 
-#                                  dot = apply_lhs, 
-#                                  dtype = 'float64')
 
         f1_tilde = linalg.cg(self.m, f1)[0]
         
