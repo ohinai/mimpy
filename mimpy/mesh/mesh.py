@@ -81,7 +81,8 @@ class variable_array():
             self.pointers[self.number_of_entries, 0] = self.next_data_pos
             self.pointers[self.number_of_entries, 1] = len(data)
         else:
-            self.pointers.resize((self.new_size(len(self.pointers),len(data)), 2),
+            new_array_size = self.new_size(len(self.pointers),len(data))
+            self.pointers.resize((new_array_size, 2),
                                  refcheck=False)
             self.pointers[self.number_of_entries, 0] = self.next_data_pos
             self.pointers[self.number_of_entries, 1] = len(data)
@@ -95,8 +96,6 @@ class variable_array():
             else:
                 self.data.resize(self.new_size((len(self.data)), self.dim),
                                  refcheck=False)
-            print data 
-            print self.data
             self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
 
         self.next_data_pos = len(data)+self.next_data_pos
@@ -147,7 +146,8 @@ class variable_array():
                 else:
                     self.data.resize(self.new_size((len(self.data)), self.dim),
                                      refcheck=False)
-                    self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
+                    self.data[self.next_data_pos:
+                                  self.next_data_pos+len(data)] = data
 
             self.pointers[index, 0] = self.next_data_pos
             self.pointers[index, 1] = len(data)
@@ -312,7 +312,8 @@ class Mesh:
             self.points[self.number_of_points] = new_point
             self.number_of_points += 1
         else:
-            self.points.resize((len(self.points)+len(self.points)/2+1, 3), refcheck=False)
+            new_array_size = (len(self.points)+len(self.points)/2+1, 3)
+            self.points.resize(new_array_size, refcheck=False)
             self.points[self.number_of_points] = new_point
             self.number_of_points += 1
         return self.number_of_points-1
@@ -364,7 +365,8 @@ class Mesh:
 
         if self.has_face_shifted_centroid:
             if len(self.face_shifted_centroids)-1<new_face_index:
-                new_size = self.memory_extension(len(self.face_shifted_centroids))
+                new_size = self.memory_extension(
+                    len(self.face_shifted_centroids))
                 self.face_shifted_centroids.resize((new_size, 3))
 
         return new_face_index
@@ -380,7 +382,7 @@ class Mesh:
         bottom of the face list. The function
         returns the new face index.
         """
-        # Proper duplication requires duplicating 
+        # Proper duplication requires duplicating
         # all the properties fo the face.
         new_index = self.add_face(self.get_face(face_index))
         self.set_face_area(new_index, self.get_face_area(face_index))
@@ -444,12 +446,15 @@ class Mesh:
 
                 normal = self.get_face_normal(face_index)
                 current_point = self.get_point(self.get_face(face_index)[-1])
-                for (local_index, next_point_index) in enumerate(self.get_face(face_index)):
+                for (local_index, next_point_index) in \
+                        enumerate(self.get_face(face_index)):
                     next_point = self.get_point(next_point_index)
                     face_vec = next_point - current_point
                     check_vec = current_point - intersection_point
 
-                    direction[local_index] = np.dot(np.cross(face_vec, check_vec), normal)
+                    direction[local_index] = np.dot(np.cross(face_vec,
+                                                             check_vec),
+                                                    normal)
                     current_point = next_point
 
                 if (direction>0.).all():
@@ -542,7 +547,8 @@ class Mesh:
 
         if self.has_cell_shifted_centroid:
             if len(self.cell_shifted_centroid)-1<new_cell_index:
-                new_size = self.memory_extension(len(self.cell_shifted_centroid))
+                new_size = self.memory_extension(
+                    len(self.cell_shifted_centroid))
                 self.cell_shifted_centroid.resize((new_size, 3))
 
         return new_cell_index
@@ -606,11 +612,7 @@ class Mesh:
         using number_of_faces. The add_face method
         will add an extra entry for the shifted centroids.
         """
-        raise Exception("Function initialize_face_shifted_centorid not defined yet")
-        if number_of_faces is None:
-            self.face_shifted_centroids = [None]*self.get_number_of_faces()
-        else:
-            self.face_shifted_centroids = [None]*number_of_faces
+        raise NotImplementedError
 
     def set_cell_shifted_centroid(self, cell_index, centroid):
         """ Sets the shifted centroid. Since the shifted centroid
@@ -2047,7 +2049,7 @@ class Mesh:
             self.set_face_quadrature_weights(new_face_index, 
                                              [self.get_face_real_centroid(new_face_index)])
             
-            local_face_index_in_other = self.get_cell(other_cell).index(face_index)
+            local_face_index_in_other = list(self.get_cell(other_cell)).index(face_index)
             new_cell_faces = self.get_cell(other_cell)
             new_cell_faces[local_face_index_in_other] = new_face_index
             
@@ -2676,7 +2678,7 @@ class Mesh:
                 new_cell_faces[local_face_index_in_cell] = bot_res_face_index
 
                 top_cell_index = self.face_to_cell[top_res_face_index][0]
-                local_top_face_index_in_cell = self.get_cell(top_cell_index).index(top_res_face_index)
+                local_top_face_index_in_cell = list(self.get_cell(top_cell_index)).index(top_res_face_index)
                 top_res_face_orientation =\
                     self.get_cell_normal_orientation(top_cell_index)[local_top_face_index_in_cell]
                                 
