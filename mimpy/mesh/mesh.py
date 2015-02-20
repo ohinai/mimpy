@@ -32,7 +32,7 @@ class variable_array():
     The structure allows the user to modify the entries
     as well as extend the data as needed.
     """
-    def __init__(self, dtype=np.dtype('f'), size=(1,1), dim = 1):
+    def __init__(self, dtype=np.dtype('f'), size=(1, 1), dim = 1):
         self.pointer_capacity = size[0]
         self.data_capacity  = size[1]
         self.dim = dim
@@ -40,7 +40,7 @@ class variable_array():
         self.dtype = dtype
         self.pointers = np.empty(shape=(self.pointer_capacity, 2),
                                  dtype=np.dtype("i"))
-        if self.dim==1:
+        if self.dim == 1:
             self.data = np.empty(shape = (self.data_capacity),
                                  dtype=self.dtype)
         else:
@@ -50,6 +50,10 @@ class variable_array():
         self.number_of_entries = 0
         self.next_data_pos = 0
 
+    def __del__(self):
+        del self.pointers
+        del self.data
+        
     def set_pointer_capacity(self, capacity):
         """ Sets the maximum number of entries in
         the data structure.
@@ -77,11 +81,11 @@ class variable_array():
     def add_entry(self, data):
         """ Adds new data to end of the list.
         """
-        if self.number_of_entries<len(self.pointers):
+        if self.number_of_entries < len(self.pointers):
             self.pointers[self.number_of_entries, 0] = self.next_data_pos
             self.pointers[self.number_of_entries, 1] = len(data)
         else:
-            new_array_size = self.new_size(len(self.pointers),len(data))
+            new_array_size = self.new_size(len(self.pointers), len(data))
             self.pointers.resize((new_array_size, 2),
                                  refcheck=False)
             self.pointers[self.number_of_entries, 0] = self.next_data_pos
@@ -99,14 +103,14 @@ class variable_array():
             self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
 
         self.next_data_pos = len(data)+self.next_data_pos
-        self.number_of_entries +=1
+        self.number_of_entries += 1
 
         return self.number_of_entries-1
 
     def get_entry(self, index):
         """ Return entry.
         """
-        if index>self.number_of_entries:
+        if index > self.number_of_entries:
             raise IndexError("No entry with index " +str(index))
         (pos,  length) = self.pointers[index]
         return self.data[pos:pos+length]
@@ -132,7 +136,7 @@ class variable_array():
         wasted memory.
         """
         (pos, length) = self.pointers[index]
-        if length<=len(data):
+        if length <= len(data):
             self.data[pos:pos+len(data)] = data
             self.pointers[index, 1] = len(data)
         else:
@@ -172,7 +176,7 @@ class Mesh:
     hexahedral mesh, a sublcass HexMesh inherits
     from Mesh, and adds the appropriate functionality.
     """
-    def __init__(self, mesh_size = 1000):
+    def __init__(self):
         # List of points used to construct mesh faces.
         # Each point coordinate is prepresented by
         # a Numpy array.
@@ -308,7 +312,7 @@ class Mesh:
         and appends the point to the end of the point list.
         Returns the index of the new point.
         """
-        if self.number_of_points<len(self.points):
+        if self.number_of_points < len(self.points):
             self.points[self.number_of_points] = new_point
             self.number_of_points += 1
         else:
@@ -358,13 +362,13 @@ class Mesh:
             new_size = self.memory_extension(len(self.face_real_centroids))
             self.face_real_centroids.resize((new_size, 3), refcheck=False)
 
-        if len(self.face_to_cell)-1<new_face_index:
+        if len(self.face_to_cell)-1 < new_face_index:
             new_size = self.memory_extension(len(self.face_to_cell))
             self.face_to_cell.resize((new_size, 2))
             self.face_to_cell[new_face_index:, :] = -1
 
         if self.has_face_shifted_centroid:
-            if len(self.face_shifted_centroids)-1<new_face_index:
+            if len(self.face_shifted_centroids)-1 < new_face_index:
                 new_size = self.memory_extension(
                     len(self.face_shifted_centroids))
                 self.face_shifted_centroids.resize((new_size, 3))
@@ -377,21 +381,21 @@ class Mesh:
         self.faces[face_index] = points
 
     def remove_from_face_to_cell(self, face_index, cell_index):
-        """ Removes the cell_index from face_to_cell map 
-        at for face_index. 
+        """ Removes the cell_index from face_to_cell map
+        at for face_index.
         """
         if self.face_to_cell[face_index, 0] == cell_index:
-            self.face_to_cell[face_index, 0]= -1
+            self.face_to_cell[face_index, 0] = -1
         elif self.face_to_cell[face_index, 1] == cell_index:
-            self.face_to_cell[face_index, 1]= -1
+            self.face_to_cell[face_index, 1] = -1
         else:
             raise Exception("cell_index " + str(cell_index)+
                             " not found in face_to_cell for "+
                             str(face_index))
 
     def add_to_face_to_cell(self, face_index, cell_index):
-        """ Adds cell_index to face_to_cell map 
-        at face_index. 
+        """ Adds cell_index to face_to_cell map
+        at face_index.
         """
         if self.face_to_cell[face_index, 0] ==  -1:
             self.face_to_cell[face_index, 0] =  cell_index
@@ -465,7 +469,7 @@ class Mesh:
             d /= denom
             length = np.linalg.norm(p1-p2)
 
-            if d<= length+1.e-8 and  d> 0.+1.e-8:
+            if d <= length+1.e-8 and d > 0.+1.e-8:
                 intersection_point = d*vector+p1
 
                 direction = np.zeros(len(self.get_face(face_index)))
@@ -495,19 +499,7 @@ class Mesh:
         """ Initialize cell data structure
         for known number of cells.
         """
-        raise Exception("Function initialize_cells not defined yet")
-        for cell_index in range(number_of_cells):
-            self.cells.append([])
-            self.cell_normal_orientation.append([])
-            self.cell_forcing_function.append(0.)
-            self.cell_volume.append(None)
-            self.cell_k.append(None)
-            self.cell_domain.append(None)
-            self.cell_real_centroid.append(None)
-            if self.has_two_d_polygons:
-                self.two_d_polygons.append(None)
-            if self.has_alpha:
-                self.cell_alpha.append(None)
+        raise NotImplementedError
 
     def set_cell_faces(self, cell_index, faces):
         """ Sets the cell faces.
@@ -624,11 +616,7 @@ class Mesh:
         using number_of_cells. The add_cell method
         will add an extra entry for the shifted centroids.
         """
-        raise Exception("Function initialize_cells_shifted_centorid not defined yet")
-        if number_of_cells is None:
-            self.cell_shifted_centroid = [None]*self.get_number_of_cells()
-        else:
-            self.cell_shifted_centroid = [None]*number_of_cells
+        raise NotImplementedError
 
     def initialize_face_shifted_centroid(self, number_of_faces = None):
         """ Informs Mesh that the shifted face centroid data structure
@@ -663,7 +651,7 @@ class Mesh:
         rather than the real cell centroid.
         """
         self.has_cell_shifted_centroid = True
-    
+
     def is_using_cell_shifted_centroid(self):
         """ Returns True if MFD is to use the shifted
         cell centroids, False otherwise.
@@ -747,7 +735,7 @@ class Mesh:
         return self.cell_alpha[cell_index]
 
     def set_cell_forcing_function(self, cell_index, forcing_value):
-        """ Sets total forcing q (float) for cell_index. 
+        """ Sets total forcing q (float) for cell_index.
         """
         self.cell_forcing_function[cell_index] = forcing_value
 
@@ -852,9 +840,9 @@ class Mesh:
         """ Assign face_index to a certain boundary_marker grouping.
         the face_orientation indicated whether the normal of that
         face points in (-1) or out (1) of the cell the face
-        belongs to. 
+        belongs to.
 
-        A face should never be associated with more than one marker. 
+        A face should never be associated with more than one marker.
         """
         self.boundary_faces[boundary_marker].append([face_index,
                                                      face_orientation])
@@ -905,7 +893,8 @@ class Mesh:
         """
         number_of_boundary_faces = 0
         for boundary_marker in self.boundary_markers:
-            number_of_boundary_faces += len(self.boundary_faces[boundary_marker])
+            number_of_boundary_faces += \
+                len(self.boundary_faces[boundary_marker])
 
         return number_of_boundary_faces
 
@@ -939,7 +928,7 @@ class Mesh:
         return self.face_quadrature_weights[face_index]
 
     def has_face_quadrature(self, face_index):
-        """ Returns True if face_index has associated 
+        """ Returns True if face_index has associated
         quadrature points and weights.
         """
         return self.face_quadrature_points.has_key(face_index)
@@ -1004,8 +993,6 @@ class Mesh:
 
         cell_index = self.face_to_cell[face_index][0]
 
-        local_face_index = list(self.get_cell(cell_index)).index(face_index)
-
         if self.cell_faces_neumann.has_key(cell_index):
             self.cell_faces_neumann[cell_index].append(face_index)
         else:
@@ -1026,7 +1013,8 @@ class Mesh:
         # correctly, and doesn't effect the right-hand
         # side of the problem.
         self.dirichlet_boundary_values[face_index] = 0.
-        self.dirichlet_boundary_pointers[face_index] = (cell_index, face_orientation)
+        self.dirichlet_boundary_pointers[face_index] = \
+            (cell_index, face_orientation)
 
     def get_dirichlet_pointer_faces(self):
         """ Returns all the faces with Dirichlet
@@ -1047,7 +1035,8 @@ class Mesh:
         # correctly, and doesn't effect the right-hand
         # side of the problem.
         self.dirichlet_boundary_values[face_index] = 0.
-        self.face_to_lagrange_pointer[face_index] = (lagrange_index, face_orientation)
+        self.face_to_lagrange_pointer[face_index] = \
+            (lagrange_index, face_orientation)
 
     def get_all_face_to_lagrange_pointers(self):
         """ Returns all face indices that are
@@ -1094,17 +1083,17 @@ class Mesh:
                                              face_orientation,
                                              pointer_index,
                                              pointer_orientation):
-	""" Sets a neumann boundary as a pointer to another
-	face in the domain.
-	"""
+        """ Sets a neumann boundary as a pointer to another
+        face in the domain.
+        """
         self.neumann_boundary_values[face_index] = 0.
         self.neumann_boundary_pointers[face_index] = \
             (pointer_index, -face_orientation*pointer_orientation)
 
     def get_neumann_pointer_faces(self):
-	""" Returns all the faces with Neumann
+        """ Returns all the faces with Neumann
         values set by pointing to a cell.
-	"""
+        """
         return self.neumann_boundary_pointers.keys()
 
     def get_neumann_pointer_for_face(self, face_index):
@@ -1134,7 +1123,8 @@ class Mesh:
         # becomes additive to the source term
         # for that cell.
         self.cell_forcing_function[cell_index] = 0.
-        self.forcing_function_pointers[cell_index] = zip(face_indices, face_orientations)
+        self.forcing_function_pointers[cell_index] = \
+            zip(face_indices, face_orientations)
 
     def get_forcing_pointer_cells(self):
         """ Returns cell indices with forcing function
@@ -1144,7 +1134,7 @@ class Mesh:
 
     def get_forcing_pointers_for_cell(self, cell_index):
         """ Returns list of pointers (face_indices)
-        for cell_index. 
+        for cell_index.
         """
         return self.forcing_function_pointers[cell_index]
 
@@ -1166,7 +1156,7 @@ class Mesh:
 
     def get_cell_domain(self, cell_index):
         """ Returns cell domain identifier
-        for cell_index. 
+        for cell_index.
         """
         return self.cell_domain[cell_index]
 
@@ -1181,7 +1171,7 @@ class Mesh:
         """
         cells_in_domain = []
         for cell_index in range(self.get_number_of_cells()):
-            if self.cell_domain[cell_index]==domain:
+            if self.cell_domain[cell_index] == domain:
                 cells_in_domain.append(cell_index)
         return cells_in_domain
 
@@ -1196,24 +1186,26 @@ class Mesh:
         of forcing_function over the volume of the cell.
         """
         for cell_index in range(self.get_number_of_cells()):
-            current_quad_points = self.get_cell_quadrature_points(cell_index)
-            current_quad_weights = self.get_cell_quadrature_weights(cell_index)
-            for [quad_point, quad_weight] in zip(current_quad_points, current_quad_weights):
+            point_list = self.get_cell_quadrature_points(cell_index)
+            weight_list = self.get_cell_quadrature_weights(cell_index)
+            for [quad_point, quad_weight] in zip(point_list, weight_list):
                 self.cell_forcing_function[cell_index] += \
                     (forcing_function(quad_point)*quad_weight)
 
-    def apply_forcing_from_grad(self, grad_p, forcing_function):
+    def apply_forcing_from_grad(self, grad_p):
         """ Computes the source term for a cell from the
         exact representation of the gradient integrated over the
         boundaries of the cell.
         """
         for cell_index in range(self.get_number_of_cells()):
-            for (face_index, orientation) in \
-                    zip(self.get_cell(cell_index), self.get_cell_normal_orientation(cell_index)):
+            face_list = self.get_cell(cell_index)
+            orientation_list = self.get_cell_normal_orientation(cell_index)
+            for (face_index, orientation) in zip(face_list, orientation_list):
                 current_normal = self.get_face_normal(face_index)
                 current_center = self.get_face_real_centroid(face_index)
-                exact_flux = np.dot(grad_p(current_center), current_normal)*self.get_face_area(face_index)*\
-                    orientation
+                exact_flux = np.dot(grad_p(current_center), current_normal)
+                exact_flux *= self.get_face_area(face_index)
+                exact_flux *= orientation
                 self.cell_forcing_function[cell_index] += exact_flux
 
     def apply_neumann_from_function(self, boundary_marker, grad_u):
@@ -1234,18 +1226,20 @@ class Mesh:
         for [boundary_index, boundary_orientation] in \
                 self.get_boundary_faces_by_marker(boundary_marker):
             neumann_value = 0.
-            for (quad_points, quad_weights) in \
-                    zip(self.get_face_quadrature_points(boundary_index),
-                        self.get_face_quadrature_weights(boundary_index)):
-                    neumann_value += \
-                        (np.dot(grad_u(quad_points),\
-                                    self.get_face_normal(boundary_index))*\
-                             quad_weights)
+            point_list = self.get_face_quadrature_points(boundary_index)
+            weight_list = self.get_face_quadrature_weights(boundary_index)
+            for (quad_point, quad_weight) in zip(point_list, weight_list):
+                current_normal = self.get_face_normal(boundary_index)
+                current_grad = grad_u(quad_point)
+                neumann_value += current_grad.dot(current_normal)*quad_weight
 
-            self.neumann_boundary_values[boundary_index] = neumann_value/self.get_face_area(boundary_index)
+            face_area = self.get_face_area(boundary_index)
+            self.neumann_boundary_values[boundary_index] = neumann_value
+            self.neumann_boundary_values[boundary_index] /= face_area
             cell_index = self.face_to_cell[boundary_index][0]
 
-            local_face_index = list(self.get_cell(cell_index)).index(boundary_index)
+            cell_list = list(self.get_cell(cell_index))
+            local_face_index = cell_list.index(boundary_index)
 
             if self.cell_faces_neumann.has_key(cell_index):
                 self.cell_faces_neumann[cell_index].append(boundary_index)
@@ -1269,11 +1263,10 @@ class Mesh:
         for (boundary_index, boundary_orientation) \
                 in self.get_boundary_faces_by_marker(boundary_marker):
             quad_sum = 0.
-            for (quad_points, quad_weights) \
-                    in zip(self.get_face_quadrature_points(boundary_index),
-                           self.get_face_quadrature_weights(boundary_index)):
-
-                    quad_sum += quad_weights * p_function(quad_points)
+            points_list = self.get_face_quadrature_points(boundary_index)
+            weights_list = self.get_face_quadrature_weights(boundary_index)
+            for (quad_point, quad_weight) in zip(points_list, weights_list):
+                quad_sum += quad_weight * p_function(quad_point)
 
             self.dirichlet_boundary_values[boundary_index] = \
                 quad_sum*boundary_orientation
@@ -1322,159 +1315,156 @@ class Mesh:
 
 
     def find_face_normal(self, face_index):
-        """ Finds the face normal based on 
-        rotation around the face boundary. 
-        Assumes the face is planar. 
+        """ Finds the face normal based on
+        rotation around the face boundary.
+        Assumes the face is planar.
         """
         face = self.get_face(face_index)
         for i in range(len(face)):
             v1 = self.get_point(face[i+1]) - self.get_point(face[i])
             v2 = self.get_point(face[i]) - self.get_point(face[i-1])
             new_face_normal = np.cross(v2, v1)
-            if np.linalg.norm(new_face_normal) >1.e-10: 
+            if np.linalg.norm(new_face_normal) >1.e-10:
                 new_face_normal /= np.linalg.norm(new_face_normal)
                 return new_face_normal
-        raise Exception("Couldn't compute normal for face " + srt(face_index))
-       
+        raise Exception("Couldn't compute normal for face " + str(face_index))
 
     def find_face_centroid(self, face_index):
-        """ Returns centroid coordinates for face_index. 
-        This function assumes planarity of the face. 
-        and is currently intended for use with three dimensional 
-        meshes. It uses the first two edges of the face as 
-        vectors, and the rest of the face is projected onto 
-        the 2D surface defined by those two edges. 
+        """ Returns centroid coordinates for face_index.
+        This function assumes planarity of the face.
+        and is currently intended for use with three dimensional
+        meshes. It uses the first two edges of the face as
+        vectors, and the rest of the face is projected onto
+        the 2D surface defined by those two edges.
         The function returns the area of the face, as well
-        as the x, y, z coordinates of its center. 
+        as the x, y, z coordinates of its center.
         """
-        if self.dim == 3:
-            polygon = map(lambda x: np.array(self.get_point(x)), 
-                          self.get_face(face_index))
-            
-            v1 = polygon[1]-polygon[0]
-            v2 = polygon[-1]-polygon[0]
+        polygon = map(lambda x: np.array(self.get_point(x)),
+                      self.get_face(face_index))
 
-            assert(np.linalg.norm(v2) >1.e-12)
-            assert(np.linalg.norm(v1) >1.e-12)
-            
-            v1 = v1/np.linalg.norm(v1)
+        v1 = polygon[1]-polygon[0]
+        v2 = polygon[-1]-polygon[0]
 
-            v_temp = np.cross(v1,v2)
+        assert(np.linalg.norm(v2) >1.e-12)
+        assert(np.linalg.norm(v1) >1.e-12)
+
+        v1 = v1/np.linalg.norm(v1)
+
+        v_temp = np.cross(v1, v2)
+        v2 = np.cross(v_temp, v1)
+
+
+        if np.linalg.norm(v2)< 1.e-10:
+            v2 = polygon[-2]-polygon[-1]
+            v_temp = np.cross(v1, v2)
             v2 = np.cross(v_temp, v1)
 
+        v2 = v2/np.linalg.norm(v2)
 
-            if np.linalg.norm(v2)< 1.e-10:
-                v2 = polygon[-2]-polygon[-1]
-                v_temp = np.cross(v1,v2)
-                v2 = np.cross(v_temp, v1)
-            
-            v2 = v2/np.linalg.norm(v2)
+        origin = polygon[0]
 
-            origin = polygon[0]
+        transposed_polygon = map(lambda x: x - origin, polygon)
+        polygon_projected_v1 = map(lambda x: np.dot(x, v1),
+                                   transposed_polygon)
+        polygon_projected_v2 = map(lambda x: np.dot(x, v2),
+                                   transposed_polygon)
+        polygon_projected =  zip(polygon_projected_v1,
+                                 polygon_projected_v2)
 
-            transposed_polygon = map(lambda x: x - origin, polygon)
-            polygon_projected_v1 = map(lambda x: np.dot(x, v1), 
-                                       transposed_polygon)
-            polygon_projected_v2 = map(lambda x: np.dot(x, v2), 
-                                       transposed_polygon)
-            polygon_projected =  zip(polygon_projected_v1,  
-                                     polygon_projected_v2)
+        area = self.compute_polygon_area(polygon_projected)
 
-            area = self.compute_polygon_area(polygon_projected)
+        centroid_x = 0.
+        centroid_y = 0.
 
-            centroid_x = 0.
-            centroid_y = 0.
+        N = len(polygon_projected)
 
-            N = len(polygon_projected)
+        for i in range(N-1):
+            centroid_x += ((polygon_projected[i][0]+
+                            polygon_projected[i+1][0])*
+                           (polygon_projected[i][0]*
+                            polygon_projected[i+1][1]-
+                            polygon_projected[i+1][0]*
+                            polygon_projected[i][1]))
 
-            for i in range(N-1):
-                centroid_x += ((polygon_projected[i][0]+
-                                polygon_projected[i+1][0])*
-                               (polygon_projected[i][0]*
-                                polygon_projected[i+1][1]-
-                                polygon_projected[i+1][0]*
-                                polygon_projected[i][1]))
-                
-                centroid_y += ((polygon_projected[i][1]+
-                                polygon_projected[i+1][1])*
-                               (polygon_projected[i][0]*
-                                polygon_projected[i+1][1]-
-                                polygon_projected[i+1][0]*
-                                polygon_projected[i][1]))
+            centroid_y += ((polygon_projected[i][1]+
+                            polygon_projected[i+1][1])*
+                           (polygon_projected[i][0]*
+                            polygon_projected[i+1][1]-
+                            polygon_projected[i+1][0]*
+                            polygon_projected[i][1]))
 
-            centroid_x += ((polygon_projected[N-1][0]+ 
-                            polygon_projected[0][0])* 
-                           (polygon_projected[N-1][0]* 
-                            polygon_projected[0][1]- 
-                            polygon_projected[0][0]* 
-                            polygon_projected[N-1][1]))
+        centroid_x += ((polygon_projected[N-1][0]+
+                        polygon_projected[0][0])*
+                       (polygon_projected[N-1][0]*
+                        polygon_projected[0][1]-
+                        polygon_projected[0][0]*
+                        polygon_projected[N-1][1]))
 
-            centroid_y += ((polygon_projected[N-1][1]+ 
-                            polygon_projected[0][1])* 
-                           (polygon_projected[N-1][0]* 
-                            polygon_projected[0][1]- 
-                            polygon_projected[0][0]* 
-                            polygon_projected[N-1][1]))
+        centroid_y += ((polygon_projected[N-1][1]+
+                        polygon_projected[0][1])*
+                       (polygon_projected[N-1][0]*
+                        polygon_projected[0][1]-
+                        polygon_projected[0][0]*
+                        polygon_projected[N-1][1]))
 
-            centroid_x = centroid_x/(6.*area)
-            centroid_y = centroid_y/(6.*area)
+        centroid_x = centroid_x/(6.*area)
+        centroid_y = centroid_y/(6.*area)
 
-            centroid_3d_x = 0.
-            centroid_3d_y = 0.
-            centroid_3d_z = 0.
+        centroid_3d_x = 0.
+        centroid_3d_y = 0.
+        centroid_3d_z = 0.
 
-            centroid_3d_x += polygon[0][0]
-            centroid_3d_y += polygon[0][1]
-            centroid_3d_z += polygon[0][2]
+        centroid_3d_x += polygon[0][0]
+        centroid_3d_y += polygon[0][1]
+        centroid_3d_z += polygon[0][2]
 
-            centroid_3d_x += centroid_x * v1[0]
-            centroid_3d_y += centroid_x * v1[1]
-            centroid_3d_z += centroid_x * v1[2]
+        centroid_3d_x += centroid_x * v1[0]
+        centroid_3d_y += centroid_x * v1[1]
+        centroid_3d_z += centroid_x * v1[2]
 
-            centroid_3d_x += centroid_y * v2[0]
-            centroid_3d_y += centroid_y * v2[1]
-            centroid_3d_z += centroid_y * v2[2]
-            
-            return (area, np.array([centroid_3d_x, centroid_3d_y, centroid_3d_z]))
-        
+        centroid_3d_x += centroid_y * v2[0]
+        centroid_3d_y += centroid_y * v2[1]
+        centroid_3d_z += centroid_y * v2[2]
+
+        centroid = np.array([centroid_3d_x, centroid_3d_y, centroid_3d_z])
+        return (area, centroid)
+
     def compute_polygon_area(self, polygon, dims = [0, 1]):
-        """ Computes the area of a polygon. A polygon is 
-        represented by a list of Numpy array coordinates 
-        going around the polygon. The optional parameter 
-        *dims* represents which two coordinates to use 
-        when the polygon is in 3D space. 
+        """ Computes the area of a polygon. A polygon is
+        represented by a list of Numpy array coordinates
+        going around the polygon. The optional parameter
+        *dims* represents which two coordinates to use
+        when the polygon is in 3D space.
         """
         current_x = dims[0]
-        current_y = dims[1] 
+        current_y = dims[1]
 
         area = 0.
 
         N = len(polygon)
 
         for i in range(N-1):
-            area += (polygon[i][current_x]*polygon[i+1][current_y]- 
+            area += (polygon[i][current_x]*polygon[i+1][current_y]-
                      polygon[i+1][current_x]*polygon[i][current_y])
 
-        area += (polygon[N-1][current_x]*polygon[0][current_y]- 
+        area += (polygon[N-1][current_x]*polygon[0][current_y]-
                  polygon[0][current_x]*polygon[N-1][current_y])
 
         area *= .5
-        # The function returns the absolute value of the area. 
+        # The function returns the absolute value of the area.
         return abs(area)
 
     def find_volume_centroid(self, cell_index):
-        """ Returns the volume and centroid for a 3D cell_index. 
-        Based on code and paper by Brian Mirtich. 
+        """ Returns the volume and centroid for a 3D cell_index.
+        Based on code and paper by Brian Mirtich.
         """
-        
         volume = 0.
         centroid = np.zeros(3)
-
-        for (face_index, face_orientation) in zip(self.get_cell(cell_index), 
-                                                  self.get_cell_normal_orientation(cell_index)):
-
+        face_list = self.get_cell(cell_index)
+        orientation_list = self.get_cell_normal_orientation(cell_index)
+        for (face_index, face_orientation) in zip(face_list, orientation_list):
             current_normal = self.get_face_normal(face_index)*face_orientation
-            
+
             if (abs(current_normal[0]) > abs(current_normal[1])) and \
                     (abs(current_normal[0]) > abs(current_normal[2])):
                 C = 0
@@ -1482,7 +1472,7 @@ class Mesh:
                 C = 1
             else:
                 C = 2
-                
+
             A = (C+1)%3
             B = (A+1)%3
 
@@ -1492,7 +1482,7 @@ class Mesh:
             Paa = 0.
             Pab = 0.
             Pbb = 0.
-            
+
             if face_orientation > 0:
                 points = self.get_face(face_index)
                 next_points = list(points[1:])+list(points[:1])
@@ -1505,22 +1495,17 @@ class Mesh:
                 b0 = self.get_point(point_index)[B]
                 a1 = self.get_point(next_point_index)[A]
                 b1 = self.get_point(next_point_index)[B]
-                da = a1-a0;
-                db = b1-b0;
-                a0_2 = a0*a0 
-                a0_3 = a0_2*a0 
-                a0_4 = a0_3*a0
-                b0_2 = b0*b0 
-                b0_3 = b0_2*b0 
-                b0_4 = b0_3*b0
+                da = a1-a0
+                db = b1-b0
+                a0_2 = a0*a0
+                a0_3 = a0_2*a0
+                b0_2 = b0*b0
+                b0_3 = b0_2*b0
                 a1_2 = a1*a1
-                a1_3 = a1_2*a1 
-                b1_2 = b1*b1
-                b1_3 = b1_2*b1;
-                C1 = a1 + a0;
+                C1 = a1 + a0
                 Ca = a1*C1 + a0_2
                 Caa = a1*Ca + a0_3
-                Cb = b1*(b1 + b0) + b0_2 
+                Cb = b1*(b1 + b0) + b0_2
                 Cbb = b1*Cb + b0_3
                 Cab = 3.*a1_2 + 2.*a1*a0 + a0_2
                 Kab = a1_2 + 2*a1*a0 + 3*a0_2
@@ -1539,20 +1524,20 @@ class Mesh:
             Pbb /= -12.0
             Pab /= 24.0
 
-            w = -current_normal.dot(self.get_point(self.get_face(face_index)[0]))
+            first_point = self.get_point(self.get_face(face_index)[0])
+            w = -current_normal.dot(first_point)
             k1 = 1./current_normal[C]
             k2 = k1*k1
             k3 = k2*k1
-            k4 = k3*k1
-            
+
             Fa = k1*Pa
             Fb = k1*Pb
             Fc = -k2*(current_normal[A]*Pa + current_normal[B]*Pb + w*P1)
 
-            Faa = k1*Paa;
-            Fbb = k1*Pbb;
-            Fcc = k3*((current_normal[A]*current_normal[A])*Paa+ 
-                      2*current_normal[A]*current_normal[B]*Pab+ 
+            Faa = k1*Paa
+            Fbb = k1*Pbb
+            Fcc = k3*((current_normal[A]*current_normal[A])*Paa+
+                      2*current_normal[A]*current_normal[B]*Pab+
                       (current_normal[B]*current_normal[B])*Pbb+
                       w*(2.*(current_normal[A]*Pa+current_normal[B]*Pb)+w*P1))
 
@@ -1568,13 +1553,13 @@ class Mesh:
             centroid[C] += current_normal[C]*Fcc
 
         centroid /= volume*2.
-        
+
         return (volume, centroid)
 
     def find_volume_centroid_old(self, cell_index):
-        """ Returns the volume and centroid for a 3D cell_index. 
-        Uses volInt function in C and passes informaiton 
-        using file transfers. 
+        """ Returns the volume and centroid for a 3D cell_index.
+        Uses volInt function in C and passes informaiton
+        using file transfers.
         """
         temp_input = open("temp.dat", 'w')
 
@@ -1593,33 +1578,33 @@ class Mesh:
                     current_vertex_count += 1
 
         print >> temp_input , len(global_to_local_point_mapping)
-        print >> temp_input 
+        print >> temp_input
 
         for index in range(len(local_to_global_point_mapping)):
             global_index = local_to_global_point_mapping[index]
             print >> temp_input ,  " ".join(map(
                     lambda x: str(x), self.get_point(global_index)))
 
-        print >> temp_input 
+        print >> temp_input
         print >> temp_input, len(current_cell)
-        print >> temp_input 
+        print >> temp_input
 
         ## Must check that the face is numbered in the right-hand
         ## rule relative to the normal*orientation.
         for (face_index, face_orientation) in \
                 zip(current_cell, current_cell_orientations):
 
-            print >> temp_input , len(self.get_face(face_index)), 
-            
+            print >> temp_input , len(self.get_face(face_index)),
+
             if face_orientation > 0:
                 for edge in self.get_face(face_index):
-                    print >> temp_input, global_to_local_point_mapping[edge], 
-                print >> temp_input 
+                    print >> temp_input, global_to_local_point_mapping[edge],
+                print >> temp_input
 
             else:
                 for edge in reversed(self.get_face(face_index)):
-                    print >> temp_input, global_to_local_point_mapping[edge], 
-                print >> temp_input 
+                    print >> temp_input, global_to_local_point_mapping[edge],
+                print >> temp_input
 
         temp_input.close()
 
@@ -1643,11 +1628,11 @@ class Mesh:
         return (volume, np.array([center_x, center_y, center_z]))
 
     def add_scalar_to_matplotlib(self, cell_data):
-        """ Method for visualizing scalar data in 
-        general 2D meshes using matplotlib. 
+        """ Method for visualizing scalar data in
+        general 2D meshes using matplotlib.
         """
-        fig=pylab.figure()
-        ax=fig.add_subplot(111)
+        fig = pylab.figure()
+        ax = fig.add_subplot(111)
         patches = map(lambda x:Polygon(x, True), self.two_d_polygons)
         p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=1.0)
         p.set_array(cell_data)
@@ -1656,39 +1641,38 @@ class Mesh:
         pylab.colorbar(p)
 
     def add_vector_to_matplotlib(self, face_data):
-        """ Method for visualizing vector data in 
-        general 2D meshes using matplotlib. 
+        """ Method for visualizing vector data in
+        general 2D meshes using matplotlib.
         """
         max_velocity = max(map(abs, face_data))
         min_edge_length = min(self.face_areas)
         vector_scale = max_velocity/min_edge_length*.5
-        print "maxVelocity", max_velocity
         vectors = map(lambda x: x[0]*x[1], zip(face_data, self.face_normals))
-        pylab.quiver(map(lambda x: x[0], self.face_real_centroids), 
+        pylab.quiver(map(lambda x: x[0], self.face_real_centroids),
                      map(lambda x: x[1], self.face_real_centroids),
                      map(lambda x: x[0], vectors),
                      map(lambda x: x[1], vectors),
                      angles='xy',scale = vector_scale,color='r')
 
     def show_matplotlib(self, file_name = None):
-        """ Displays the 2D mesh data that was set using 
-        add_scalar_to_matplotlib and add_vector_to_matplotlib. 
-        If no file_name is specified, the plot will show 
-        as a pop up during runtime. 
+        """ Displays the 2D mesh data that was set using
+        add_scalar_to_matplotlib and add_vector_to_matplotlib.
+        If no file_name is specified, the plot will show
+        as a pop up during runtime.
         """
         if file_name is not None:
             pylab.savefig(file_name)
         pylab.show()
 
-    def output_vector_field(self, 
-                            file_name, 
-                            vector_magnitudes = [], 
+    def output_vector_field(self,
+                            file_name,
+                            vector_magnitudes = [],
                             vector_labels = []):
-        """ Outputs vector data in the vtk format. The vector 
-        field can be processed using the glyph filter in 
-        Paraview. The function takes a list of vector 
+        """ Outputs vector data in the vtk format. The vector
+        field can be processed using the glyph filter in
+        Paraview. The function takes a list of vector
         magnitudes that are associated with each face
-        normal. 
+        normal.
         """
         output = open(file_name +".vtk",'w')
 
@@ -1697,10 +1681,10 @@ class Mesh:
         print >> output, "ASCII"
         print >> output, "DATASET UNSTRUCTURED_GRID"
         print >> output, "POINTS", self.get_number_of_faces() ,  "float"
-        
+
         for face_index in range(self.get_number_of_faces()):
             current_point = self.get_face_real_centroid(face_index)
-            print >> output, current_point[0], 
+            print >> output, current_point[0],
             print >> output, current_point[1],
             print >> output, current_point[2]
 
@@ -1715,26 +1699,26 @@ class Mesh:
 
         for index in range(self.get_number_of_faces()):
             print >> output, "1"
-        print >> output, " " 
+        print >> output, " "
         print >> output, "POINT_DATA", number_of_faces
-        print >> output, " " 
+        print >> output, " "
 
         for data_index in range(len(vector_labels)):
             print >> output, "VECTORS", vector_labels[data_index], "float"
-            
+
             for face_index in range(len(vector_magnitudes[data_index])):
-                current_vector = vector_magnitudes[data_index][face_index] * \
+                current_vector = vector_magnitudes[data_index][face_index]*\
                     self.get_face_normal(face_index)
 
-                print >> output, current_vector[0], 
+                print >> output, current_vector[0],
                 print >> output, current_vector[1],
                 print >> output, current_vector[2]
 
-            print >>output, " " 
-    
+            print >> output, " "
+
     def output_cell_normals(self, file_name, cell_index):
-        """ Outputs the normals over the cell in the outward direction. 
-        The function is intended for checking the correct orienation of cell. 
+        """ Outputs the normals over the cell in the outward direction.
+        The function is intended for checking the correct orienation of cell.
         """
         output = open(file_name +".vtk",'w')
 
@@ -1745,11 +1729,11 @@ class Mesh:
         print >> output, "ASCII"
         print >> output, "DATASET UNSTRUCTURED_GRID"
         print >> output, "POINTS", number_of_faces ,  "float"
-        
+
         for face_index in self.get_cell(cell_index):
             centroid = self.get_face_real_centroid(face_index)
-            print >> output, centroid[0], 
-            print >> output, centroid[1], 
+            print >> output, centroid[0],
+            print >> output, centroid[1],
             print >> output, centroid[2]
 
         print >> output, " "
@@ -1758,25 +1742,27 @@ class Mesh:
 
         for index in range(number_of_faces):
             print >> output, "1", index+1
-        print >> output, " " 
+        print >> output, " "
         print >> output, "POINT_DATA", number_of_faces
-        print >> output, " " 
-            
-        print >> output, "VECTORS", "OUT_NORMAL", "float"
+        print >> output, " "
 
-        for (face_index, orientation) in zip(self.get_cell(cell_index), 
-                                         self.get_cell_normal_orientation(cell_index)):
+        print >> output, "VECTORS", "OUT_NORMAL", "float"
+        face_list = self.get_cell(cell_index)
+        orientation_list = self.get_cell_normal_orientation(cell_index)
+        for (face_index, orientation) in zip(face_list, orientation_list):
             normal = self.get_face_normal(face_index)
-    
-            print >> output, normal[0]*orientation, 
-            print >> output, normal[1]*orientation, 
+            print >> output, normal[0]*orientation,
+            print >> output, normal[1]*orientation,
             print >> output, normal[2]*orientation
 
-        print >>output, " " 
+        print >> output, " "
 
- 
-    def output_vtk_faces(self, file_name, face_indices, face_values = [], face_value_labels = []):
-        """ Outputs in vtk format the faces in face_indices. 
+    def output_vtk_faces(self,
+                         file_name,
+                         face_indices,
+                         face_values = [],
+                         face_value_labels = []):
+        """ Outputs in vtk format the faces in face_indices.
         """
         output = open(file_name +".vtk",'w')
         print >> output, "# vtk DataFile Version 2.0"
@@ -1796,85 +1782,35 @@ class Mesh:
 
         print >> output, "CELLS", len(face_indices)
         print >> output, total_polygon_points
-        
+
         for face_index in face_indices:
             current_face = self.get_face(face_index)
-            print >> output, len(current_face), 
+            print >> output, len(current_face),
             for point in current_face:
-                print >> output, point, 
-            print >> output, "\n", 
+                print >> output, point,
+            print >> output, "\n",
 
         print >> output, "CELL_TYPES", len(face_indices)
         for face_index in face_indices:
             print >> output, 7
-            
+
         if face_values:
-            print >>output, "CELL_DATA", len(face_indices)
+            print >> output, "CELL_DATA", len(face_indices)
             for (entry, entryname) in zip(face_values, face_value_labels):
-                print >>output, "SCALARS", entryname, "double 1"
-                print >>output, "LOOKUP_TABLE default" 
+                print >> output, "SCALARS", entryname, "double 1"
+                print >> output, "LOOKUP_TABLE default"
                 for value in entry:
-                    print >>output, value
-
+                    print >> output, value
 
         output.close()
 
-    def output_vtk_mesh_polygon(self, file_name, cell_values=[], cell_value_labels=[]):
-        """ Base implementation for producing 
-        vtk files for general polyhedral meshes. 
-        The functions draws the unstructured mesh by 
-        duplicating the polygonal faces and assigning 
-        the values to the faces. 
+    def output_vtk_mesh(self,
+                        file_name,
+                        cell_values=[],
+                        cell_value_labels=[]):
+        """ Base implementation for producing
+        vtk files for general polyhedral meshes.
         """
-        output = open(file_name +".vtk",'w')
-
-        print >> output, "# vtk DataFile Version 2.0"
-        print >> output, "# unstructured mesh"
-        print >> output, "ASCII"
-        print >> output, "DATASET UNSTRUCTURED_GRID"
-        print >> output, "POINTS", self.get_number_of_points(), "float"
-
-        for point_index in range(self.get_number_of_points()):
-            point = self.get_point(point_index)
-            print >> output, point[0], point[1], point[2]
-
-        total_polygon_points = 0
-        for cell_index in range(self.get_number_of_cells()):
-            for face_index in self.get_cell(cell_index):
-                total_polygon_points += \
-                    self.get_number_of_face_points(face_index)+1
-
-        print >> output, "CELLS", self.get_number_of_faces()*2-self.get_number_of_boundary_faces(), 
-        print >> output, total_polygon_points
-        
-        for cell_index in range(self.get_number_of_cells()):
-            for face_index in self.get_cell(cell_index):
-                current_face = self.get_face(face_index)
-                print >> output, len(current_face), 
-                for point in current_face:
-                    print >> output, point, 
-                print >> output, "\n", 
-
-        print >> output, "CELL_TYPES", self.get_number_of_faces()*2-self.get_number_of_boundary_faces()
-        for face_index in range(self.get_number_of_faces()*2-self.get_number_of_boundary_faces()):
-            print >> output, 7
-
-        if cell_values:
-            print >>output, "CELL_DATA", self.get_number_of_faces()*2-self.get_number_of_boundary_faces()
-            for (entry, entryname) in zip(cell_values, cell_value_labels):
-                print >>output, "SCALARS", entryname, "double 1"
-                print >>output, "LOOKUP_TABLE default" 
-                for (cell_index, value) in enumerate(entry):
-                    for face_index in self.get_cell(cell_index):
-                        print >>output, value
-                        
-        output.close()
-
-    def output_vtk_mesh(self, file_name, cell_values=[], cell_value_labels=[]):
-        """ Base implementation for producing 
-        vtk files for general polyhedral meshes. 
-        """
-        print "Parent VTK"
         output = open(file_name +".vtk",'w')
         print >> output, "# vtk DataFile Version 2.0"
         print >> output, "# unstructured mesh"
@@ -1891,72 +1827,74 @@ class Mesh:
             for face_index in self.get_cell(cell_index):
                 total_polygon_points+=\
                     self.get_number_of_face_points(face_index)+1
-            total_polygon_points+=2
-            
-        print >> output, "CELLS", self.get_number_of_cells(), 
+            total_polygon_points += 2
+
+        print >> output, "CELLS", self.get_number_of_cells(),
         print >> output, total_polygon_points
-        
+
         for cell_index in range(self.get_number_of_cells()):
-            number_of_entries = len(self.get_cell(cell_index))+\
-                sum([self.get_number_of_face_points(face_index) for face_index in self.get_cell(cell_index)])+1
-            print >>output, number_of_entries,
-            print >>output, len(self.get_cell(cell_index)), 
+            number_of_entries = len(self.get_cell(cell_index))
+            for face_index in self.get_cell(cell_index):
+                number_of_entries += self.get_number_of_face_points(face_index)
+            number_of_entries += 1
+
+            print >> output, number_of_entries,
+            print >> output, len(self.get_cell(cell_index)),
             for face_index in self.get_cell(cell_index):
                 current_face = self.get_face(face_index)
-                print >> output, len(current_face), 
+                print >> output, len(current_face),
                 for point in current_face:
-                    print >> output, point, 
-            print >> output, "\n", 
-            
+                    print >> output, point,
+            print >> output, "\n",
+
         print >> output, "CELL_TYPES", self.get_number_of_cells()
         for cell_index in range(self.get_number_of_cells()):
             print >> output, 42
 
         if cell_values:
-            print >>output, "CELL_DATA", self.get_number_of_cells()
+            print >> output, "CELL_DATA", self.get_number_of_cells()
             for (entry, entryname) in zip(cell_values, cell_value_labels):
-                print >>output, "SCALARS", entryname, "double 1"
-                print >>output, "LOOKUP_TABLE default" 
+                print >> output, "SCALARS", entryname, "double 1"
+                print >> output, "LOOKUP_TABLE default"
                 for value in entry:
-                    print >>output, value
-                    
+                    print >> output, value
+
         output.close()
 
-    def output_scalar_gnuplot(self, cell_values , filename):
-        """ Outputs scalar values associated with mesh to 
-        gnuplot. Only works for 2D meshes. 
+    def output_scalar_gnuplot(self, cell_values, filename):
+        """ Outputs scalar values associated with mesh to
+        gnuplot. Only works for 2D meshes.
         """
         if self.mesh.dim == 2:
             gnuout  = open(filename+'.dat','w')
             for cell_index in range(self.mesh.get_number_of_cells()):
-                cellCenter =  self.mesh.get_cell_real_centroid(cell_index)
-                print >>gnuout, cellCenter[0], cellCenter[1], 
-                print >>gnuout, cel_values[cell_index]
+                cell_center =  self.mesh.get_cell_real_centroid(cell_index)
+                print >> gnuout, cell_center[0], cell_center[1],
+                print >> gnuout, cell_values[cell_index]
         else:
             print "no 3D gnuplot output"
 
     def find_cell_near_point(self, point):
-        """
-        Returns cell whose centroid is closest 
-        to a given point. 
+        """ Returns cell whose centroid is closest
+        to a given point.
         """
         closest_cell = 0
         min_distance = np.linalg.norm(self.get_cell_real_centroid(0)-point)
         for cell_index in range(1, self.get_number_of_cells()):
-            new_distance = np.linalg.norm(self.get_cell_real_centroid(cell_index)-point)
+            cell_centroid = self.get_cell_real_centroid(cell_index)
+            new_distance = np.linalg.norm(cell_centroid-point)
             if new_distance < min_distance:
                 closest_cell = cell_index
                 min_distance = new_distance
 
         return closest_cell
-        
 
     def nonplanar_normal(self, face):
         for i in range(1):
-            v1 = self.get_point(face[i+1]) - self.get_point(face[i]) 
-            v2 = self.get_point(face[i]) - self.get_point(face[i-1]) 
+            v1 = self.get_point(face[i+1]) - self.get_point(face[i])
+            v2 = self.get_point(face[i]) - self.get_point(face[i-1])
             normal = np.cross(v2, v1)
-            
+
         return normal/np.linalg.norm(normal)
 
     def nonplanar_face_centroid(self, face):
@@ -1964,11 +1902,11 @@ class Mesh:
         p2 = self.get_point(face[1])
         p3 = self.get_point(face[2])
         p4 = self.get_point(face[3])
-        
-        centerPoint = .25 * (p1 + p2 + p3 + p4)
-        
-        return centerPoint
-    
+
+        center_point = .25 * (p1 + p2 + p3 + p4)
+
+        return center_point
+
     def nonplanar_cell_centroid(self, cell):
         centroid = np.zeros(3)
         count = 0.
@@ -1976,7 +1914,7 @@ class Mesh:
             for point in self.get_face(face):
                 count += 1.
                 centroid += self.get_point(point)
-                
+
         centroid = centroid/count
         return centroid
 
@@ -1987,9 +1925,9 @@ class Mesh:
         p2 = self.points[face[1]]
         p3 = self.points[face[2]]
         p4 = self.points[face[3]]
-        
+
         centerPoint = .25 * (p1 + p2 + p3 + p4)
-        
+
         a = np.linalg.norm(p1-p2)
         b = np.linalg.norm(p2-centerPoint)
         c = np.linalg.norm(centerPoint - p1)
@@ -2018,13 +1956,13 @@ class Mesh:
 
         area += math.sqrt(s * (s-a) * (s - b) * (s - c))
 
-        return area 
+        return area
 
-    def subdivide_by_domain(self, cells, domain_number):
-        """ Takes a collection of cells, and 
-        seperates them from the rest of the domain 
-        using lagrange multipliers at the sub-domain 
-        boundary. 
+    def subdivide_by_domain(self, cells):
+        """ Takes a collection of cells, and
+        seperates them from the rest of the domain
+        using lagrange multipliers at the sub-domain
+        boundary.
         """
         lagrange_faces = []
         for cell_index in cells:
@@ -2032,7 +1970,6 @@ class Mesh:
                 neighboring_cells = self.face_to_cell[face_index]
                 if len(neighboring_cells)> 1:
                     cell1, cell2 = neighboring_cells
-                    print cell1, cell2
                     if cell1 == cell_index:
                         if cell2 not in cells:
                             lagrange_faces.append(face_index)
@@ -2040,58 +1977,61 @@ class Mesh:
                         if cell1 not in cells:
                             lagrange_faces.append(face_index)
 
-        
         for face_index in lagrange_faces:
             (cell1, cell2) = self.face_to_cell[face_index]
             if cell1 in cells:
-                this_cell = cell1
                 other_cell = cell2
             else:
-                this_cell = cell2
                 other_cell = cell1
-                
+
             new_face_index = self.add_face(self.get_face(face_index))
             lagrange_face_index = self.add_face(self.get_face(face_index))
-            
-            self.set_face_normal(new_face_index, self.get_face_normal(face_index))
-            self.set_face_normal(lagrange_face_index, self.get_face_normal(face_index))
-            
-            self.set_face_real_centroid(new_face_index, 
+
+            self.set_face_normal(new_face_index,
+                                 self.get_face_normal(face_index))
+            self.set_face_normal(lagrange_face_index,
+                                 self.get_face_normal(face_index))
+
+            self.set_face_real_centroid(new_face_index,
                                         self.get_face_real_centroid(face_index))
-            self.set_face_real_centroid(lagrange_face_index, 
+            self.set_face_real_centroid(lagrange_face_index,
                                         self.get_face_real_centroid(face_index))
 
-            self.set_face_area(new_face_index, 
+            self.set_face_area(new_face_index,
                                self.get_face_area(face_index))
-            self.set_face_area(lagrange_face_index, 
+            self.set_face_area(lagrange_face_index,
                                self.get_face_area(face_index))
-            
+
             self.add_boundary_face(100, new_face_index, 1)
             self.add_boundary_face(100, face_index, 1)
-            
-            self.set_face_quadrature_points(new_face_index, 
-                                            [self.get_face_real_centroid(new_face_index)])
-            print "error in quadrature weights "
-            self.set_face_quadrature_weights(new_face_index, 
-                                             [self.get_face_real_centroid(new_face_index)])
-            
-            local_face_index_in_other = list(self.get_cell(other_cell)).index(face_index)
+
+            current_centroid = self.get_face_real_centroid(new_face_index)
+            self.set_face_quadrature_points(new_face_index,
+                                            [current_centroid])
+
+            current_area = self.get_face_area(new_face_index)
+            self.set_face_quadrature_weights(new_face_index,
+                                             [current_area])
+
+            faces_list = list(self.get_cell(other_cell))
+            local_face_index_in_other = faces_list.index(face_index)
+
             new_cell_faces = self.get_cell(other_cell)
             new_cell_faces[local_face_index_in_other] = new_face_index
-            
 
     def build_frac_from_faces(self, faces, boundary_locations = []):
-        """ Takes a list of face indices, and 
-        extrudes them into cells. 
+        """ Takes a list of face indices, and
+        extrudes them into cells.
         """
         boundary_markers = self.get_boundary_markers()
-        ## All fracture boundaries share the same marker. 
+        ## All fracture boundaries share the same marker.
         assert(len(boundary_markers)+1 not in boundary_markers)
         fracture_boundary_marker = len(boundary_markers)+1
-        self.add_boundary_marker(fracture_boundary_marker, "fracture_boundaries")
+        self.add_boundary_marker(fracture_boundary_marker,
+                                 "fracture_boundaries")
 
         connections = []
-        non_connected_edges = []        
+        non_connected_edges = []
         for face in faces:
             non_connected_edges.append([])
             for local_edge_index in range(len(self.get_face(face))):
@@ -2178,7 +2118,6 @@ class Mesh:
                 new_multiple_connection_groups[-1].append(list(connections[connection_index]))
                 
         multiple_connection_groups = new_multiple_connection_groups
-        print "multiple_connection_groups", multiple_connection_groups
         connections_without_multiple = []
 
         for connection_index in range(len(connections)):
@@ -2230,7 +2169,6 @@ class Mesh:
                 face2_top = group[max_top_connection_index][1]
                 face2_bot = group[max_bot_connection_index][1]
 
-                print done_faces
                 if ((current_face, 'TOP')) not in done_faces:
                     subface_connections.append(group[max_top_connection_index]+['TOP'])
                     done_faces.append((current_face, 'TOP')) 
@@ -2355,9 +2293,9 @@ class Mesh:
             norm1 = np.zeros(3)
             for (local_face_index, orientation) in connection[7]:
                 if orientation == 0: 
-                    norm1+= self.get_face_normal(faces[local_face_index])
+                    norm1 += self.get_face_normal(faces[local_face_index])
                 else:
-                    norm1-= self.get_face_normal(faces[local_face_index])
+                    norm1 -= self.get_face_normal(faces[local_face_index])
 
             norm2 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
@@ -2381,10 +2319,10 @@ class Mesh:
             point_3_index = self.add_point(point3)
             point_4_index = self.add_point(point4)
             
-            new_face_index =self.add_face([point_1_index, 
-                                           point_2_index, 
-                                           point_3_index, 
-                                           point_4_index,])
+            new_face_index = self.add_face([point_1_index, 
+                                            point_2_index, 
+                                            point_3_index, 
+                                            point_4_index,])
             
             (area, centroid) =  self.find_face_centroid(new_face_index)
             self.set_face_normal(new_face_index, 
@@ -2400,7 +2338,7 @@ class Mesh:
             face_to_walls[connection[0]].append((new_face_index, 1))
             face_to_walls[connection[1]].append((new_face_index, -1))
 
-            top_points[connection[0]][connection[2]]=point_4_index
+            top_points[connection[0]][connection[2]] = point_4_index
             top_points[connection[0]][connection[3]%
                                       len(self.get_face(faces[connection[0]]))]=point_3_index
 
@@ -2430,15 +2368,13 @@ class Mesh:
 
                 
         ## Build the subfaces. 
-        print "subface_connections"
-        print subface_connections
         for connection in subface_connections:
             norm1 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
                 if orientation == 0: 
-                    norm1+= self.get_face_normal(faces[local_face_index])
+                    norm1 += self.get_face_normal(faces[local_face_index])
                 else:
-                    norm1-= self.get_face_normal(faces[local_face_index])
+                    norm1 -= self.get_face_normal(faces[local_face_index])
 
             norm2 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
@@ -2686,7 +2622,6 @@ class Mesh:
         for face in face_to_walls:
             top_res_face_index = faces[face]
 
-            print self.face_to_cell[top_res_face_index, 0], self.face_to_cell[top_res_face_index, 1]
             if self.face_to_cell[top_res_face_index, 0] >= 0 and \
                     self.face_to_cell[top_res_face_index, 1] >= 0 : 
                 bot_res_face_index = self.add_face(list(self.get_face(top_res_face_index)))
@@ -2744,7 +2679,8 @@ class Mesh:
     def build_mesh(self):
         """ Base class function for constructing the mesh. 
         """
-        raise("Has not been implemented")
+        raise NotImplementedError
+
 
     
 
