@@ -376,6 +376,32 @@ class Mesh:
         """
         self.faces[face_index] = points
 
+    def remove_from_face_to_cell(self, face_index, cell_index):
+        """ Removes the cell_index from face_to_cell map 
+        at for face_index. 
+        """
+        if self.face_to_cell[face_index, 0] == cell_index:
+            self.face_to_cell[face_index, 0]= -1
+        elif self.face_to_cell[face_index, 1] == cell_index:
+            self.face_to_cell[face_index, 1]= -1
+        else:
+            raise Exception("cell_index " + str(cell_index)+
+                            " not found in face_to_cell for "+
+                            str(face_index))
+
+    def add_to_face_to_cell(self, face_index, cell_index):
+        """ Adds cell_index to face_to_cell map 
+        at face_index. 
+        """
+        if self.face_to_cell[face_index, 0] ==  -1:
+            self.face_to_cell[face_index, 0] =  cell_index
+        elif self.face_to_cell[face_index, 1] ==  -1:
+            self.face_to_cell[face_index, 1] =  cell_index
+        else:
+            raise Exception("cell_index " + str(cell_index)+
+                            " could not be added to "+
+                            str(face_index))
+
     def duplicate_face(self, face_index):
         """ Creates new face with all the properties
         of the face_index, and adds the face to the
@@ -489,7 +515,7 @@ class Mesh:
         self.cells[cell_index] = faces
         for face_index in faces:
             if cell_index not in self.face_to_cell[face_index]:
-                self.face_to_cell[face_index].append(cell_index)
+                self.add_to_face_to_cell(face_index, cell_index)
 
     def set_cell_orientation(self, cell_index, orientation):
         """ Sets the cell orientation.
@@ -978,7 +1004,7 @@ class Mesh:
 
         cell_index = self.face_to_cell[face_index][0]
 
-        local_face_index = self.get_cell(cell_index).index(face_index)
+        local_face_index = list(self.get_cell(cell_index)).index(face_index)
 
         if self.cell_faces_neumann.has_key(cell_index):
             self.cell_faces_neumann[cell_index].append(face_index)
@@ -1219,7 +1245,7 @@ class Mesh:
             self.neumann_boundary_values[boundary_index] = neumann_value/self.get_face_area(boundary_index)
             cell_index = self.face_to_cell[boundary_index][0]
 
-            local_face_index = self.get_cell(cell_index).index(boundary_index)
+            local_face_index = list(self.get_cell(cell_index)).index(boundary_index)
 
             if self.cell_faces_neumann.has_key(cell_index):
                 self.cell_faces_neumann[cell_index].append(boundary_index)
@@ -2660,32 +2686,34 @@ class Mesh:
         for face in face_to_walls:
             top_res_face_index = faces[face]
 
-            if len(self.face_to_cell[top_res_face_index]) == 2:
+            print self.face_to_cell[top_res_face_index, 0], self.face_to_cell[top_res_face_index, 1]
+            if self.face_to_cell[top_res_face_index, 0] >= 0 and \
+                    self.face_to_cell[top_res_face_index, 1] >= 0 : 
                 bot_res_face_index = self.add_face(list(self.get_face(top_res_face_index)))
                 self.set_face_area(bot_res_face_index, self.get_face_area(top_res_face_index))
                 self.set_face_normal(bot_res_face_index, self.get_face_normal(top_res_face_index))
                 self.set_face_real_centroid(bot_res_face_index, 
                                             self.get_face_real_centroid(top_res_face_index))
                 if self.has_face_shifted_centroid:
-                    self.set_face_shifted_centroid(bot_res_face_index, 
+                    self.set_face_shifted_centroid(bot_res_face_index,
                                                    self.get_face_real_centroid(top_res_face_index))
 
-                bottom_cell = self.face_to_cell[top_res_face_index][1]
+                bottom_cell = self.face_to_cell[top_res_face_index, 1]
 
                 new_cell_faces = array.array('i', self.get_cell(bottom_cell))
                 local_face_index_in_cell = new_cell_faces.index(top_res_face_index)
 
                 new_cell_faces[local_face_index_in_cell] = bot_res_face_index
 
-                top_cell_index = self.face_to_cell[top_res_face_index][0]
+                top_cell_index = self.face_to_cell[top_res_face_index, 0]
                 local_top_face_index_in_cell = list(self.get_cell(top_cell_index)).index(top_res_face_index)
                 top_res_face_orientation =\
                     self.get_cell_normal_orientation(top_cell_index)[local_top_face_index_in_cell]
-                                
-                self.face_to_cell[top_res_face_index].remove(bottom_cell)
+
+                self.remove_from_face_to_cell(top_res_face_index, bottom_cell)
                 self.set_cell_faces(bottom_cell, new_cell_faces)
             else:
-                raise("Face on boundary encountered")
+                raise Exception("Face on boundary encountered")
                 
             new_cell_index = self.add_cell(array.array('i', [x[0] for x in face_to_walls[face]]), 
                                            array.array('i', [x[1] for x in face_to_walls[face]]))
