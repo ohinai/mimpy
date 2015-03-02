@@ -19,6 +19,14 @@ Run:
     
         $ python hexmesh_example_1.py 
 
+If all goes well, you should get a file named (hexmesh_example_1.vtk). Open the file using 
+Paraview and plot "MFDPressure." You should see something like this:
+
+.. image:: hexmesh_solution.png
+
+
+
+
 
 
 
