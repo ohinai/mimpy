@@ -24,6 +24,9 @@ Paraview and plot "MFDPressure." You should see something like this:
 
 .. image:: hexmesh_solution.png
 
+Congratulations! You've just approximated the solution to a Partial Differential Equation using the 
+Mimetic Finite Difference method. 
+
 
 
 
