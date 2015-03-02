@@ -5,7 +5,6 @@ import mesh
 import array 
 
 import hexmesh_cython 
-        
 
 class HexMesh(mesh.Mesh):
     
@@ -261,7 +260,6 @@ class HexMesh(mesh.Mesh):
                                                          i, j, k))
                     count +=1 
         
-        print "building faces"
         self.build_faces(nk, nj, ni)
 
 	### adding cells:
