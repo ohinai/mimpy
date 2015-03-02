@@ -13,7 +13,7 @@ from multiprocessing import Pool
 try:
     from petsc4py import PETSc
 except:
-    print "petsc4py not defined"
+    pass
 
 def sign(x):
     """ Returns the sign of float x. 
@@ -374,16 +374,10 @@ class MFD():
         neumann_boundary_indices = \
             map(lambda x: x[0], self.mesh.get_neumann_boundary_values())
 
-
         total_work = self.mesh.get_number_of_cells()
         percentage_inc = 10.
         last_percent = 10.
         for cell_index in range(self.mesh.get_number_of_cells()):
-
-            if float(cell_index)/float(total_work)*100>last_percent:
-                print "percentage done", last_percent
-                last_percent+= percentage_inc
-
             m_e = self.build_m_e(cell_index, k_unity)
 
             neumann_faces = self.mesh.get_cell_faces_neumann(cell_index)
@@ -415,8 +409,6 @@ class MFD():
             m_data.append(1.)
             m_row.append(face_index)
             m_col.append(face_index)
-
-        print "All Ortho = ", self.all_ortho
 
         if save_update_info:
             self.m_data_for_update = np.array(m_data)
