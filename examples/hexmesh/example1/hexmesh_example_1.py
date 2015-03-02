@@ -27,8 +27,6 @@ res_mesh = hexmesh.HexMesh()
 def mod_function(p, i, j, k):
     return p
 
-
-print "building mesh..."
 res_mesh.build_mesh(5, 5, 5, K, 1., 1., 1., mod_function)
 
 #Apply Dirichlet boundary conditions to all 6 faces. 
