@@ -28,7 +28,7 @@ def mod_function(p, i, j, k):
     return p
 
 
-print "building..."
+print "building mesh..."
 res_mesh.build_mesh(5, 5, 5, K, 1., 1., 1., mod_function)
 
 #Apply Dirichlet boundary conditions to all 6 faces. 
@@ -39,7 +39,6 @@ res_mesh.apply_dirichlet_from_function(3, lambda p:u(p))
 res_mesh.apply_dirichlet_from_function(4, lambda p:u(p))
 res_mesh.apply_dirichlet_from_function(5, lambda p:u(p))
 
-print "forcing..."
 #Apply the forcing function f. 
 res_mesh.apply_forcing_from_function(f)
  
