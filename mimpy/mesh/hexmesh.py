@@ -135,17 +135,10 @@ class HexMesh(mesh.Mesh):
 
                         if k == 0:
                             self.add_boundary_face(4, face_index, -1)
-                            self.set_face_quadrature_points(face_index, 
-                                                            [self.get_face_real_centroid(face_index)])
-                            self.set_face_quadrature_weights(face_index, 
-                                                             [self.get_face_area(face_index)])
+
 
                         if k == nk-1:
                             self.add_boundary_face(5, face_index, 1)
-                            self.set_face_quadrature_points(face_index, 
-                                                         [self.get_face_real_centroid(face_index)])
-                            self.set_face_quadrature_weights(face_index, 
-                                                          [self.get_face_area(face_index)])
 
                         count += 1
 
@@ -168,17 +161,9 @@ class HexMesh(mesh.Mesh):
 
                         if j == 0:
                             self.add_boundary_face(2, face_index, -1)
-                            self.set_face_quadrature_points(face_index, 
-                                                         [self.get_face_real_centroid(face_index)])
-                            self.set_face_quadrature_weights(face_index,  
-                                                          [self.get_face_area(face_index)])
                             
                         if j == nj - 1:
                             self.add_boundary_face(3, face_index, 1)
-                            self.set_face_quadrature_points(face_index, 
-                                                            [self.get_face_real_centroid(face_index)])
-                            self.set_face_quadrature_weights(face_index, 
-                                                             [self.get_face_area(face_index)])
 
                         count += 1
 
@@ -201,17 +186,10 @@ class HexMesh(mesh.Mesh):
 
                         if i == 0:
                             self.add_boundary_face(0, count, -1)
-                            self.set_face_quadrature_points(count, 
-                                                            [self.get_face_real_centroid(count)])
-                            self.set_face_quadrature_weights(count, 
-                                                             [self.get_face_area(count)])
 
                         if i == ni - 1:
                             self.add_boundary_face(1, count, 1)
-                            self.set_face_quadrature_points(count, 
-                                                            [self.get_face_real_centroid(count)])
-                            self.set_face_quadrature_weights(count, 
-                                                             [self.get_face_area(count)])
+
                             
                         count += 1
         #self.populate_face_areas()
@@ -290,14 +268,7 @@ class HexMesh(mesh.Mesh):
                                                             self.ijk_to_index(i+1, j+1, k+1), 
                                                             self.ijk_to_index(i, j+1, k+1),]))
 
-        for cell_index in range(len(self.cells)):
-            centroid = self.nonplanar_cell_centroid(self.get_cell(cell_index))
-            (volume, _ ) = self.find_volume_centroid(cell_index)
-            
-            self.set_cell_volume(cell_index, volume)
-            self.set_cell_real_centroid(cell_index, centroid)
-            self.set_cell_quadrature_points(cell_index, [centroid])
-            self.set_cell_quadrature_weights(cell_index, [volume])
+        self.find_volume_centroid_all()
                              
         for cell_index in range(self.get_number_of_cells()):
             

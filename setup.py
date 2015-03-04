@@ -32,7 +32,7 @@ setup(
     author_email='ohinai@gmail.com',
     url='https://github.com/ohinai/mimpy',
     packages=[
-        'mimpy', "mimpy.mesh", "mimpy.mfd", "mimpy.singlephase", 
+        'mimpy', "mimpy.mesh", "mimpy.mfd", "mimpy.models.singlephase", 
     ],
     package_dir={'mimpy':
                  'mimpy'},
