@@ -46,6 +46,16 @@ class HexMesh(mesh.Mesh):
                                       self.faces.data, 
                                       self.points, 
                                       self.face_areas)
+
+    def populate_face_normals(self):
+        """ Finds all the faces normals and 
+        stores them the normals array. 
+        """
+        hexmesh_cython.all_face_normals(self.faces.pointers, 
+                                        len(self.faces), 
+                                        self.faces.data, 
+                                        self.points, 
+                                        self.face_normals)
         
     def nonplanar_area(self, face):
         area = 0.
@@ -87,22 +97,19 @@ class HexMesh(mesh.Mesh):
         return area 
 
     def get_dim_x(self):
-        """
-        Return the dimension of the domain 
+        """ Return the dimension of the domain 
         in the X direction. 
         """
         return self.dim_x
 
     def get_dim_y(self):
-        """
-        Return the dimension of the domain 
+        """ Return the dimension of the domain 
         in the Y direction. 
         """
         return self.dim_y
 
     def get_dim_z(self):
-        """
-        Return the dimension of the domain 
+        """ Return the dimension of the domain 
         in the Z direction. 
         """
         return self.dim_z
@@ -122,20 +129,14 @@ class HexMesh(mesh.Mesh):
                                                      self.ijk_to_index(i+1,j+1,k),
                                                      self.ijk_to_index(i,j+1,k)])
                         
-                        face_index = self.get_number_of_faces()
-                        self.add_face(new_face)
-                        self.set_face_normal(face_index, 
-                                             self.nonplanar_normal(new_face))
-                        self.set_face_area(face_index, 
-                                           self.nonplanar_area(new_face))
+                        face_index = self.add_face(new_face)
+
                         self.set_face_real_centroid(face_index, 
                                                     self.nonplanar_face_centroid(new_face))
 
                         self.polygon_ijka_to_index[(i,j,k,0)] = face_index
-
                         if k == 0:
                             self.add_boundary_face(4, face_index, -1)
-
 
                         if k == nk-1:
                             self.add_boundary_face(5, face_index, 1)
@@ -148,12 +149,8 @@ class HexMesh(mesh.Mesh):
                                     self.ijk_to_index(i+1,j,k+1), 
                                     self.ijk_to_index(i+1,j,k)]
                         
-                        face_index = self.get_number_of_faces()
-                        self.add_face(new_face)
-                        self.set_face_normal(face_index, 
-                                             self.nonplanar_normal(new_face))
-                        self.set_face_area(face_index, 
-                                           self.nonplanar_area(new_face))
+                        face_index = self.add_face(new_face)
+
                         self.set_face_real_centroid(face_index, 
                                                     self.nonplanar_face_centroid(new_face))
                         
@@ -173,12 +170,8 @@ class HexMesh(mesh.Mesh):
                                     self.ijk_to_index(i,j+1,k+1), 
                                     self.ijk_to_index(i,j,k+1)]
 
-                        face_index = self.get_number_of_faces()
-                        self.add_face(new_face)
-                        self.set_face_normal(face_index, 
-                                             self.nonplanar_normal(new_face))
-                        self.set_face_area(face_index, 
-                                           self.nonplanar_area(new_face))
+                        face_index = self.add_face(new_face)
+
                         self.set_face_real_centroid(face_index, 
                                                     self.nonplanar_face_centroid(new_face))
 
@@ -192,7 +185,9 @@ class HexMesh(mesh.Mesh):
 
                             
                         count += 1
-        #self.populate_face_areas()
+                        
+        self.populate_face_areas()
+        self.populate_face_normals()
 
 
     def ijk_to_index(i,j, k):
@@ -204,7 +199,6 @@ class HexMesh(mesh.Mesh):
                    modification_function = lambda x, i, j, k: x):
         
         self.dim = 3
-        self.vtk_cells = []
 
         # Needs to be moved to an __init__ function. 
         self.dim_x = dim_x
@@ -254,20 +248,9 @@ class HexMesh(mesh.Mesh):
                     
                     cell_index = self.add_cell(new_cell,
                                                array.array('i', [-1, -1, -1, 1, 1, 1]))
-
                     
                     self.cell_to_ijk[cell_index] = (i, j, k)
                     
-                    self.vtk_cells.append(array.array('i', [self.ijk_to_index(i, j, k), 
-                                                            self.ijk_to_index(i+1, j, k), 
-                                                            self.ijk_to_index(i+1, j+1, k), 
-                                                            self.ijk_to_index(i, j+1, k), 
-                                                            
-                                                            self.ijk_to_index(i, j, k+1), 
-                                                            self.ijk_to_index(i+1, j, k+1), 
-                                                            self.ijk_to_index(i+1, j+1, k+1), 
-                                                            self.ijk_to_index(i, j+1, k+1),]))
-
         self.find_volume_centroid_all()
                              
         for cell_index in range(self.get_number_of_cells()):
@@ -296,43 +279,8 @@ class HexMesh(mesh.Mesh):
                 print >>output, normal[1] * vectorMagnitude[face], 
                 print >>output, " "
 
-    def output_vtk_mesh_hex(self, filename, CellValues = [], CellValueLabels = []):
-        output = open(filename + ".vtk", 'w')
-        print >>output, "# vtk DataFile Version 2.0"
-        print >>output, "#unstructured mesh"
-        print >>output, "ASCII"
-        print >>output, "DATASET UNSTRUCTURED_GRID"
-
-        print >>output, "POINTS", self.get_number_of_points(), "float"
         
-        for p in self.points:
-            print >>output, p[0], p[1], p[2]
 
-        print >>output, "CELLS", self.get_number_of_cells(), 9 * self.get_number_of_cells()
-        
-        for cell in self.vtk_cells:
-            print >> output, 8, " ".join(map(str, cell))
-
-        print >>output, "CELL_TYPES", self.get_number_of_cells()
-
-        for cell in self.vtk_cells:
-            print >>output, 12
-
-        if CellValues:
-            print >>output, "CELL_DATA", self.get_number_of_cells()
-            for (entry, entryname) in zip(CellValues, CellValueLabels):
-                print >>output, "SCALARS", entryname, "double 1"
-                print >>output, "LOOKUP_TABLE default" 
-                for value in entry:
-                    print >>output, value
-            
-        
-"""
-        print >> output, "POLYGONS", self.get_number_of_faces(), self.get_number_of_faces() * 5
-        
-        for face in self.faces:
-            print >>output, "4", face[0], face[1], face[2], face[3]
-"""        
 
 
 

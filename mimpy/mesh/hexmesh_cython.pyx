@@ -13,6 +13,20 @@ cdef dist(float[:] v1, float[:] v2):
     return sqrt(summation)
 
 
+cdef cross(float[:] v1, float[:] v2, float[:] result):
+    result[0] = v1[1]*v2[2] - v1[2]*v2[1]
+    result[1] = v1[2]*v2[0] - v1[0]*v2[2]
+    result[2] = v1[0]*v2[1] - v1[1]*v2[0]
+
+cdef normalize(float[:] v):
+    normal=v[0]*v[0]
+    normal+=v[1]*v[1]
+    normal+=v[2]*v[2]
+    normal = sqrt(normal)
+    v[0] /= normal
+    v[1] /= normal
+    v[2] /= normal
+
 def all_face_areas(int[:,:] pointer, 
                    int nfaces, 
                    int [:] faces, 
@@ -74,4 +88,32 @@ def all_face_areas(int[:,:] pointer,
         area += sqrt(s*(s-a)*(s-b)*(s-c))
         face_areas[face_index] = area
 
+def all_face_normals(int[:,:] pointer, 
+                     int nfaces, 
+                     int [:] faces, 
+                     float [:, :] points,
+                     float[:, :] face_normals):
+    
+    
+    cdef float[3] v1
+    cdef float[3] v2
+    cdef float[:] p1
+    cdef float[:] p2
+    cdef float[:] p3
+    
+    for face_index in range(nfaces):
+        p1 = points[faces[pointer[face_index, 0]]]
+        p2 = points[faces[pointer[face_index, 0]+1]]
+        p3 = points[faces[pointer[face_index, 0]+2]]
+        
+        v2[0] = p2[0] - p3[0]
+        v2[1] = p2[1] - p3[1]
+        v2[2] = p2[2] - p3[2]
 
+        v1[0] = p1[0] - p2[0]
+        v1[1] = p1[1] - p2[1]
+        v1[2] = p1[2] - p2[2]
+
+        cross(v1, v2, face_normals[face_index])
+        normalize(face_normals[face_index])
+        

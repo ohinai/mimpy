@@ -1366,7 +1366,6 @@ class Mesh:
         """
         ## This is based on the code and 
         ## paper by Brian Mirtich. 
-
         zero3 = np.zeros(3)
         for cell_index in range(self.get_number_of_cells()):
             self.set_cell_volume(cell_index, 0.)
