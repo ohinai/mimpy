@@ -54,6 +54,21 @@ class MFD():
         self.m_data_for_update = None
         self.m_e_locations = None
 
+        # dict: {face_index: Dirichlet value, ... }
+        self.dirichlet_boundary_values = {}
+
+        # dict: {face_index: Neumann value, ... }
+        self.neumann_boundary_values = {}
+
+        # list: [F1, F2, F3, ....]
+        self.cell_forcing_function = np.empty(shape=(0), dtype=float)
+
+        # Dict from cell to a list of faces
+        # in the cell that are also neumann faces.
+        # Used for incroporating the boundary
+        # conditions when building m and div_t.
+        self.cell_faces_neumann = {}
+
         self.non_ortho_count = 0
         self.all_ortho = True
 
@@ -61,6 +76,7 @@ class MFD():
         """ Links the MFD object to an instance of a Mesh class. 
         """
         self.mesh = mesh
+        self.cell_forcing_function.resize(self.mesh.get_number_of_cells(), refcheck=False)
 
     def set_compute_diagonality(self, setting):
         """ During matrix M_x construction, compute how 
@@ -103,14 +119,14 @@ class MFD():
         div_t_col = array.array('i')
 
         neumaan_boundary_indices = map(lambda x: x[0], 
-                                       self.mesh.get_neumann_boundary_values()) 
+                                       self.get_neumann_boundary_values()) 
         for current_cell_index in range(self.mesh.get_number_of_cells()):
             current_cell = self.mesh.get_cell(current_cell_index)
             current_cell_orientations = \
                 self.mesh.get_cell_normal_orientation(current_cell_index)
 
-            neumann_faces = self.mesh.get_cell_faces_neumann(current_cell_index)
-
+            neumann_faces = self.get_cell_faces_neumann(current_cell_index)
+            
             for [face_index, face_orientation] in \
                     zip(current_cell, current_cell_orientations):
 
@@ -372,7 +388,7 @@ class MFD():
 
         current_length = 0
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.mesh.get_neumann_boundary_values())
+            map(lambda x: x[0], self.get_neumann_boundary_values())
 
         total_work = self.mesh.get_number_of_cells()
         percentage_inc = 10.
@@ -380,7 +396,7 @@ class MFD():
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_e = self.build_m_e(cell_index, k_unity)
 
-            neumann_faces = self.mesh.get_cell_faces_neumann(cell_index)
+            neumann_faces = self.get_cell_faces_neumann(cell_index)
 
             current_cell = self.mesh.get_cell(cell_index)
             current_orientation = \
@@ -403,9 +419,8 @@ class MFD():
             if save_update_info:
                 self.m_e_locations.append(current_length)
 
-
         for face_index in map(lambda x: x[0], 
-                                self.mesh.get_neumann_boundary_values()):
+                                self.get_neumann_boundary_values()):
             m_data.append(1.)
             m_row.append(face_index)
             m_col.append(face_index)
@@ -435,7 +450,7 @@ class MFD():
 
         current_length = 0
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.mesh.get_neumann_boundary_values())                            
+            map(lambda x: x[0], self.get_neumann_boundary_values())                            
 
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_e = self.build_m_e(cell_index, k_unity)
@@ -463,7 +478,7 @@ class MFD():
 
 
         for face_index in map(lambda x: x[0], 
-                                self.mesh.get_neumann_boundary_values()):
+                                self.get_neumann_boundary_values()):
             m_data.append(1.)
             m_row.append(face_index)
             m_col.append(face_index)
@@ -766,7 +781,7 @@ class MFD():
 
         gravity_force = m_coo.dot(gravity_force)
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.mesh.get_neumann_boundary_values())
+            map(lambda x: x[0], self.get_neumann_boundary_values())
 
         for face_index in range(self.mesh.get_number_of_faces()):
             if face_index not in neumann_boundary_indices:
@@ -778,22 +793,172 @@ class MFD():
         """
         for cell_index in range(self.mesh.get_number_of_cells()):
             self.rhs[cell_index + self.mesh.get_number_of_faces()] +=\
-                self.mesh.get_cell_forcing_function(cell_index)
+                self.cell_forcing_function[cell_index]
 
     def build_rhs_neumann(self):
         """ Construct the entries for the Neumann boundaries 
         in the RHS. 
         """
         for [boundary_index, boundary_value] in \
-                self.mesh.get_neumann_boundary_values():
+                self.get_neumann_boundary_values():
             self.rhs[boundary_index] =  boundary_value
+            
+    def get_cell_faces_neumann(self, cell_index):
+        """ Returns all the faces in cell_index that
+        are also neumann faces.
+        """
+        if self.cell_faces_neumann.has_key(cell_index):
+            return self.cell_faces_neumann[cell_index]
+        else:
+            return []
 
+    def apply_neumann_from_function(self, boundary_marker, grad_u):
+        """ Sets the Neumann boundary values for the
+        faces assigned to boundary_marker based on a 
+        a functional representation grad_u. All
+        boundary faces associated with
+        boundary_marker will be set as Neumann
+        The function grad_u takes a Numpy array
+        representing a point coordinate on the
+        face and returns
+        the vector of the Neumann condition at that point.
+        The face centroid is used as a quadrature point. 
+        """
+        for [boundary_index, boundary_orientation] in \
+                self.mesh.get_boundary_faces_by_marker(boundary_marker):
+            current_normal = self.mesh.get_face_normal(boundary_index)
+            current_grad = grad_u(self.mesh.get_face_real_centroid(boundary_index))
+            neumann_value = current_grad.dot(current_normal)
+
+            self.neumann_boundary_values[boundary_index] = neumann_value
+            cell_index = self.mesh.face_to_cell[boundary_index][0]
+
+            cell_list = list(self.mesh.get_cell(cell_index))
+            local_face_index = cell_list.index(boundary_index)
+
+            if self.cell_faces_neumann.has_key(cell_index):
+                self.cell_faces_neumann[cell_index].append(boundary_index)
+            else:
+                self.cell_faces_neumann[cell_index] = [boundary_index]
+
+
+    def set_neumann_by_face(self,
+                              face_index,
+                              face_orientation,
+                              value):
+        """ Directly sets Neumann value to face_index.
+        The input *value* corresponding to the
+        integral of the pressure over the face.
+        """
+        self.neumann_boundary_values[face_index] = value
+
+        cell_index = self.mesh.face_to_cell[face_index][0]
+
+        if self.cell_faces_neumann.has_key(cell_index):
+            self.cell_faces_neumann[cell_index].append(face_index)
+        else:
+            self.cell_faces_neumann[cell_index] = [face_index]
+
+    def get_dirichlet_boundary_values(self):
+        """ Returns a list of all faces designated as
+        Dirichlet boundaries and their values.
+        """
+        return self.dirichlet_boundary_values.iteritems()
+
+    def get_dirichlet_boundary_value_by_face(self, face_index):
+        """ Return pressure value at face_index.
+        """
+        return self.dirichlet_boundary_values[face_index]
+
+    def get_number_of_dirichlet_faces(self):
+        """ Returns the number of Dirichlet boundary faces.
+        """
+        return len(self.dirichlet_boundary_values)
+
+    def get_neumann_boundary_values(self):
+        """ Returns a list of all faces designated as
+        Neumann boundaries and their values.
+        """
+        return self.neumann_boundary_values.iteritems()
+
+    def reset_dirichlet_boundaries(self):
+        """ Resets all Dirichlet bounday data.
+        """
+        self.dirichlet_boundary_values = {}
+
+    def reset_neumann_boundaries(self):
+        """ Resets all Neumann bounday data.
+        """
+        self.neumann_boundary_values = {}
+
+    def apply_dirichlet_from_function(self, boundary_marker, p_function):
+        """ Sets the Dirichlet boundary values for the
+        for the faces assigned to boundary_marker based on  
+        a functional representation p_function. All
+        boundary faces associated with
+        boundary_marker will be set as Dirichlet.
+        The p_function takes a Numpy array
+        representing a point coordinate on the
+        face and returns the scalar value of
+        the Dirichlet condition at that point.
+        The face centoid is used as a quadrature point. 
+        """
+        for (boundary_index, boundary_orientation) \
+                in self.mesh.get_boundary_faces_by_marker(boundary_marker):
+            dirichlet_value = p_function(self.mesh.get_face_real_centroid(boundary_index))
+            dirichlet_value *= self.mesh.get_face_area(boundary_index)
+
+            self.dirichlet_boundary_values[boundary_index] = \
+                dirichlet_value*boundary_orientation
+
+    def apply_forcing_from_function(self, forcing_function):
+        """ Sets forcing function for entire problem based on
+        a functional representation forcing_function.
+        The forcing_function takes a Numpy array
+        representing a point coordinate and returns
+        the value of the forcing function at that point.
+        The cell centroid is used as a quadrature point. 
+        """
+        for cell_index in range(self.mesh.get_number_of_cells()):
+            forcing_value = forcing_function(self.mesh.get_cell_real_centroid(cell_index))
+            forcing_value *= self.mesh.get_cell_volume(cell_index)
+            self.cell_forcing_function[cell_index] = forcing_value
+
+    def apply_forcing_from_grad(self, grad_p):
+        """ Computes the source term for a cell from the
+        exact representation of the gradient integrated over the
+        boundaries of the cell.
+        """
+        for cell_index in range(self.mesh.get_number_of_cells()):
+            face_list = self.mesh.get_cell(cell_index)
+            orientation_list = self.mesh.get_cell_normal_orientation(cell_index)
+            for (face_index, orientation) in zip(face_list, orientation_list):
+                current_normal = self.mesh.get_face_normal(face_index)
+                current_center = self.mesh.get_face_real_centroid(face_index)
+                exact_flux = np.dot(grad_p(current_center), current_normal)
+                exact_flux *= self.get_face_area(face_index)
+                exact_flux *= orientation
+                self.cell_forcing_function[cell_index] += exact_flux
+
+    def process_internal_boundaries(self):
+        """ Conducts appropriate processing needed 
+        to correctly incorporate internal boundary conditions. 
+        """
+        for (face_index, face_orientation) in self.mesh.get_internal_no_flow():
+            cell_index = self.mesh.face_to_cell[boundary_index][0]
+            cell_list = list(self.mesh.get_cell(cell_index))
+            local_face_index = cell_list.index(boundary_index)
+            if self.cell_faces_neumann.has_key(cell_index):
+                self.cell_faces_neumann[cell_index].append(boundary_index)
+            else:
+                self.cell_faces_neumann[cell_index] = [boundary_index]
+        
     def build_rhs_dirichlet(self):
         """ Construct the entries for the Dirichlet boundaries 
         in the RHS. 
         """
         for [boundary_index, boundary_value] in \
-                self.mesh.get_dirichlet_boundary_values():
+                self.get_dirichlet_boundary_values():
             self.rhs[boundary_index] = -boundary_value
 
     def get_analytical_pressure_solution(self, p_function, quadrature_method = 0):
