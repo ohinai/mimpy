@@ -27,21 +27,21 @@ res_mesh = hexmesh.HexMesh()
 def mod_function(p, i, j, k):
     return p
 
-res_mesh.build_mesh(5, 5, 5, K, 1., 1., 1., mod_function)
+res_mesh.build_mesh(10, 10,  10, K, 1., 1., 1., mod_function)
 
-#Apply Dirichlet boundary conditions to all 6 faces. 
-res_mesh.apply_dirichlet_from_function(0, lambda p:u(p))
-res_mesh.apply_dirichlet_from_function(1, lambda p:u(p))
-res_mesh.apply_dirichlet_from_function(2, lambda p:u(p))
-res_mesh.apply_dirichlet_from_function(3, lambda p:u(p))
-res_mesh.apply_dirichlet_from_function(4, lambda p:u(p))
-res_mesh.apply_dirichlet_from_function(5, lambda p:u(p))
-
-#Apply the forcing function f. 
-res_mesh.apply_forcing_from_function(f)
- 
 #Connect the MFD instance to the new mesh. 
 res_mfd.set_mesh(res_mesh)
+
+#Apply Dirichlet boundary conditions to all 6 faces. 
+res_mfd.apply_dirichlet_from_function(0, lambda p:u(p))
+res_mfd.apply_dirichlet_from_function(1, lambda p:u(p))
+res_mfd.apply_dirichlet_from_function(2, lambda p:u(p))
+res_mfd.apply_dirichlet_from_function(3, lambda p:u(p))
+res_mfd.apply_dirichlet_from_function(4, lambda p:u(p))
+res_mfd.apply_dirichlet_from_function(5, lambda p:u(p))
+
+#Apply the forcing function f. 
+res_mfd.apply_forcing_from_function(f)
 
 #Build the LHS and RHS. 
 res_mfd.build_lhs()
