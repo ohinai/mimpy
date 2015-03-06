@@ -12,7 +12,7 @@ The best way to get the code right now is to clone the git repo and run the setu
 
     .. code-block:: bash
     
-        $ git clone https://github.com/ohinai/pas.git
+        $ git clone https://github.com/ohinai/mimpy.git
         $ python setup.py install 
 
 An simple example of using the code can be found in (examples/hexmesh/example1/hexmesh_example_1.py).
