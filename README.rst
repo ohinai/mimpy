@@ -1,7 +1,6 @@
 =====
 mimpy
 =====
-Mimetic Finite Differences in Python
 
 Mimpy is a Python based library for solving elliptic PDE using the Mimetic Finite 
 Difference Method. Most numerical codes are limited to tetrahedral or hexahedral 
