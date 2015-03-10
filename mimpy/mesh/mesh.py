@@ -4,15 +4,13 @@ import numpy as np
 import os
 import array
 import math
-
+from itertools import islice
 import mesh_cython
-
 
 try:
     import matplotlib
     from matplotlib.patches import Circle, Wedge, Polygon
     from matplotlib.collections import PatchCollection
-
     import pylab
 
 except ImportError:
@@ -206,12 +204,6 @@ class Mesh:
         # they are in.
         self.face_to_cell = np.empty(shape=(0, 2), dtype=np.dtype('i'))
 
-        # Dict from cell to a list of faces
-        # in the cell that are also neumann faces.
-        # Used for incroporating the boundary
-        # conditions when building m and div_t.
-        self.cell_faces_neumann = {}
-
         # A point on the plane of the face that is used
         # to build the MFD matrix R. This point does
         # not have to be on the face itself.
@@ -232,7 +224,7 @@ class Mesh:
         # List of cells. Each cell is made up of a list
         # of faces.
         self.cells = variable_array(dtype=np.dtype('i'))
-
+        
         # For each cell, a list of bools indicating
         # whether the normal in self.face_normals
         # is in or out of the cell.
@@ -260,12 +252,6 @@ class Mesh:
         # For 2D meshes, optional polygon representation of cells.
         self.two_d_polygons = []
 
-        # dict: {face_index: Dirichlet value, ... }
-        self.dirichlet_boundary_values = {}
-
-        # dict: {face_index: Neumann value, ... }
-        self.neumann_boundary_values = {}
-
         # dict: {face_index: (cell_index, face_orientation), ...}
         # Allows Dirichlet boundaries to be set implicitly
         # based on pressure of cells.
@@ -275,14 +261,19 @@ class Mesh:
         # Allows Neumann boundaries to be set implicitly
         # based on fluxes at other faces.
         self.neumann_boundary_pointers = {}
-
+        
+        # Faces designated as no flow, meant for 
+        # interior boundary conditions not to be 
+        # set by user. 
+        self.internal_no_flow = []
+        
         # dict: {face_index: (lagrange_index, orientation)}
         # Allows dirichlet boundaries to point to
         # lagrange multipliers for domain decomposition.
         # A lagrange multiplier is a face identicial
         # to the one pointing to it, but not associated
         # with any cells.
-        self.face_to_lagrange_pointer = {}
+        self.face_to_lagrange_pointers = {}
 
         # dict: lagrange_index: [(face_index_1, orientation), ...], ...}
         # Points a lagrange multiplier to faces associated
@@ -293,9 +284,6 @@ class Mesh:
         # Allows source terms to be set implicitly
         # based on fluxes at other faces.
         self.forcing_function_pointers = {}
-
-        # list: [F1, F2, F3, ....]
-        self.cell_forcing_function = np.empty(shape=(0), dtype=float)
 
         # Lowest order term coef
         # List: [alpha1, alpha2, ...]
@@ -441,15 +429,6 @@ class Mesh:
         """
         return len(self.cells[cell_index])
 
-    def get_cell_faces_neumann(self, cell_index):
-        """ Returns all the faces in cell_index that
-        are also neumann faces.
-        """
-        if self.cell_faces_neumann.has_key(cell_index):
-            return self.cell_faces_neumann[cell_index]
-        else:
-            return []
-
     def is_line_seg_intersect_face(self, face_index, p1, p2):
         """ Returns True if the line segment
         intersects with a face.
@@ -499,6 +478,189 @@ class Mesh:
         """
         raise NotImplementedError
 
+    def load_mesh(self, file_name):
+        """ Loads mesh from mms file. 
+        """
+        input_file = open(file_name)
+        version = input_file.next()
+        date = input_file.next()
+        name = input_file.next()
+        comments = input_file.next()
+        input_file.next()
+        input_file.next()
+
+        for line in input_file:
+            line_split = line.split()
+            if line_split[0] == "POINTS":
+                number_of_points = int(line_split[1])
+                self.number_of_points = number_of_points
+                self.points = np.loadtxt(islice(input_file,number_of_points))
+
+            elif line_split[0] == "FACES":
+                number_of_faces = int(line_split[1])
+                self.faces.number_of_entries = number_of_faces
+                current_line = input_file.next()
+                n_data_entries=  int(current_line)
+                self.faces.data = np.loadtxt(islice(input_file, n_data_entries),
+                                             dtype=np.dtype('i'))
+                current_line = input_file.next()
+                n_pointers = int(current_line)
+                self.faces.pointers = np.loadtxt(islice(input_file, n_pointers),
+                                                 dtype=np.dtype('i'))
+
+            elif line_split[0] == "FACE_NORMALS":
+                number_of_faces = int(line_split[1])
+                self.face_normals = np.loadtxt(islice(input_file, number_of_faces))
+
+            elif line_split[0] == "FACE_AREAS":
+                number_of_faces = int(line_split[1])
+                self.face_areas = np.loadtxt(islice(input_file, number_of_faces))
+
+            elif line_split[0] == "FACE_REAL_CENTROIDS":
+                number_of_faces = int(line_split[1])
+                self.face_real_centroids = np.loadtxt(islice(input_file, number_of_faces))
+
+            elif line_split[0] == "FACE_SHIFTED_CENTROIDS":
+                self.has_face_shifted_centroid = True
+                number_of_faces = int(line_split[1])
+                self.face_shifted_centroids = np.loadtxt(islice(input_file, number_of_faces))
+
+            elif line_split[0] == "CELLS":
+                number_of_cells = int(line_split[1])
+                self.cells.number_of_entries = number_of_cells
+                current_line = input_file.next()
+                n_data_entries=  int(current_line)
+                self.cells.data = np.loadtxt(islice(input_file, n_data_entries),
+                                             dtype=np.dtype('i'))
+
+                current_line = input_file.next()
+                n_pointers = int(current_line)
+
+                self.cells.pointers = np.loadtxt(islice(input_file, n_pointers),
+                                                 dtype=np.dtype('i'))
+
+            elif line_split[0] == "CELL_NORMAL_ORIENTATION":
+                number_of_cells = int(line_split[1])
+                self.cell_normal_orientation.number_of_entries =\
+                    number_of_cells
+                current_line = input_file.next()
+                n_data_entries = int(current_line)
+                self.cell_normal_orientation.data =\
+                    np.loadtxt(islice(input_file, n_data_entries),
+                               dtype=np.dtype('i'))
+                    
+                current_line = input_file.next()
+                n_pointers = int(current_line)
+                self.cell_normal_orientation.pointers = \
+                    np.loadtxt(islice(input_file, n_pointers),
+                               dtype=np.dtype('i'))
+
+            elif line_split[0] == "CELL_VOLUMES":
+                number_of_cells = int(line_split[1])
+                self.cell_volume = np.loadtxt(islice(input_file, number_of_cells))
+
+            elif line_split[0] == "CELL_REAL_CENTROIDS":
+                number_of_cells = int(line_split[1])
+                self.cell_real_centroid = np.loadtxt(islice(input_file, number_of_cells))
+                
+            elif line_split[0] == "CELL_SHIFTED_CENTROIDS":
+                number_of_cells = int(line_split[1])
+                self.cell_shifted_centroids = np.loadtxt(islice(input_file, number_of_cells))
+                
+            elif line_split[0] == "CELL_K":
+                number_of_cells = int(line_split[1])
+                self.cell_k = np.loadtxt(islice(input_file, number_of_cells))
+                
+            elif line_split[0] == "BOUNDARY_MARKERS":
+                number_of_boundary_markers = int(line_split[1])
+                
+                for line_index in range(number_of_boundary_markers):
+                    current_line = input_file.next()
+                    line_split = current_line.split()
+                    entries = [int(x) for x in line_split]
+                    boundary_marker = entries.pop(0)
+                    self.add_boundary_marker(boundary_marker, "FROMFILE")
+                    while entries:
+                        self.add_boundary_face(boundary_marker, 
+                                               entries.pop(0), 
+                                               entries.pop(0))
+                    
+
+    def save_mesh(self, file_name):
+        """ Saves mesh file in mms format. 
+        """
+        output_file = open(file_name+".mms", 'w')
+        print >>output_file, "0.1"
+        print >> output_file, "date"
+        print >> output_file, "name"
+        print >> output_file, "comments"
+        print >>output_file, "#"
+        print >>output_file, "#"
+        
+        print >>output_file, "POINTS", 
+        print >>output_file, len(self.points)
+        np.savetxt(output_file, self.points)
+        
+        print >>output_file, "FACES", self.get_number_of_faces()
+        print >>output_file, len(self.faces.data)
+        np.savetxt(output_file, self.faces.data,  fmt='%i')
+        print >>output_file, len(self.faces.pointers)
+        np.savetxt(output_file, self.faces.pointers, fmt="%i %i")
+            
+        print >>output_file, "FACE_NORMALS", self.get_number_of_faces()
+        np.savetxt(output_file, self.face_normals)
+
+        print >>output_file, "FACE_AREAS", self.get_number_of_faces()
+        for face_index in range(self.get_number_of_faces()):
+            print >>output_file, self.get_face_area(face_index)
+
+        print >>output_file, "FACE_REAL_CENTROIDS", self.get_number_of_faces()
+        for face_index in range(self.get_number_of_faces()):
+            current_centroid = self.get_face_real_centroid(face_index)
+            print >>output_file, current_centroid[0], 
+            print >>output_file, current_centroid[1], 
+            print >>output_file, current_centroid[2] 
+
+        if self.has_face_shifted_centroid:
+            print >>output_file, "FACE_SHIFTED_CENTROIDS", self.get_number_of_faces()
+            for face_index in range(self.get_number_of_faces()):
+                print >>output_file, self.get_face_real_centroid(face_index)
+
+        print >>output_file, "CELLS", self.get_number_of_cells()
+        print >>output_file, len(self.cells.data)
+        np.savetxt(output_file, self.cells.data,  fmt='%i')
+        print >>output_file, len(self.cells.pointers)
+        np.savetxt(output_file, self.cells.pointers, fmt="%i %i")
+
+        print >>output_file, "CELL_NORMAL_ORIENTATION", self.get_number_of_cells()
+        print >>output_file, len(self.cell_normal_orientation.data)
+        np.savetxt(output_file, self.cell_normal_orientation.data,  fmt='%i')
+        print >>output_file, len(self.cell_normal_orientation.pointers)
+        np.savetxt(output_file, self.cell_normal_orientation.pointers, fmt="%i %i")
+        
+        print >>output_file, "CELL_VOLUMES", self.get_number_of_cells()
+        np.savetxt(output_file, self.cell_volume)
+
+        print >>output_file, "CELL_REAL_CENTROIDS", self.get_number_of_cells()
+        np.savetxt(output_file, self.cell_real_centroid)
+
+        if self.has_cell_shifted_centroid:
+            print >>output_file, "CELL_SHIFTED_CENTROIDS", self.get_number_of_cells()
+            np.savetxt(ouptut_file, self.cell_shifted_centroids)
+
+        print >>output_file, "CELL_K", self.get_number_of_cells()
+        np.savetxt(output_file, self.cell_k)
+
+        print >>output_file, "BOUNDARY_MARKERS", len(self.boundary_markers)
+        for marker_index in self.boundary_markers:
+            print >>output_file, marker_index, 
+            for (face_index, face_orientation) in\
+                    self.get_boundary_faces_by_marker(marker_index):
+                print >>output_file, face_index, face_orientation, 
+            print >>output_file, "\n", 
+
+        output_file.close()
+
     def set_cell_faces(self, cell_index, faces):
         """ Sets the cell faces.
         """
@@ -525,10 +687,6 @@ class Mesh:
         """
         new_cell_index = self.cells.add_entry(list_of_faces)
         self.cell_normal_orientation.add_entry(list_of_orientations)
-
-        if len(self.cell_forcing_function)-1<new_cell_index:
-            new_size = self.memory_extension(len(self.cell_forcing_function))
-            self.cell_forcing_function.resize(new_size, refcheck=False)
 
         if len(self.cell_volume)-1<new_cell_index:
             new_size = self.memory_extension(len(self.cell_volume))
@@ -729,16 +887,6 @@ class Mesh:
         """
         return self.cell_alpha[cell_index]
 
-    def set_cell_forcing_function(self, cell_index, forcing_value):
-        """ Sets total forcing q (float) for cell_index.
-        """
-        self.cell_forcing_function[cell_index] = forcing_value
-
-    def get_cell_forcing_function(self, cell_index):
-        """ Returns total forcing (float) for cell_index.
-        """
-        return self.cell_forcing_function[cell_index]
-
     def set_face_real_centroid(self, face_index, centroid):
         """ Sets face centroid for face_index.
         """
@@ -904,22 +1052,16 @@ class Mesh:
         self.dirichlet_boundary_values[face_index] = value * \
             self.get_face_area(face_index)*face_orientation
 
-    def set_neumann_by_face(self,
-                              face_index,
-                              face_orientation,
-                              value):
-        """ Directly sets Neumann value to face_index.
-        The input *value* corresponding to the
-        integral of the pressure over the face.
+    def add_internal_no_flow(self, face_index, face_orientation):
+        """ Sets face as interior no flow boundary condition. 
         """
-        self.neumann_boundary_values[face_index] = value
+        self.internal_no_flow.append([face_index, face_orientation])
 
-        cell_index = self.face_to_cell[face_index][0]
-
-        if self.cell_faces_neumann.has_key(cell_index):
-            self.cell_faces_neumann[cell_index].append(face_index)
-        else:
-            self.cell_faces_neumann[cell_index] = [face_index]
+    def get_internal_no_flow(self):
+        """ Returns list of faces set as 
+        internal no flow condition. 
+        """
+        return self.internal_no_flow
 
     def set_dirichlet_face_pointer(self,
                                    face_index,
@@ -935,7 +1077,6 @@ class Mesh:
         # allows the MFD code to build the matrix
         # correctly, and doesn't effect the right-hand
         # side of the problem.
-        self.dirichlet_boundary_values[face_index] = 0.
         self.dirichlet_boundary_pointers[face_index] = \
             (cell_index, face_orientation)
 
@@ -958,14 +1099,14 @@ class Mesh:
         # correctly, and doesn't effect the right-hand
         # side of the problem.
         self.dirichlet_boundary_values[face_index] = 0.
-        self.face_to_lagrange_pointer[face_index] = \
+        self.face_to_lagrange_pointers[face_index] = \
             (lagrange_index, face_orientation)
 
     def get_all_face_to_lagrange_pointers(self):
         """ Returns all face indices that are
         pointing to a lagrange multiplier.
         """
-        return self.face_to_lagrange_pointer.keys()
+        return self.face_to_lagrange_pointers.keys()
 
     def get_face_to_lagrange_pointer(self, face_index):
         """ Returns the lagrange multiplier index
@@ -1045,7 +1186,6 @@ class Mesh:
         # (in case of well for example), it
         # becomes additive to the source term
         # for that cell.
-        self.cell_forcing_function[cell_index] = 0.
         self.forcing_function_pointers[cell_index] = \
             zip(face_indices, face_orientations)
 
@@ -1060,16 +1200,6 @@ class Mesh:
         for cell_index.
         """
         return self.forcing_function_pointers[cell_index]
-
-    def reset_dirichlet_boundaries(self):
-        """ Resets all Dirichlet bounday data.
-        """
-        self.dirichlet_boundary_values = {}
-
-    def reset_neumann_boundaries(self):
-        """ Resets all Neumann bounday data.
-        """
-        self.neumann_boundary_values = {}
 
     def set_cell_domain(self, cell_index, domain):
         """ Sets cell domain identifier
@@ -1098,112 +1228,6 @@ class Mesh:
                 cells_in_domain.append(cell_index)
         return cells_in_domain
 
-    def apply_forcing_from_function(self, forcing_function):
-        """ Sets forcing function for entire problem based on
-        a functional representation forcing_function.
-        The forcing_function takes a Numpy array
-        representing a point coordinate and returns
-        the value of the forcing function at that point.
-        The cell centroid is used as a quadrature point. 
-        """
-        for cell_index in range(self.get_number_of_cells()):
-            forcing_value = forcing_function(self.get_cell_real_centroid(cell_index))
-            forcing_value *= self.get_cell_volume(cell_index)
-            self.cell_forcing_function[cell_index] = forcing_value
-
-    def apply_forcing_from_grad(self, grad_p):
-        """ Computes the source term for a cell from the
-        exact representation of the gradient integrated over the
-        boundaries of the cell.
-        """
-        for cell_index in range(self.get_number_of_cells()):
-            face_list = self.get_cell(cell_index)
-            orientation_list = self.get_cell_normal_orientation(cell_index)
-            for (face_index, orientation) in zip(face_list, orientation_list):
-                current_normal = self.get_face_normal(face_index)
-                current_center = self.get_face_real_centroid(face_index)
-                exact_flux = np.dot(grad_p(current_center), current_normal)
-                exact_flux *= self.get_face_area(face_index)
-                exact_flux *= orientation
-                self.cell_forcing_function[cell_index] += exact_flux
-
-    def apply_neumann_from_function(self, boundary_marker, grad_u):
-        """ Sets the Neumann boundary values for the
-        entire problem based on
-        a functional representation grad_u. All
-        boundary faces associated with
-        boundary_marker will be set as Neumann
-        The function grad_u takes a Numpy array
-        representing a point coordinate on the
-        face and returns
-        the vector of the Neumann condition at that point.
-        The face centroid is used as a quadrature point. 
-        """
-        for [boundary_index, boundary_orientation] in \
-                self.get_boundary_faces_by_marker(boundary_marker):
-            
-            current_normal = self.get_face_normal(boundary_index)
-            current_grad = grad_u(self.get_face_real_centroid(boundary_index))
-            neumann_value = current_grad.dot(current_normal)
-
-            self.neumann_boundary_values[boundary_index] = neumann_value
-            cell_index = self.face_to_cell[boundary_index][0]
-
-            cell_list = list(self.get_cell(cell_index))
-            local_face_index = cell_list.index(boundary_index)
-
-            if self.cell_faces_neumann.has_key(cell_index):
-                self.cell_faces_neumann[cell_index].append(boundary_index)
-            else:
-                self.cell_faces_neumann[cell_index] = [boundary_index]
-
-    def apply_dirichlet_from_function(self, boundary_marker, p_function):
-        """ Sets the Dirichlet boundary values for the
-        entire problem based on
-        a functional representation p_function. All
-        boundary faces associated with
-        boundary_marker will be set as Dirichlet.
-        The p_function takes a Numpy array
-        representing a point coordinate on the
-        face and returns the scalar value of
-        the Dirichlet condition at that point.
-        The face centoid is used as a quadrature point. 
-        """
-        for (boundary_index, boundary_orientation) \
-                in self.get_boundary_faces_by_marker(boundary_marker):
-            dirichlet_value = p_function(self.get_face_real_centroid(boundary_index))
-            dirichlet_value *= self.get_face_area(boundary_index)
-
-            self.dirichlet_boundary_values[boundary_index] = \
-                dirichlet_value*boundary_orientation
-
-    def apply_neumann_from_list(self, boundary_index, grad_u_values):
-        """ Not implemented yet.
-        """
-        pass
-
-    def get_dirichlet_boundary_values(self):
-        """ Returns a list of all faces designated as
-        Dirichlet boundaries and their values.
-        """
-        return self.dirichlet_boundary_values.iteritems()
-
-    def get_dirichlet_boundary_value_by_face(self, face_index):
-        """ Return pressure value at face_index.
-        """
-        return self.dirichlet_boundary_values[face_index]
-
-    def get_number_of_dirichlet_faces(self):
-        """ Returns the number of Dirichlet boundary faces.
-        """
-        return len(self.dirichlet_boundary_values)
-
-    def get_neumann_boundary_values(self):
-        """ Returns a list of all faces designated as
-        Neumann boundaries and their values.
-        """
-        return self.neumann_boundary_values.iteritems()
-
     def set_gravity_vector(self, gravity_vector):
         """ Set vector indicating gravity acceleration direction.
         """
@@ -1218,7 +1242,6 @@ class Mesh:
         """ Returns the gravity acceleration constant.
         """
         return self.gravity_acceleration
-
 
     def find_face_normal(self, face_index):
         """ Finds the face normal based on
@@ -1986,17 +2009,10 @@ class Mesh:
             new_cell_faces = self.get_cell(other_cell)
             new_cell_faces[local_face_index_in_other] = new_face_index
 
-    def build_frac_from_faces(self, faces, boundary_locations = []):
+    def build_frac_from_faces(self, faces):
         """ Takes a list of face indices, and
         extrudes them into cells.
         """
-        boundary_markers = self.get_boundary_markers()
-        ## All fracture boundaries share the same marker.
-        assert(len(boundary_markers)+1 not in boundary_markers)
-        fracture_boundary_marker = len(boundary_markers)+1
-        self.add_boundary_marker(fracture_boundary_marker,
-                                 "fracture_boundaries")
-
         connections = []
         non_connected_edges = []
         for face in faces:
@@ -2518,16 +2534,10 @@ class Mesh:
                 
                 self.set_face_area(new_face_index, area)
                 
-                current_fracture_boundary = fracture_boundary_marker
-                for b_case in boundary_locations:
-                    condition = b_case[0]
-                    if condition(centroid):
-                        current_fracture_boundary = b_case[1]
-                
                 if np.dot(normal, centroid -self.get_face_real_centroid(global_face_index))>  0.:
-                    self.add_boundary_face(current_fracture_boundary, new_face_index, 1)
+                    self.add_internal_no_flow(new_face_index, 1)
                 else:
-                    self.add_boundary_face(current_fracture_boundary, new_face_index, -1)
+                    self.add_internal_no_flow(new_face_index, -1)
 
                 face_to_walls[local_face_index].append((new_face_index, 1))
 
@@ -2539,7 +2549,7 @@ class Mesh:
             new_face_points = top_points[local_face_index]
             new_face_index = self.add_face(new_face_points)
             face_to_walls[local_face_index].append((new_face_index, 1))
-            self.add_boundary_face(fracture_boundary_marker, new_face_index, 1)
+            self.add_internal_no_flow(new_face_index, 1)
 
             (area, centroid) =  self.find_face_centroid(new_face_index)
             self.set_face_normal(new_face_index, 
@@ -2557,7 +2567,7 @@ class Mesh:
             new_face_index = self.add_face(new_face_points)
             face_to_walls[local_face_index].append((new_face_index, -1))
 
-            self.add_boundary_face(fracture_boundary_marker, new_face_index, 1)
+            self.add_internal_no_flow(new_face_index, 1)
 
             (area, centroid) =  self.find_face_centroid(new_face_index)
 
@@ -2628,7 +2638,6 @@ class Mesh:
                                             -top_res_face_orientation, 
                                             new_cell_index)
 
-        self.apply_neumann_from_function(fracture_boundary_marker, lambda x:np.zeros(3))
         self.output_vtk_faces("new_faces", new_faces)
 
     def build_mesh(self):
