@@ -10,7 +10,7 @@ Tests for `mimpy` module.
 
 import unittest
 
-from mimpy import mimpy
+import mimpy
 
 
 class TestMimpy(unittest.TestCase):

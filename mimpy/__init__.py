@@ -1,3 +1,3 @@
 
-__all__ = ["mesh", "mfd"]
+__all__ = ["mesh", "mfd", "models"]
 

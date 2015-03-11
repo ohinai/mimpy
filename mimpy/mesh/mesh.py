@@ -5,7 +5,7 @@ import os
 import array
 import math
 from itertools import islice
-import mimpy.mesh.mesh_cython
+import mimpy.mesh.mesh_cython as mesh_cython
 
 try:
     import matplotlib
