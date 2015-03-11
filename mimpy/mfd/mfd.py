@@ -2,13 +2,12 @@
 import numpy as np
 import sys
 import copy
-import array 
+import array
 
 from scipy import sparse, diag
 import scipy.sparse.linalg.dsolve as dsolve
 import scipy.sparse.linalg as linalg
 from multiprocessing import Pool
-
 
 try:
     from petsc4py import PETSc
@@ -16,7 +15,7 @@ except:
     pass
 
 def sign(x):
-    """ Returns the sign of float x. 
+    """ Returns the sign of float x.
     """
     if abs(x) == x:
         return 1.
@@ -24,11 +23,11 @@ def sign(x):
         return -1.
 
 class MFD():
-    """ The MFD class provides functionality for 
-    constructing mimetic discretization matrices 
+    """ The MFD class provides functionality for
+    constructing mimetic discretization matrices
     for sovling elliptic PDE. An instance of MFD
-    constructs the matrices based on the information 
-    it finds in an instance of the Mesh class. 
+    constructs the matrices based on the information
+    it finds in an instance of the Mesh class.
     """
     def __init__(self):
         self.mesh = None
@@ -44,8 +43,8 @@ class MFD():
         self.print_progress = False
 
         self.compute_diagonality = False
-        
-        # List indicating orthogonality of cells.  
+
+        # List indicating orthogonality of cells.
         self.diagonality_index_list = None
 
         self.m_e_construction_method = 0
@@ -73,14 +72,15 @@ class MFD():
         self.all_ortho = True
 
     def set_mesh(self, mesh):
-        """ Links the MFD object to an instance of a Mesh class. 
+        """ Links the MFD object to an instance of a Mesh class.
         """
         self.mesh = mesh
-        self.cell_forcing_function.resize(self.mesh.get_number_of_cells(), refcheck=False)
+        self.cell_forcing_function.resize(self.mesh.get_number_of_cells(),
+                                          refcheck=False)
 
     def set_compute_diagonality(self, setting):
-        """ During matrix M_x construction, compute how 
-        diagonal the local stiffness matrices 
+        """ During matrix M_x construction, compute how
+        diagonal the local stiffness matrices
         m_e. The equation is:
 
         ||M_E - diag(diag(M_E)||_2/||M_E||_2
@@ -88,12 +88,12 @@ class MFD():
         self.compute_diagonality = setting
 
     def get_diagonality(self):
-        """ Returns a list of cell diagonality indices. 
+        """ Returns a list of cell diagonality indices.
         """
-        return self.diagonality_index_list 
-        
+        return self.diagonality_index_list
+
     def set_m_e_construction_method(self, method_index):
-        """ Set construction method for the local matrices 
+        """ Set construction method for the local matrices
         m_e. Method indices correspond to:
 
         0 => U = R^TR(R^TN)^-1
@@ -103,11 +103,11 @@ class MFD():
         self.m_e_construction_method = method_index
 
     def build_div(self, shift=1):
-        """ Build the div and div^T matrices and returns 
-        arrays for constructing a coo sparse matrix 
+        """ Build the div and div^T matrices and returns
+        arrays for constructing a coo sparse matrix
         representation. The lists returned are:
 
-        [[div_data, div_row, div_col], 
+        [[div_data, div_row, div_col],
         [div_t_data, div_t_row, div_t_col]]
         """
         div_data = array.array('f')
@@ -118,15 +118,15 @@ class MFD():
         div_t_row = array.array('i')
         div_t_col = array.array('i')
 
-        neumaan_boundary_indices = map(lambda x: x[0], 
-                                       self.get_neumann_boundary_values()) 
+        neumaan_boundary_indices = map(lambda x: x[0],
+                                       self.get_neumann_boundary_values())
         for current_cell_index in range(self.mesh.get_number_of_cells()):
             current_cell = self.mesh.get_cell(current_cell_index)
             current_cell_orientations = \
                 self.mesh.get_cell_normal_orientation(current_cell_index)
 
             neumann_faces = self.get_cell_faces_neumann(current_cell_index)
-            
+
             for [face_index, face_orientation] in \
                     zip(current_cell, current_cell_orientations):
 
@@ -136,30 +136,30 @@ class MFD():
                 div_row.append(current_cell_index+
                                shift*self.mesh.get_number_of_faces())
                 div_col.append(face_index)
-                
+
                 if face_index not in neumann_faces:
                     div_t_data.append(-new_entry)
                     div_t_row.append(face_index)
                     div_t_col.append(current_cell_index+
                                      shift*self.mesh.get_number_of_faces())
-    
-        return [[div_data, div_row, div_col], 
+
+        return [[div_data, div_row, div_col],
                 [div_t_data, div_t_row, div_t_col]]
 
     def build_r_e(self, cell_index):
-        """ Build matrix R_E for construction of 
-        local stiffness matrix M_E. 
-        The function defaults to using the 
-        real centroids of the cells and faces 
-        unless otherwise specified by functions 
-        is_using_face_shifted_centroid and 
-        is_using_cell_shifted_centroid. 
+        """ Build matrix R_E for construction of
+        local stiffness matrix M_E.
+        The function defaults to using the
+        real centroids of the cells and faces
+        unless otherwise specified by functions
+        is_using_face_shifted_centroid and
+        is_using_cell_shifted_centroid.
         """
-        r_e = np.zeros((self.mesh.get_number_of_cell_faces(cell_index), 
+        r_e = np.zeros((self.mesh.get_number_of_cell_faces(cell_index),
                            self.mesh.dim))
 
         counter = 0
-        
+
         if self.mesh.is_using_cell_shifted_centroid():
             cell_centroid = self.mesh.get_cell_shifted_centroid(cell_index)
         else:
@@ -182,7 +182,7 @@ class MFD():
                 r_e[counter][2] = self.mesh.get_face_area(face_index)
                 r_e[counter][2] *= (face_centroid[2]-cell_centroid[2])
 
-                counter += 1        
+                counter += 1
 
         elif self.mesh.dim == 2:
             for face_index in self.mesh.get_cell(cell_index):
@@ -200,46 +200,41 @@ class MFD():
                 r_e[counter][1] = self.mesh.get_face_area(face_index)
                 r_e[counter][1] *= (face_centroid[1]-cell_centroid[1])
 
-                counter += 1        
+                counter += 1
 
         return r_e
 
     def build_n_e(self, cell_index, k_unity = False):
-        """ Build matrix N_E using the standard 
-        definition for the mimetic method. 
+        """ Build matrix N_E using the standard
+        definition for the mimetic method.
         """
         number_of_faces = len(self.mesh.get_cell(cell_index))
-
         n_e = np.zeros((number_of_faces, self.mesh.dim))
 
         counter = 0
-        
+
+        face_face_orientation = \
+            zip(self.mesh.get_cell(cell_index),
+                self.mesh.get_cell_normal_orientation(cell_index))
+            
         if k_unity:
-            for [face_index, face_orientation] in \
-                    zip(self.mesh.get_cell(cell_index), 
-                        self.mesh.get_cell_normal_orientation(cell_index)):
-
-                    n_e[counter, :] =  self.mesh.get_face_normal(face_index) 
-                    n_e[counter, :] *= face_orientation
-
-                    counter += 1
-
+            for [face_index, face_orientation] in face_face_orientation:
+                n_e[counter, :] = self.mesh.get_face_normal(face_index)
+                n_e[counter, :] *= face_orientation
+                counter += 1
         else:
-            for [face_index, face_orientation] in \
-                    zip(self.mesh.get_cell(cell_index), 
-                        self.mesh.get_cell_normal_orientation(cell_index)):
-                    
-                    n_e[counter, :] = np.dot(self.mesh.get_cell_k(cell_index),
-                                             self.mesh.get_face_normal(face_index))
-                    n_e[counter, :] *= face_orientation
-                
-                    counter += 1
+            
+            for [face_index, face_orientation] in face_face_orientation:
+                n_e[counter, :] = np.dot(self.mesh.get_cell_k(cell_index),
+                                         self.mesh.get_face_normal(face_index))
+                n_e[counter, :] *= face_orientation
+                counter += 1
 
         return n_e
 
     def build_c_e(self, n_e):
-        """ Construct matrix C_E. The matrix 
-        must satisfy N_E^T C_E = 0. 
+        """ Construct matrix C_E. The matrix
+        must satisfy N_E^T C_E = 0.
         """
         [u, s, v] = np.linalg.svd(np.transpose(n_e))
 
@@ -247,13 +242,13 @@ class MFD():
             c_e = np.transpose(v)[:, 3:]
 
         if self.mesh.dim == 2:
-            c_e = np.transpose(v)[:, 2:]    
-        
+            c_e = np.transpose(v)[:, 2:]
+
         return c_e
 
     def build_d_e(self, n_e):
-        """ Construct matrix D_E. The matrix 
-        must satisfy R_E^T D_E = 0. 
+        """ Construct matrix D_E. The matrix
+        must satisfy R_E^T D_E = 0.
         """
         [u, s, v] = np.linalg.svd(np.transpose(n_e))
 
@@ -261,37 +256,37 @@ class MFD():
             c_e = np.transpose(v)[:, 3:]
 
         if self.mesh.dim == 2:
-            c_e = np.transpose(v)[:, 2:]    
-        
+            c_e = np.transpose(v)[:, 2:]
+
         return c_e
 
-    
     def build_w_e(self, cell_index):
-        """ Construct matrix W_E from Brezzi et al. 
-        paper. 
+        """ Construct matrix W_E from Brezzi et al.
+        paper.
         """
         r_e = self.build_r_e(cell_index)
         n_e = self.build_n_e(cell_index)
-        
+
         d_e = self.build_d_e(r_e)
         current_k = self.mesh.get_cell_k(cell_index)
         k_inv = np.linalg.inv(current_k)
 
         w_e = n_e.dot(np.linalg.inv(n_e.T.dot(r_e)).dot(n_e.T))
-        
-        w_e += d_e.dot(d_e.T)*np.trace(current_k)/self.mesh.get_cell_volume(cell_index)
+
+        w_e += d_e.dot(d_e.T)
+        w_e *= np.trace(current_k)
+        w_e /= self.mesh.get_cell_volume(cell_index)
 
         return w_e
-        
 
     def build_m_e(self, cell_index, k_unity = False):
-        """ Construct the local stiffness matrix M_E. 
+        """ Construct the local stiffness matrix M_E.
         The construction is based on the relation:
         M_E = R_E (R_E^T N_E)^-1 R_E^T + C_E U C_E^T
-        Matrix U is a parameter that can be chosen 
-        during construction. The options for setting 
-        parameter U are set using function 
-        set_m_e_construction_method. 
+        Matrix U is a parameter that can be chosen
+        during construction. The options for setting
+        parameter U are set using function
+        set_m_e_construction_method.
         """
         r_e = self.build_r_e(cell_index)
         if k_unity:
@@ -319,8 +314,6 @@ class MFD():
             ## Based on producing RT0 for triangles
             ## from "The Mimetic Finite Difference Method"
             ## By Gianmarco Manzini,  Eqn 54.
-#            if self.mesh.dim != 2:
-#                raise("Using method 2 with 3D mesh!")
             k_inv = np.linalg.inv(current_k)
             u = 0.
             for face_index in self.mesh.get_cell(cell_index):
@@ -331,8 +324,8 @@ class MFD():
             m_e += np.dot(c_e, np.dot(u, c_e.T))
 
         elif self.m_e_construction_method == 3:
-            ## Based on Mimetic Finite Difference method 
-            ## in JCP 2013. 
+            ## Based on Mimetic Finite Difference method
+            ## in JCP 2013.
             lambda_c = .5*np.trace(r_e.dot(np.linalg.inv(r_e.T.dot(n_e)).dot(r_e.T)))
             m_e += lambda_c*(np.eye(self.mesh.get_number_of_cell_faces(cell_index))\
                              -(n_e.dot(np.linalg.inv(n_e.T.dot(n_e)))).dot(n_e.T))
@@ -354,31 +347,31 @@ class MFD():
             for i in range(len(self.mesh.get_cell(cell_index))):
                 max_index = absmaxindex(r_e[i, :])
                 diagonal.append(r_e[i, max_index]/n_e[i,max_index])
-            
+
             m_e = np.diag(diagonal)
 
         if self.check_m_e:
             if np.linalg.norm(np.dot(m_e, n_e)-r_e) > 1.e-6:
                 print "M_E N ne R"
-            
+
         if self.compute_diagonality:
             self.diagonality_index_list[cell_index] = \
                 np.linalg.norm(m_e-np.diag(np.diag(m_e)))/np.linalg.norm(m_e)
-            
+
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
         return m_e
-        
+
     def build_m(self, save_update_info = False, k_unity = False):
-        """ Construct the global matrix M_x. This is 
-        done by first constructing local matrices 
-        M_E and constructing a coo matrix for 
-        the global matrix. 
+        """ Construct the global matrix M_x. This is
+        done by first constructing local matrices
+        M_E and constructing a coo matrix for
+        the global matrix.
         """
         if self.compute_diagonality:
             self.diagonality_index_list = \
                 np.zeros(self.mesh.get_number_of_cells())
-        
+
         m_data = array.array('f')
         m_row = array.array('i')
         m_col = array.array('i')
@@ -419,7 +412,7 @@ class MFD():
             if save_update_info:
                 self.m_e_locations.append(current_length)
 
-        for face_index in map(lambda x: x[0], 
+        for face_index in map(lambda x: x[0],
                                 self.get_neumann_boundary_values()):
             m_data.append(1.)
             m_row.append(face_index)
@@ -432,15 +425,15 @@ class MFD():
 
 
     def build_m_parallel(self, save_update_info = False, k_unity = False):
-        """ Construct the global matrix M_x. This is 
-        done by first constructing local matrices 
-        M_E and constructing a coo matrix for 
-        the global matrix. 
+        """ Construct the global matrix M_x. This is
+        done by first constructing local matrices
+        M_E and constructing a coo matrix for
+        the global matrix.
         """
         if self.compute_diagonality:
             self.diagonality_index_list = \
                 np.zeros(self.mesh.get_number_of_cells())
-        
+
         m_data = array.array('f')
         m_row = array.array('i')
         m_col = array.array('i')
@@ -450,7 +443,7 @@ class MFD():
 
         current_length = 0
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.get_neumann_boundary_values())                            
+            map(lambda x: x[0], self.get_neumann_boundary_values())
 
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_e = self.build_m_e(cell_index, k_unity)
@@ -477,7 +470,7 @@ class MFD():
                 self.m_e_locations.append(current_length)
 
 
-        for face_index in map(lambda x: x[0], 
+        for face_index in map(lambda x: x[0],
                                 self.get_neumann_boundary_values()):
             m_data.append(1.)
             m_row.append(face_index)
@@ -492,28 +485,28 @@ class MFD():
 
 
     def update_m(self, m_coo, multipliers):
-        """ Updates matrix Mx using a list of constants 
+        """ Updates matrix Mx using a list of constants
         that represent values multiplied by K.
-        For this function to work, the 
-        save_update_info would have to be set 
-        to True while running build_m function. 
-        The MFD instance saves the original m_e 
-        matrices used to construct the full Mx 
+        For this function to work, the
+        save_update_info would have to be set
+        to True while running build_m function.
+        The MFD instance saves the original m_e
+        matrices used to construct the full Mx
         matrix in coo format, and used
         """
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_start = self.m_e_locations[cell_index]
             m_end = self.m_e_locations[cell_index+1]
-            
+
             new_m_e = multipliers[cell_index]*self.m_data_for_update[m_start:m_end]
-            
+
             m_coo[m_start:m_end] = new_m_e
-        
+
     def build_bottom_right(self, alpha = 0.):
-        """ Build the matrix C in the global 
-        saddle point problem (bottom right 
-        side of the matrix). Returns 
-        data, row and col data for coo matrix. 
+        """ Build the matrix C in the global
+        saddle point problem (bottom right
+        side of the matrix). Returns
+        data, row and col data for coo matrix.
         """
         bottom_right_data = array.array('f')
         bottom_right_row = array.array('i')
@@ -526,35 +519,35 @@ class MFD():
                 bottom_right_data.append(entry)
                 bottom_right_row.append(cell_index+self.mesh.get_number_of_faces())
                 bottom_right_col.append(cell_index+self.mesh.get_number_of_faces())
-                
+
         else:
             for cell_index in range(self.mesh.get_number_of_cells()):
                 entry = alpha * self.mesh.get_cell_volume(cell_index)
                 bottom_right_data.append(entry)
                 bottom_right_row.append(cell_index+self.mesh.get_number_of_faces())
                 bottom_right_col.append(cell_index+self.mesh.get_number_of_faces())
-    
+
         return [bottom_right_data, bottom_right_row, bottom_right_col]
-    
+
     def build_coupling_terms(self):
-        """ Builds matrices L and L^T that 
-        couple the fracture domains 
-        with the reservoir as well as 
-        different reservoir domains. 
-        Used information found in the 
-        boundary and forcing function 
-        pointers. 
+        """ Builds matrices L and L^T that
+        couple the fracture domains
+        with the reservoir as well as
+        different reservoir domains.
+        Used information found in the
+        boundary and forcing function
+        pointers.
         """
         coupling_data = array.array('f')
         coupling_row = array.array('i')
         coupling_col = array.array('i')
-        
+
         for cell_index in self.mesh.get_forcing_pointer_cells():
             for (face_index, orientation) in self.mesh.get_forcing_pointers_for_cell(cell_index):
                 coupling_data.append(-self.mesh.get_face_area(face_index)*orientation)
                 coupling_row.append(cell_index+self.mesh.get_number_of_faces())
                 coupling_col.append(face_index)
-        
+
         for face_index in self.mesh.get_dirichlet_pointer_faces():
             (cell_index, orientation) = self.mesh.get_dirichlet_pointer_for_face(face_index)
             coupling_data.append(self.mesh.get_face_area(face_index)*orientation)
@@ -572,22 +565,22 @@ class MFD():
             coupling_data.append(self.mesh.get_face_area(face_index)*orientation)
             coupling_row.append(face_index)
             coupling_col.append(lagrange_index)
-            
+
         for lagrange_index in self.mesh.get_all_lagrange_to_face_pointers():
             for face_index, orientation in self.mesh.get_lagrange_to_face_pointers(lagrange_index):
                 coupling_data.append(-self.mesh.get_face_area(face_index)*orientation)
                 coupling_row.append(lagrange_index)
                 coupling_col.append(face_index)
-                
+
         return [coupling_data, coupling_row, coupling_col]
-            
+
     def build_lhs(self, alpha = 0):
         """
-        Builds the entire saddle point problem, 
-        |  M    DIV^T |  
+        Builds the entire saddle point problem,
+        |  M    DIV^T |
         |             |
-        | DIV     C   | 
-        Returns the system in coo matrix format. 
+        | DIV     C   |
+        Returns the system in coo matrix format.
         """
         lhs_data = array.array('f')
         lhs_row = array.array('i')
@@ -631,8 +624,8 @@ class MFD():
 
         del coupling_info
 
-        self.lhs = sparse.coo_matrix((lhs_data, 
-                                      (lhs_row, 
+        self.lhs = sparse.coo_matrix((lhs_data,
+                                      (lhs_row,
                                        lhs_col)))
 
         del lhs_data
@@ -643,26 +636,26 @@ class MFD():
 
     def build_lhs_petsc(self, alpha = 0):
         """
-        Builds the entire saddle point problem, 
-        |  M    DIV^T |  
+        Builds the entire saddle point problem,
+        |  M    DIV^T |
         |             |
-        | DIV     C   | 
-        Returns the system in coo matrix format. 
+        | DIV     C   |
+        Returns the system in coo matrix format.
         """
         self.build_lhs()
         lhs_csr = self.lhs.tocsr()
         self.lhs = PETSc.Mat()
 
         self.lhs.create(PETSc.COMM_WORLD)
-        self.lhs.createAIJWithArrays(size=lhs_csr.shape, csr=(lhs_csr.indptr, 
-                                                               lhs_csr.indices, 
+        self.lhs.createAIJWithArrays(size=lhs_csr.shape, csr=(lhs_csr.indptr,
+                                                               lhs_csr.indices,
                                                                lhs_csr.data))
 
         self.lhs.setUp()
-        
+
         self.lhs.assemblyBegin()
         self.lhs.assemblyEnd()
-        
+
         return self.lhs
 
         m_info = self.build_m()
@@ -706,15 +699,15 @@ class MFD():
             self.lhs[coupling_info[1][index], coupling_info[2][index]] = coupling_info[0][index]
 
         del coupling_info
-        
+
 
     def build_lhs_divided(self, alpha = 0):
         """
-        Builds the saddle point problem, 
-        |  M    DIV^T |  
+        Builds the saddle point problem,
+        |  M    DIV^T |
         |             |
-        | DIV     C   | 
-        divided into the separate components. 
+        | DIV     C   |
+        divided into the separate components.
         """
         m_info = self.build_m()
 
@@ -742,41 +735,41 @@ class MFD():
             self.coupling = sparse.coo_matrix((coupling_info[0], (coupling_info[1], coupling_info[2])))
         else:
             pass
-        
+
         del coupling_info
 
     def get_number_of_dof(self):
-        """ Returns total number of degrees 
-        of freedom for the saddle-point system. 
+        """ Returns total number of degrees
+        of freedom for the saddle-point system.
         """
         return (self.mesh.get_number_of_cells()+
                 self.mesh.get_number_of_faces())
 
     def build_rhs(self):
-        """ Build RHS for the saddle-point problem. 
+        """ Build RHS for the saddle-point problem.
         """
         self.rhs = np.zeros(self.get_number_of_dof())
-        
+
         self.build_rhs_neumann()
         self.build_rhs_dirichlet()
         self.build_rhs_forcing()
         return self.rhs
 
     def add_gravity(self):
-        """ Adds gravity effects to right hand side of problem 
-        based on density, acceleration and gravity vector 
-        set in Mesh class. 
+        """ Adds gravity effects to right hand side of problem
+        based on density, acceleration and gravity vector
+        set in Mesh class.
         """
         gravity_force = np.zeros(self.mesh.get_number_of_faces())
         for face_index in range(self.mesh.get_number_of_faces()):
             gravity_force[face_index] = self.mesh.get_fluid_density()
             gravity_force[face_index] *= self.mesh.get_gravity_acceleration()
-            gravity_force[face_index] *= np.dot(self.mesh.get_gravity_vector(), 
+            gravity_force[face_index] *= np.dot(self.mesh.get_gravity_vector(),
                                                 self.mesh.get_face_normal(face_index))
 
         [m_data, m_row, m_col] = self.build_m(k_unity = True)
-        m_coo = sparse.coo_matrix((np.array(m_data), 
-                                   (np.array(m_row), 
+        m_coo = sparse.coo_matrix((np.array(m_data),
+                                   (np.array(m_row),
                                     np.array(m_col))))
 
         gravity_force = m_coo.dot(gravity_force)
@@ -788,21 +781,21 @@ class MFD():
                 self.rhs[face_index] += gravity_force[face_index]
 
     def build_rhs_forcing(self):
-        """ Construct the entries for the forcing 
-        function in the RHS. 
+        """ Construct the entries for the forcing
+        function in the RHS.
         """
         for cell_index in range(self.mesh.get_number_of_cells()):
             self.rhs[cell_index + self.mesh.get_number_of_faces()] +=\
                 self.cell_forcing_function[cell_index]
 
     def build_rhs_neumann(self):
-        """ Construct the entries for the Neumann boundaries 
-        in the RHS. 
+        """ Construct the entries for the Neumann boundaries
+        in the RHS.
         """
         for [boundary_index, boundary_value] in \
                 self.get_neumann_boundary_values():
             self.rhs[boundary_index] =  boundary_value
-            
+
     def get_cell_faces_neumann(self, cell_index):
         """ Returns all the faces in cell_index that
         are also neumann faces.
@@ -814,7 +807,7 @@ class MFD():
 
     def apply_neumann_from_function(self, boundary_marker, grad_u):
         """ Sets the Neumann boundary values for the
-        faces assigned to boundary_marker based on a 
+        faces assigned to boundary_marker based on a
         a functional representation grad_u. All
         boundary faces associated with
         boundary_marker will be set as Neumann
@@ -822,7 +815,7 @@ class MFD():
         representing a point coordinate on the
         face and returns
         the vector of the Neumann condition at that point.
-        The face centroid is used as a quadrature point. 
+        The face centroid is used as a quadrature point.
         """
         for [boundary_index, boundary_orientation] in \
                 self.mesh.get_boundary_faces_by_marker(boundary_marker):
@@ -893,7 +886,7 @@ class MFD():
 
     def apply_dirichlet_from_function(self, boundary_marker, p_function):
         """ Sets the Dirichlet boundary values for the
-        for the faces assigned to boundary_marker based on  
+        for the faces assigned to boundary_marker based on
         a functional representation p_function. All
         boundary faces associated with
         boundary_marker will be set as Dirichlet.
@@ -901,7 +894,7 @@ class MFD():
         representing a point coordinate on the
         face and returns the scalar value of
         the Dirichlet condition at that point.
-        The face centoid is used as a quadrature point. 
+        The face centoid is used as a quadrature point.
         """
         for (boundary_index, boundary_orientation) \
                 in self.mesh.get_boundary_faces_by_marker(boundary_marker):
@@ -917,7 +910,7 @@ class MFD():
         The forcing_function takes a Numpy array
         representing a point coordinate and returns
         the value of the forcing function at that point.
-        The cell centroid is used as a quadrature point. 
+        The cell centroid is used as a quadrature point.
         """
         for cell_index in range(self.mesh.get_number_of_cells()):
             forcing_value = forcing_function(self.mesh.get_cell_real_centroid(cell_index))
@@ -941,8 +934,8 @@ class MFD():
                 self.cell_forcing_function[cell_index] += exact_flux
 
     def process_internal_boundaries(self):
-        """ Conducts appropriate processing needed 
-        to correctly incorporate internal boundary conditions. 
+        """ Conducts appropriate processing needed
+        to correctly incorporate internal boundary conditions.
         """
         for (face_index, face_orientation) in self.mesh.get_internal_no_flow():
             cell_index = self.mesh.face_to_cell[boundary_index][0]
@@ -952,18 +945,18 @@ class MFD():
                 self.cell_faces_neumann[cell_index].append(boundary_index)
             else:
                 self.cell_faces_neumann[cell_index] = [boundary_index]
-        
+
     def build_rhs_dirichlet(self):
-        """ Construct the entries for the Dirichlet boundaries 
-        in the RHS. 
+        """ Construct the entries for the Dirichlet boundaries
+        in the RHS.
         """
         for [boundary_index, boundary_value] in \
                 self.get_dirichlet_boundary_values():
             self.rhs[boundary_index] = -boundary_value
 
     def get_analytical_pressure_solution(self, p_function, quadrature_method = 0):
-        """ Returns the average pressure over each cell computed 
-        by using the real centroid of the cell as quadrature. 
+        """ Returns the average pressure over each cell computed
+        by using the real centroid of the cell as quadrature.
         """
         if quadrature_method == 0:
             return np.array(map(p_function, self.mesh.get_all_cell_real_centroids()))
@@ -971,8 +964,8 @@ class MFD():
             return np.array(map(p_function, self.mesh.get_all_cell_shifted_centroids()))
 
     def get_analytical_velocity_solution(self, grad_p):
-        """ Returns the average flux over each face computed 
-        by using the real centroid of the face as quadrature. 
+        """ Returns the average flux over each face computed
+        by using the real centroid of the face as quadrature.
         """
         flux_vector = []
         for face_index in range(self.mesh.get_number_of_faces()):
@@ -984,12 +977,12 @@ class MFD():
         return flux_vector
 
     def l2_error_velocity_per_cell(self, grad_p):
-        """ Returns a vector of length number of cells 
-        with the relative error of the velocity 
-        for each cell. 
+        """ Returns a vector of length number of cells
+        with the relative error of the velocity
+        for each cell.
         """
         error_flux = np.zeros(self.mesh.get_number_of_cells())
-        
+
         for cell_index in range(self.mesh.get_number_of_cells()):
             error_flux_numerator = 0.
             error_flux_denominator = 0.
@@ -998,20 +991,20 @@ class MFD():
                 current_center = self.mesh.get_face_real_centroid(face_index)
 
                 exact_flux = np.dot(grad_p(current_center), current_normal)
-                
-                error_flux_numerator += (self.mesh.get_cell_volume(cell_index)* 
+
+                error_flux_numerator += (self.mesh.get_cell_volume(cell_index)*
                                          (self.solution[face_index]-exact_flux)**2)
 
-                error_flux_denominator += (self.mesh.get_cell_volume(cell_index)* 
+                error_flux_denominator += (self.mesh.get_cell_volume(cell_index)*
                                            (exact_flux)**2)
 
             error_flux[cell_index] = np.sqrt(error_flux_numerator/error_flux_denominator)
         return error_flux
 
     def compute_l2_error_velocity(self, grad_p, quadrature_method = 0):
-        """ Computes the L2 velocity error of the final 
-        solution relative to an analytical solution 
-        grad_p. 
+        """ Computes the L2 velocity error of the final
+        solution relative to an analytical solution
+        grad_p.
         """
         error_flux_numerator = 0.
         error_flux_denominator = 0.
@@ -1027,39 +1020,39 @@ class MFD():
                     raise("no quadrature for method" + quadrature_method)
 
                 exact_flux = np.dot(grad_p(current_center), current_normal)
-                
-                error_flux_numerator += (self.mesh.get_cell_volume(cell_index)* 
+
+                error_flux_numerator += (self.mesh.get_cell_volume(cell_index)*
                                          (self.solution[face_index]-exact_flux)**2)
 
-                error_flux_denominator += (self.mesh.get_cell_volume(cell_index)* 
+                error_flux_denominator += (self.mesh.get_cell_volume(cell_index)*
                                            (exact_flux)**2)
 
         return np.sqrt(error_flux_numerator)
 
     def compute_x_error_velocity(self, grad_p):
-        """ Compute the velocity error in the X norm 
+        """ Compute the velocity error in the X norm
         ||| grad_p^I - v_h |||_X
         """
         grad_p_i_min_v_h = np.zeros(self.mesh.get_number_of_faces()+self.mesh.get_number_of_cells())
-        
+
         for face_index in range(self.mesh.get_number_of_faces()):
-            grad_p_i_min_v_h[face_index] = np.dot(grad_p(self.mesh.get_face_real_centroid(face_index)), 
+            grad_p_i_min_v_h[face_index] = np.dot(grad_p(self.mesh.get_face_real_centroid(face_index)),
                                           self.mesh.get_face_normal(face_index))
 
             grad_p_i_min_v_h[face_index] -= self.solution[face_index]
-        
-        error = np.dot(self.lhs.dot(grad_p_i_min_v_h)[:self.mesh.get_number_of_faces()], 
+
+        error = np.dot(self.lhs.dot(grad_p_i_min_v_h)[:self.mesh.get_number_of_faces()],
                        grad_p_i_min_v_h[:self.mesh.get_number_of_faces()])
-        
+
         return np.sqrt(error)
 
     def compute_l2_error_pressure(self, p_function, quadrature_method = 0):
-        """ Computes the L2 error against a analytical solution p_function. 
-        The option quadrature_method specifies the way integral is 
+        """ Computes the L2 error against a analytical solution p_function.
+        The option quadrature_method specifies the way integral is
         approximated:
-        0 => use the real cell centroid. 
-        1 => use the shifted cell centroid. 
-        2 => use quadrature points specified in mesh. 
+        0 => use the real cell centroid.
+        1 => use the shifted cell centroid.
+        2 => use quadrature points specified in mesh.
         """
         error_numerator = 0.
         error_denominator = 0.
@@ -1077,28 +1070,28 @@ class MFD():
                 exact_pressure = 0.
 
                 for (quad_point, quad_weight) in \
-                        zip(self.mesh.get_cell_quadrature_points(cell_index), 
-                            self.mesh.get_cell_quadrature_weights(cell_index)): 
+                        zip(self.mesh.get_cell_quadrature_points(cell_index),
+                            self.mesh.get_cell_quadrature_weights(cell_index)):
                         exact_pressure += p_function(quad_point)*quad_weight
-            
+
             error_numerator += self.mesh.get_cell_volume(cell_index)* \
                 (self.solution[self.mesh.get_number_of_faces()+cell_index]- \
                      exact_pressure)**2
             error_denominator += self.mesh.get_cell_volume(cell_index)* \
                 exact_pressure**2
-            
+
         return np.sqrt(error_numerator)
 
     def solve(self, initial_guess = 0., solver = 'spsolve'):
-        """ Solves the full saddle points system after construction 
+        """ Solves the full saddle points system after construction
         of the LHS and RHS of the problem. Returns the full
-        solution vector. 
+        solution vector.
         """
         self.solution = np.zeros(self.mesh.get_number_of_faces()+self.mesh.get_number_of_cells())
         if solver == 'spsolve':
             self.lhs = self.lhs.tocsc()
             self.solution = linalg.spsolve(self.lhs, self.rhs)
-	
+
         elif solver == 'gmres':
             self.lhs = self.lhs.tocsc()
             [self.solution, converged] = linalg.gmres(self.lhs, self.rhs, tol=1.e-8)
@@ -1109,8 +1102,8 @@ class MFD():
 
 
     def cg_inner(self, apply_lhs, b, tol = 1.e-8):
-        """ Local implementation of CG algorithm. 
-        Code from example in wikipedia page on CG methods. 
+        """ Local implementation of CG algorithm.
+        Code from example in wikipedia page on CG methods.
         """
         current_x = np.zeros(len(b))
         r = b-apply_lhs(current_x)
@@ -1129,7 +1122,7 @@ class MFD():
                 return current_x
 
             alpha = rsold/p.dot(Ap)
-            
+
             current_x += alpha*p
             r-=alpha*Ap
             rsnew = r.dot(r)
@@ -1137,14 +1130,14 @@ class MFD():
                 return current_x
             p=r+rsnew/rsold*p
             rsold = rsnew
-            
+
         print "\t\t went over max iterations", rsnew
         return current_x
 
 
     def cg(self, apply_lhs, b, tol = 1.e-10):
-        """ Local implementation of CG algorithm. 
-        Code from example in wikipedia page on CG methods. 
+        """ Local implementation of CG algorithm.
+        Code from example in wikipedia page on CG methods.
         """
         current_x = np.zeros(len(b))
         r = b-apply_lhs(current_x)
@@ -1163,7 +1156,7 @@ class MFD():
                 return current_x
 
             alpha = rsold/p.dot(Ap)
-            
+
             current_x += alpha*p
             r-=alpha*Ap
             rsnew = r.dot(r)
@@ -1171,107 +1164,107 @@ class MFD():
                 return current_x
             p=r+rsnew/rsold*p
             rsold = rsnew
-            
+
         print "went over max iterations", rsnew
         return current_x
-    
+
     def solve_divided(self):
-        """ Solve the divided system of equations using 
-        a Schur compliment method. 
+        """ Solve the divided system of equations using
+        a Schur compliment method.
         """
         f1 = self.rhs[:self.mesh.get_number_of_faces()]
         f2 = self.rhs[self.mesh.get_number_of_faces():]
 
         current_p = np.zeros(self.mesh.get_number_of_cells())
 
-        
+
         def apply_lhs(x):
-            return -self.div.dot(self.cg_inner(self.m.dot, 
-                                         self.div_t.dot(x), 
+            return -self.div.dot(self.cg_inner(self.m.dot,
+                                         self.div_t.dot(x),
                                          tol=1.e-16))
 
         f1_tilde = linalg.cg(self.m, f1)[0]
-        
+
         cg_rhs = f2-self.div.dot(f1_tilde)
-        
+
         current_p = self.cg(apply_lhs, cg_rhs)
         print "solver residual=>", np.linalg.norm(apply_lhs(current_p)-cg_rhs)
-        
-        current_v = -self.cg(self.m.dot, 
+
+        current_v = -self.cg(self.m.dot,
                                self.div_t.dot(current_p),
-                               tol=1.e-10)+f1_tilde 
-                           
+                               tol=1.e-10)+f1_tilde
+
         self.solution = np.concatenate((current_v, current_p))
 
     def solve_petsc(self):
-        """ Solving using PETSc, this requires the 
-        use of build_lhs_petsc. 
+        """ Solving using PETSc, this requires the
+        use of build_lhs_petsc.
         """
         ksp = PETSc.KSP()
         ksp.create(PETSc.COMM_WORLD)
-            
+
         ksp.setType('gmres')
         ksp.getPC().setType('ilu')
-        
+
         x, b = self.lhs.getVecs()
-        
+
         x.set(0)
         b.setArray(self.rhs)
-        
+
         ksp.setOperators(self.lhs)
         ksp.setFromOptions()
         print "solving..."
         ksp.solve(b, x)
         self.solution = x.getArray()
-    
+
     def get_pressure_solution(self):
-        """ Returns the pressure solution for the problem. The 
-        pressures are indexed in the same order as the 
-        corresponding cell indices. 
+        """ Returns the pressure solution for the problem. The
+        pressures are indexed in the same order as the
+        corresponding cell indices.
         """
         return self.solution[self.mesh.get_number_of_faces():]
 
     def get_velocity_solution_by_index(self, face_index):
         """
-        Returns the flux for face index by face_index. 
+        Returns the flux for face index by face_index.
         """
         return self.solution[face_index]
 
     def get_velocity_solution(self):
         """
-        Returns the velocity solution for the problem. The 
-        fluxes are indexed in the same order as the 
-        corresponding face indices. 
+        Returns the velocity solution for the problem. The
+        fluxes are indexed in the same order as the
+        corresponding face indices.
         """
         return self.solution[:self.mesh.get_number_of_faces()]
 
     def lhs_rank(self):
         """
-        Return the rank of the saddle-point problem 
-        using the SVD. 
+        Return the rank of the saddle-point problem
+        using the SVD.
         """
         lhs = self.lhs.todense()
         return len(filter(lambda x:abs(x)>1.e-9,np.linalg.svd(lhs)[1]))
 
     def print_lhs_to_file(self, filename):
         """
-        Output entire LHS to file (dense format). 
+        Output entire LHS to file (dense format).
         """
         matout = open( filename + ".dat", 'w')
-        
+
         lhs = self.lhs.tocsr()
 
         (height, width) = lhs.get_shape()
         for i in range(height):
             for j in range(width):
-                print >> matout, lhs[i, j], ",", 
+                print >> matout, lhs[i, j], ",",
             print >> matout
 
-        matout.close()        
-    
+        matout.close()
+
     def print_lhs_to_ppm(self, filename):
         """
-        Output LHS to ppm image file type. 
+        Output LHS to ppm image file type.
         """
         matout = open( filename + ".ppm", 'w')
 
@@ -1285,7 +1278,7 @@ class MFD():
                 if abs(self.lhs[i,j]) > 1.e-10:
                     print >> matout, 1,
                 else:
-                    print >> matout, 0, 
+                    print >> matout, 0,
             print >> matout
 
-        matout.close()        
+        matout.close()
