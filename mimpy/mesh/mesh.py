@@ -5,7 +5,7 @@ import os
 import array
 import math
 from itertools import islice
-import mesh_cython
+import mimpy.mesh.mesh_cython
 
 try:
     import matplotlib
@@ -55,7 +55,7 @@ class variable_array():
     def __del__(self):
         del self.pointers
         del self.data
-        
+
     def set_pointer_capacity(self, capacity):
         """ Sets the maximum number of entries in
         the data structure.
@@ -224,7 +224,7 @@ class Mesh:
         # List of cells. Each cell is made up of a list
         # of faces.
         self.cells = variable_array(dtype=np.dtype('i'))
-        
+
         # For each cell, a list of bools indicating
         # whether the normal in self.face_normals
         # is in or out of the cell.
@@ -261,12 +261,12 @@ class Mesh:
         # Allows Neumann boundaries to be set implicitly
         # based on fluxes at other faces.
         self.neumann_boundary_pointers = {}
-        
-        # Faces designated as no flow, meant for 
-        # interior boundary conditions not to be 
-        # set by user. 
+
+        # Faces designated as no flow, meant for
+        # interior boundary conditions not to be
+        # set by user.
         self.internal_no_flow = []
-        
+
         # dict: {face_index: (lagrange_index, orientation)}
         # Allows dirichlet boundaries to point to
         # lagrange multipliers for domain decomposition.
@@ -291,6 +291,7 @@ class Mesh:
         self.is_using_alpha_list = False
 
         self.gravity_vector = None
+        self.gravity_acceleration = 9.8
 
     def add_point(self, new_point):
         """ Takes a Numpy array
@@ -479,7 +480,7 @@ class Mesh:
         raise NotImplementedError
 
     def load_mesh(self, file_name):
-        """ Loads mesh from mms file. 
+        """ Loads mesh from mms file.
         """
         input_file = open(file_name)
         version = input_file.next()
@@ -494,13 +495,13 @@ class Mesh:
             if line_split[0] == "POINTS":
                 number_of_points = int(line_split[1])
                 self.number_of_points = number_of_points
-                self.points = np.loadtxt(islice(input_file,number_of_points))
+                self.points = np.loadtxt(islice(input_file, number_of_points))
 
             elif line_split[0] == "FACES":
                 number_of_faces = int(line_split[1])
                 self.faces.number_of_entries = number_of_faces
                 current_line = input_file.next()
-                n_data_entries=  int(current_line)
+                n_data_entries = int(current_line)
                 self.faces.data = np.loadtxt(islice(input_file, n_data_entries),
                                              dtype=np.dtype('i'))
                 current_line = input_file.next()
@@ -510,26 +511,30 @@ class Mesh:
 
             elif line_split[0] == "FACE_NORMALS":
                 number_of_faces = int(line_split[1])
-                self.face_normals = np.loadtxt(islice(input_file, number_of_faces))
+                self.face_normals = np.loadtxt(islice(input_file,
+                                                      number_of_faces))
 
             elif line_split[0] == "FACE_AREAS":
                 number_of_faces = int(line_split[1])
-                self.face_areas = np.loadtxt(islice(input_file, number_of_faces))
+                self.face_areas = np.loadtxt(islice(input_file,
+                                                    number_of_faces))
 
             elif line_split[0] == "FACE_REAL_CENTROIDS":
                 number_of_faces = int(line_split[1])
-                self.face_real_centroids = np.loadtxt(islice(input_file, number_of_faces))
+                self.face_real_centroids = np.loadtxt(islice(input_file,
+                                                             number_of_faces))
 
             elif line_split[0] == "FACE_SHIFTED_CENTROIDS":
                 self.has_face_shifted_centroid = True
                 number_of_faces = int(line_split[1])
-                self.face_shifted_centroids = np.loadtxt(islice(input_file, number_of_faces))
+                self.face_shifted_centroids = np.loadtxt(
+                    islice(input_file, number_of_faces))
 
             elif line_split[0] == "CELLS":
                 number_of_cells = int(line_split[1])
                 self.cells.number_of_entries = number_of_cells
                 current_line = input_file.next()
-                n_data_entries=  int(current_line)
+                n_data_entries = int(current_line)
                 self.cells.data = np.loadtxt(islice(input_file, n_data_entries),
                                              dtype=np.dtype('i'))
 
@@ -541,14 +546,14 @@ class Mesh:
 
             elif line_split[0] == "CELL_NORMAL_ORIENTATION":
                 number_of_cells = int(line_split[1])
-                self.cell_normal_orientation.number_of_entries =\
+                self.cell_normal_orientation.number_of_entries = \
                     number_of_cells
                 current_line = input_file.next()
                 n_data_entries = int(current_line)
-                self.cell_normal_orientation.data =\
+                self.cell_normal_orientation.data = \
                     np.loadtxt(islice(input_file, n_data_entries),
                                dtype=np.dtype('i'))
-                    
+
                 current_line = input_file.next()
                 n_pointers = int(current_line)
                 self.cell_normal_orientation.pointers = \
@@ -557,23 +562,26 @@ class Mesh:
 
             elif line_split[0] == "CELL_VOLUMES":
                 number_of_cells = int(line_split[1])
-                self.cell_volume = np.loadtxt(islice(input_file, number_of_cells))
+                self.cell_volume = np.loadtxt(islice(input_file,
+                                                     number_of_cells))
 
             elif line_split[0] == "CELL_REAL_CENTROIDS":
                 number_of_cells = int(line_split[1])
-                self.cell_real_centroid = np.loadtxt(islice(input_file, number_of_cells))
-                
+                self.cell_real_centroid = np.loadtxt(islice(input_file,
+                                                            number_of_cells))
+
             elif line_split[0] == "CELL_SHIFTED_CENTROIDS":
                 number_of_cells = int(line_split[1])
-                self.cell_shifted_centroids = np.loadtxt(islice(input_file, number_of_cells))
-                
+                self.cell_shifted_centroid = np.loadtxt(
+                    islice(input_file, number_of_cells))
+
             elif line_split[0] == "CELL_K":
                 number_of_cells = int(line_split[1])
                 self.cell_k = np.loadtxt(islice(input_file, number_of_cells))
-                
+
             elif line_split[0] == "BOUNDARY_MARKERS":
                 number_of_boundary_markers = int(line_split[1])
-                
+
                 for line_index in range(number_of_boundary_markers):
                     current_line = input_file.next()
                     line_split = current_line.split()
@@ -581,83 +589,88 @@ class Mesh:
                     boundary_marker = entries.pop(0)
                     self.add_boundary_marker(boundary_marker, "FROMFILE")
                     while entries:
-                        self.add_boundary_face(boundary_marker, 
-                                               entries.pop(0), 
+                        self.add_boundary_face(boundary_marker,
+                                               entries.pop(0),
                                                entries.pop(0))
-                    
+
 
     def save_mesh(self, file_name):
-        """ Saves mesh file in mms format. 
+        """ Saves mesh file in mms format.
         """
         output_file = open(file_name+".mms", 'w')
-        print >>output_file, "0.1"
+        print >> output_file, "0.1"
         print >> output_file, "date"
         print >> output_file, "name"
         print >> output_file, "comments"
-        print >>output_file, "#"
-        print >>output_file, "#"
-        
-        print >>output_file, "POINTS", 
-        print >>output_file, len(self.points)
+        print >> output_file, "#"
+        print >> output_file, "#"
+
+        print >> output_file, "POINTS",
+        print >> output_file, len(self.points)
         np.savetxt(output_file, self.points)
-        
-        print >>output_file, "FACES", self.get_number_of_faces()
-        print >>output_file, len(self.faces.data)
+
+        print >> output_file, "FACES", self.get_number_of_faces()
+        print >> output_file, len(self.faces.data)
         np.savetxt(output_file, self.faces.data,  fmt='%i')
-        print >>output_file, len(self.faces.pointers)
+        print >> output_file, len(self.faces.pointers)
         np.savetxt(output_file, self.faces.pointers, fmt="%i %i")
-            
-        print >>output_file, "FACE_NORMALS", self.get_number_of_faces()
+
+        print >> output_file, "FACE_NORMALS", self.get_number_of_faces()
         np.savetxt(output_file, self.face_normals)
 
-        print >>output_file, "FACE_AREAS", self.get_number_of_faces()
+        print >> output_file, "FACE_AREAS", self.get_number_of_faces()
         for face_index in range(self.get_number_of_faces()):
             print >>output_file, self.get_face_area(face_index)
 
-        print >>output_file, "FACE_REAL_CENTROIDS", self.get_number_of_faces()
+        print >> output_file, "FACE_REAL_CENTROIDS", self.get_number_of_faces()
         for face_index in range(self.get_number_of_faces()):
             current_centroid = self.get_face_real_centroid(face_index)
-            print >>output_file, current_centroid[0], 
-            print >>output_file, current_centroid[1], 
-            print >>output_file, current_centroid[2] 
+            print >> output_file, current_centroid[0],
+            print >> output_file, current_centroid[1],
+            print >> output_file, current_centroid[2]
 
         if self.has_face_shifted_centroid:
-            print >>output_file, "FACE_SHIFTED_CENTROIDS", self.get_number_of_faces()
+            print >> output_file, "FACE_SHIFTED_CENTROIDS",
+            print >> output_file, self.get_number_of_faces()
             for face_index in range(self.get_number_of_faces()):
-                print >>output_file, self.get_face_real_centroid(face_index)
+                print >> output_file, self.get_face_real_centroid(face_index)
 
-        print >>output_file, "CELLS", self.get_number_of_cells()
-        print >>output_file, len(self.cells.data)
+        print >> output_file, "CELLS", self.get_number_of_cells()
+        print >> output_file, len(self.cells.data)
         np.savetxt(output_file, self.cells.data,  fmt='%i')
-        print >>output_file, len(self.cells.pointers)
+        print >> output_file, len(self.cells.pointers)
         np.savetxt(output_file, self.cells.pointers, fmt="%i %i")
 
-        print >>output_file, "CELL_NORMAL_ORIENTATION", self.get_number_of_cells()
-        print >>output_file, len(self.cell_normal_orientation.data)
-        np.savetxt(output_file, self.cell_normal_orientation.data,  fmt='%i')
-        print >>output_file, len(self.cell_normal_orientation.pointers)
-        np.savetxt(output_file, self.cell_normal_orientation.pointers, fmt="%i %i")
-        
-        print >>output_file, "CELL_VOLUMES", self.get_number_of_cells()
+        print >> output_file, "CELL_NORMAL_ORIENTATION",
+        print >> output_file, self.get_number_of_cells()
+        print >> output_file, len(self.cell_normal_orientation.data)
+        np.savetxt(output_file, self.cell_normal_orientation.data, fmt='%i')
+        print >> output_file, len(self.cell_normal_orientation.pointers)
+        np.savetxt(output_file,
+                   self.cell_normal_orientation.pointers,
+                   fmt="%i %i")
+
+        print >> output_file, "CELL_VOLUMES", self.get_number_of_cells()
         np.savetxt(output_file, self.cell_volume)
 
-        print >>output_file, "CELL_REAL_CENTROIDS", self.get_number_of_cells()
+        print >> output_file, "CELL_REAL_CENTROIDS", self.get_number_of_cells()
         np.savetxt(output_file, self.cell_real_centroid)
 
         if self.has_cell_shifted_centroid:
-            print >>output_file, "CELL_SHIFTED_CENTROIDS", self.get_number_of_cells()
-            np.savetxt(ouptut_file, self.cell_shifted_centroids)
+            print >> output_file, "CELL_SHIFTED_CENTROIDS",
+            print >> output_file, self.get_number_of_cells()
+            np.savetxt(ouptut_file, self.cell_shifted_centroid)
 
-        print >>output_file, "CELL_K", self.get_number_of_cells()
+        print >> output_file, "CELL_K", self.get_number_of_cells()
         np.savetxt(output_file, self.cell_k)
 
-        print >>output_file, "BOUNDARY_MARKERS", len(self.boundary_markers)
+        print >> output_file, "BOUNDARY_MARKERS", len(self.boundary_markers)
         for marker_index in self.boundary_markers:
-            print >>output_file, marker_index, 
+            print >> output_file, marker_index,
             for (face_index, face_orientation) in\
                     self.get_boundary_faces_by_marker(marker_index):
-                print >>output_file, face_index, face_orientation, 
-            print >>output_file, "\n", 
+                print >> output_file, face_index, face_orientation,
+            print >> output_file, "\n",
 
         output_file.close()
 
@@ -760,26 +773,6 @@ class Mesh:
         """ Returns list of all cell centroids.
         """
         return self.cell_shifted_centroid[:self.get_number_of_cells()]
-
-    def initialize_cell_shifted_centroid(self, number_of_cells = None):
-        """ Informs Mesh that the shifted cell centroid data structure
-        will be utilized. This is necessary since shifted cell
-        centroids are an optional data structure.
-        If already known, the number of cells can be initialized
-        using number_of_cells. The add_cell method
-        will add an extra entry for the shifted centroids.
-        """
-        raise NotImplementedError
-
-    def initialize_face_shifted_centroid(self, number_of_faces = None):
-        """ Informs Mesh that the shifted face centroid data structure
-        will be utilized. This is necessary since shifted face
-        centroids are an optional data structure.
-        If already known, the number of face can be initialized
-        using number_of_faces. The add_face method
-        will add an extra entry for the shifted centroids.
-        """
-        raise NotImplementedError
 
     def set_cell_shifted_centroid(self, cell_index, centroid):
         """ Sets the shifted centroid. Since the shifted centroid
@@ -1053,13 +1046,13 @@ class Mesh:
             self.get_face_area(face_index)*face_orientation
 
     def add_internal_no_flow(self, face_index, face_orientation):
-        """ Sets face as interior no flow boundary condition. 
+        """ Sets face as interior no flow boundary condition.
         """
         self.internal_no_flow.append([face_index, face_orientation])
 
     def get_internal_no_flow(self):
-        """ Returns list of faces set as 
-        internal no flow condition. 
+        """ Returns list of faces set as
+        internal no flow condition.
         """
         return self.internal_no_flow
 
@@ -1159,13 +1152,6 @@ class Mesh:
         values set by pointing to a cell.
         """
         return self.neumann_boundary_pointers.keys()
-
-    def get_neumann_pointer_for_face(self, face_index):
-        """ Returns the face_index  for
-        which the Neumann boundary will be set
-        implicitly.
-        """
-        return self.neumann_boundary_pointers[face_index]
 
     def set_forcing_pointer(self,
                             cell_index,
@@ -1384,141 +1370,30 @@ class Mesh:
         return abs(area)
 
     def find_volume_centroid_all(self):
-        """ Computes the cell centroids and volumes 
-        for all the cells in the mesh.  
+        """ Computes the cell centroids and volumes
+        for all the cells in the mesh.
         """
-        ## This is based on the code and 
-        ## paper by Brian Mirtich. 
+        ## This is based on the code and
+        ## paper by Brian Mirtich.
         zero3 = np.zeros(3)
         for cell_index in range(self.get_number_of_cells()):
             self.set_cell_volume(cell_index, 0.)
             self.set_cell_real_centroid(cell_index, zero3)
 
-        mesh_cython.all_cell_volumes_centroids(self.cells.pointers, 
-                                               len(self.cells), 
-                                               self.cells.data, 
-                                               self.cell_normal_orientation.data,
-                                               self.points, 
-                                               self.cell_volume, 
-                                               self.cell_real_centroid,
-                                               self.faces.pointers, 
-                                               len(self.faces), 
-                                               self.faces.data, 
-                                               self.face_normals, 
-                                               self.face_to_cell)
-        return 
-        zero3 = np.zeros(3)
-        for cell_index in range(self.get_number_of_cells()):
-            self.set_cell_volume(cell_index, 0.)
-            self.set_cell_real_centroid(cell_index, zero3)
+        mesh_cython.all_cell_volumes_centroids(
+            self.cells.pointers,
+            len(self.cells),
+            self.cells.data,
+            self.cell_normal_orientation.data,
+            self.points,
+            self.cell_volume,
+            self.cell_real_centroid,
+            self.faces.pointers,
+            len(self.faces),
+            self.faces.data,
+            self.face_normals,
+            self.face_to_cell)
 
-        for face_index in range(self.get_number_of_faces()):
-            current_normal = self.get_face_normal(face_index)
-            if (abs(current_normal[0]) > abs(current_normal[1])) and \
-                    (abs(current_normal[0]) > abs(current_normal[2])):
-                C = 0
-            elif abs(current_normal[1])>abs(current_normal[2]):
-                C = 1
-            else:
-                C = 2
-
-            A = (C+1)%3
-            B = (A+1)%3
-        
-            P1 = 0.
-            Pa = 0.
-            Pb = 0.
-            Paa = 0.
-            Pab = 0.
-            Pbb = 0.
-
-            current_face = self.get_face(face_index)
-            for local_index in range(len(current_face)):
-                current_point = self.get_point(current_face[local_index])
-                next_point = self.get_point(
-                    current_face[(local_index+1)%len(current_face)])
-                
-                a0 = current_point[A]
-                b0 = current_point[B]
-                
-                a1 = next_point[A]
-                b1 = next_point[B]
-
-                da = a1-a0
-                db = b1-b0
-                a0_2 = a0*a0
-                a0_3 = a0_2*a0
-                b0_2 = b0*b0
-                b0_3 = b0_2*b0
-                a1_2 = a1*a1
-                C1 = a1 + a0
-                Ca = a1*C1 + a0_2
-                Caa = a1*Ca + a0_3
-                Cb = b1*(b1 + b0) + b0_2
-                Cbb = b1*Cb + b0_3
-                Cab = 3.*a1_2 + 2.*a1*a0 + a0_2
-                Kab = a1_2 + 2*a1*a0 + 3*a0_2
-    
-                P1 += db*C1
-                Pa += db*Ca
-                Paa += db*Caa
-                Pb += da*Cb
-                Pbb += da*Cbb
-                Pab += db*(b1*Cab + b0*Kab)
-
-            P1 /= 2.0
-            Pa /= 6.0
-            Paa /= 12.0
-            Pb /= -6.0
-            Pbb /= -12.0
-            Pab /= 24.0
-            
-            first_point = self.get_point(self.get_face(face_index)[0])
-
-            w = -current_normal.dot(first_point)
-            k1 = 1./current_normal[C]
-            k2 = k1*k1
-            k3 = k2*k1
-
-            Fa = k1*Pa
-            Fb = k1*Pb
-            Fc = -k2*(current_normal[A]*Pa + current_normal[B]*Pb + w*P1)
-
-            Faa = k1*Paa
-            Fbb = k1*Pbb
-            Fcc = k3*((current_normal[A]*current_normal[A])*Paa+
-                      2*current_normal[A]*current_normal[B]*Pab+
-                      (current_normal[B]*current_normal[B])*Pbb+
-                      w*(2.*(current_normal[A]*Pa+current_normal[B]*Pb)+w*P1))
-            
-            for cell_index in self.face_to_cell[face_index]:
-                if cell_index >= 0:
-                    local_index = list(self.get_cell(cell_index)).index(face_index)
-                    orientation = self.get_cell_normal_orientation(cell_index)[local_index]
-
-                    current_volume = self.get_cell_volume(cell_index)
-                    if A == 0:
-                        current_volume += current_normal[0]*Fa*orientation
-                    elif B == 0:
-                        current_volume += current_normal[0]*Fb*orientation
-                    else:
-                        current_volume += current_normal[0]*Fc*orientation
-
-                    self.set_cell_volume(cell_index, current_volume)
-
-                    current_centroid = self.get_cell_real_centroid(cell_index)
-
-                    current_centroid[A] += current_normal[A]*Faa*orientation
-                    current_centroid[B] += current_normal[B]*Fbb*orientation
-                    current_centroid[C] += current_normal[C]*Fcc*orientation
-
-                    self.set_cell_real_centroid(cell_index, current_centroid)
-                
-        for cell_index in range(self.get_number_of_cells()):
-            current_centroid = self.get_cell_real_centroid(cell_index)
-            volume = self.get_cell_volume(cell_index)
-            self.set_cell_real_centroid(cell_index, current_centroid/(volume*2.))
-            
     def find_volume_centroid(self, cell_index):
         """ Returns the volume and centroid for a 3D cell_index.
         Based on code and paper by Brian Mirtich.
@@ -1694,7 +1569,7 @@ class Mesh:
         for index in range(self.get_number_of_faces()):
             print >> output, "1"
         print >> output, " "
-        print >> output, "POINT_DATA", number_of_faces
+        print >> output, "POINT_DATA", self.get_number_of_faces()
         print >> output, " "
 
         for data_index in range(len(vector_labels)):
@@ -1819,7 +1694,7 @@ class Mesh:
         total_polygon_points = 0
         for cell_index in range(self.get_number_of_cells()):
             for face_index in self.get_cell(cell_index):
-                total_polygon_points+=\
+                total_polygon_points += \
                     self.get_number_of_face_points(face_index)+1
             total_polygon_points += 2
 
@@ -1855,19 +1730,6 @@ class Mesh:
 
         output.close()
 
-    def output_scalar_gnuplot(self, cell_values, filename):
-        """ Outputs scalar values associated with mesh to
-        gnuplot. Only works for 2D meshes.
-        """
-        if self.mesh.dim == 2:
-            gnuout  = open(filename+'.dat','w')
-            for cell_index in range(self.mesh.get_number_of_cells()):
-                cell_center =  self.mesh.get_cell_real_centroid(cell_index)
-                print >> gnuout, cell_center[0], cell_center[1],
-                print >> gnuout, cell_values[cell_index]
-        else:
-            print "no 3D gnuplot output"
-
     def find_cell_near_point(self, point):
         """ Returns cell whose centroid is closest
         to a given point.
@@ -1882,75 +1744,6 @@ class Mesh:
                 min_distance = new_distance
 
         return closest_cell
-
-    def nonplanar_normal(self, face):
-        for i in range(1):
-            v1 = self.get_point(face[i+1]) - self.get_point(face[i])
-            v2 = self.get_point(face[i]) - self.get_point(face[i-1])
-            normal = np.cross(v2, v1)
-
-        return normal/np.linalg.norm(normal)
-
-    def nonplanar_face_centroid(self, face):
-        p1 = self.get_point(face[0])
-        p2 = self.get_point(face[1])
-        p3 = self.get_point(face[2])
-        p4 = self.get_point(face[3])
-
-        center_point = .25 * (p1 + p2 + p3 + p4)
-
-        return center_point
-
-    def nonplanar_cell_centroid(self, cell):
-        centroid = np.zeros(3)
-        count = 0.
-        for face in cell:
-            for point in self.get_face(face):
-                count += 1.
-                centroid += self.get_point(point)
-
-        centroid = centroid/count
-        return centroid
-
-    def nonplanar_area(self, face):
-        area = 0.
-
-        p1 = self.points[face[0]]
-        p2 = self.points[face[1]]
-        p3 = self.points[face[2]]
-        p4 = self.points[face[3]]
-
-        centerPoint = .25 * (p1 + p2 + p3 + p4)
-
-        a = np.linalg.norm(p1-p2)
-        b = np.linalg.norm(p2-centerPoint)
-        c = np.linalg.norm(centerPoint - p1)
-        s = (a + b + c)/2.
-
-        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
-
-        a = np.linalg.norm(p2-p3)
-        b = np.linalg.norm(p3-centerPoint)
-        c = np.linalg.norm(centerPoint - p2)
-        s = (a + b + c)/2.
-
-        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
-
-        a = np.linalg.norm(p3-p4)
-        b = np.linalg.norm(p4-centerPoint)
-        c = np.linalg.norm(centerPoint - p3)
-        s = (a + b + c)/2.
-
-        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
-
-        a = np.linalg.norm(p4-p1)
-        b = np.linalg.norm(p1-centerPoint)
-        c = np.linalg.norm(centerPoint - p4)
-        s = (a + b + c)/2.
-
-        area += math.sqrt(s * (s-a) * (s - b) * (s - c))
-
-        return area
 
     def subdivide_by_domain(self, cells):
         """ Takes a collection of cells, and
@@ -1998,10 +1791,6 @@ class Mesh:
 
             self.add_boundary_face(100, new_face_index, 1)
             self.add_boundary_face(100, face_index, 1)
-
-            current_centroid = self.get_face_real_centroid(new_face_index)
-
-            current_area = self.get_face_area(new_face_index)
 
             faces_list = list(self.get_cell(other_cell))
             local_face_index_in_other = faces_list.index(face_index)
@@ -2155,7 +1944,7 @@ class Mesh:
                 if ((current_face, 'TOP')) not in done_faces:
                     subface_connections.append(group[max_top_connection_index]+['TOP'])
                     done_faces.append((current_face, 'TOP')) 
-                    if group[max_top_connection_index][6]==0:
+                    if group[max_top_connection_index][6] == 0:
                         done_faces.append((face2_top, 'TOP')) 
                     else:
                         done_faces.append((face2_top, 'BOT')) 
@@ -2163,7 +1952,7 @@ class Mesh:
                 if ((current_face, 'BOT')) not in done_faces:
                     subface_connections.append(group[max_bot_connection_index]+['BOT'])        
                     done_faces.append((current_face, 'BOT'))
-                    if group[max_bot_connection_index][6]==0:
+                    if group[max_bot_connection_index][6] == 0:
                         done_faces.append((face2_bot, 'BOT'))
                     else:
                         done_faces.append((face2_bot, 'TOP')) 
@@ -2265,7 +2054,6 @@ class Mesh:
         top_points = []
         bot_points = []
         mid_points = []
-        temp_out = open("tempfaces", 'w')
         for face in range(len(faces)):
             face_to_walls[face] = []
             top_points.append([-1]*len(self.get_face(faces[face])))
@@ -2283,9 +2071,9 @@ class Mesh:
             norm2 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
                 if orientation == 0: 
-                    norm2+= self.get_face_normal(faces[local_face_index])
+                    norm2 += self.get_face_normal(faces[local_face_index])
                 else:
-                    norm2-= self.get_face_normal(faces[local_face_index])
+                    norm2 -= self.get_face_normal(faces[local_face_index])
             
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
@@ -2308,8 +2096,8 @@ class Mesh:
                                             point_4_index,])
             
             (area, centroid) =  self.find_face_centroid(new_face_index)
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(self.get_face(new_face_index)))
+            current_face_normal = self.find_face_normal(new_face_index)
+            self.set_face_normal(new_face_index, current_face_normal)
 
             self.set_face_real_centroid(new_face_index, centroid)
 
@@ -2362,9 +2150,9 @@ class Mesh:
             norm2 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
                 if orientation == 0: 
-                    norm2+= self.get_face_normal(faces[local_face_index])
+                    norm2 += self.get_face_normal(faces[local_face_index])
                 else:
-                    norm2-= self.get_face_normal(faces[local_face_index])
+                    norm2 -= self.get_face_normal(faces[local_face_index])
             
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
@@ -2390,14 +2178,14 @@ class Mesh:
             point_3_index = self.add_point(point3)
             point_4_index = self.add_point(point4)
                 
-            new_face_index =self.add_face([point_1_index, 
-                                           point_2_index, 
-                                           point_3_index, 
-                                           point_4_index,])
+            new_face_index = self.add_face([point_1_index, 
+                                            point_2_index, 
+                                            point_3_index, 
+                                            point_4_index,])
 
             (area, centroid) =  self.find_face_centroid(new_face_index)
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(self.get_face(new_face_index)))
+            current_face_normal = self.find_face_normal(new_face_index)
+            self.set_face_normal(new_face_index, current_face_normal)
             self.set_face_real_centroid(new_face_index, centroid)
             
             if self.has_face_shifted_centroid:
@@ -2521,12 +2309,11 @@ class Mesh:
                 if mid_points[local_face_index][point1] != -1:
                     new_face_points.append(mid_points[local_face_index][point1])
 
-                new_face_index =self.add_face(new_face_points)
-                normal = self.nonplanar_normal(new_face_points)
-                self.set_face_normal(new_face_index, normal)
+                new_face_index = self.add_face(new_face_points)
+                current_face_normal = self.find_face_normal(new_face_index)
+                self.set_face_normal(new_face_index, current_face_normal)
                                      
                 (area, centroid) =  self.find_face_centroid(new_face_index)
-                centroid = self.nonplanar_face_centroid(new_face_points)
                 self.set_face_real_centroid(new_face_index, centroid)
                                             
                 if self.has_face_shifted_centroid:
@@ -2552,8 +2339,8 @@ class Mesh:
             self.add_internal_no_flow(new_face_index, 1)
 
             (area, centroid) =  self.find_face_centroid(new_face_index)
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(new_face_points))
+            current_face_normal = self.find_face_normal(new_face_index)
+            self.set_face_normal(new_face_index, current_face_normal)
             self.set_face_real_centroid(new_face_index, centroid)
 
             if self.has_face_shifted_centroid:
@@ -2570,9 +2357,8 @@ class Mesh:
             self.add_internal_no_flow(new_face_index, 1)
 
             (area, centroid) =  self.find_face_centroid(new_face_index)
-
-            self.set_face_normal(new_face_index, 
-                                 self.nonplanar_normal(new_face_points))
+            current_face_normal = self.find_face_normal(new_face_index)
+            self.set_face_normal(new_face_index, current_face_normal)
 
             self.set_face_real_centroid(new_face_index, centroid)
 
