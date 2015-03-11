@@ -1217,7 +1217,7 @@ class Mesh:
         """ Returns list containing
         all cell_domain tags.
         """
-        return self.cell_domain
+        return self.cell_domain[:self.get_number_of_cells()]
 
     def get_cells_in_domain(self, domain):
         """ Returns all cells with domain tag.
