@@ -5,7 +5,9 @@ mimpy
 Mimpy is a Python based library for solving elliptic PDE using the Mimetic Finite 
 Difference Method. Most numerical codes are limited to tetrahedral or hexahedral 
 meshes. The advantage of mimpy is the ability to naturally solve over a very general set of 
-of three dimensional polyhedral meshes.
+of three dimensional polyhedral meshes without the need for dual grids or local tetrahedralizations.  
+
+.. image:: three_solutions.png
 
 The best way to get the code right now is to clone the git repo and run the setup utility:
 
