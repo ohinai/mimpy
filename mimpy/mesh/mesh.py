@@ -73,7 +73,7 @@ class variable_array():
         else:
             self.data.resize((self.data_capacity, self.dim), refcheck=False)
 
-    def new_size(self, size, minimum = 10):
+    def new_size(self, size, minimum = 1000):
         """ Calculates the new size of the array
         given the old in case there is a need
         for extending the array.
@@ -133,12 +133,12 @@ class variable_array():
         return self.number_of_entries
 
     def set_entry(self, index, data):
-        """ Changes existing entry to new data. If new
+        """ Changes existing entry to new data.
         The new entry can be larger than old, but might cause
         wasted memory.
         """
         (pos, length) = self.pointers[index]
-        if length <= len(data):
+        if length >= len(data):
             self.data[pos:pos+len(data)] = data
             self.pointers[index, 1] = len(data)
         else:
@@ -149,12 +149,14 @@ class variable_array():
                 if self.dim == 1:
                     self.data.resize(self.new_size(len(self.data)),
                                      refcheck=False)
+                    self.data[self.next_data_pos:
+                                  self.next_data_pos+len(data)] = data
                 else:
                     self.data.resize(self.new_size((len(self.data)), self.dim),
                                      refcheck=False)
                     self.data[self.next_data_pos:
                                   self.next_data_pos+len(data)] = data
-
+            
             self.pointers[index, 0] = self.next_data_pos
             self.pointers[index, 1] = len(data)
             self.next_data_pos += len(data)
@@ -429,6 +431,15 @@ class Mesh:
         """ Returns the number of faces for cell_index
         """
         return len(self.cells[cell_index])
+
+    def get_face_to_cell(self, face_index):
+        """ Get list of cells connected with 
+        face_index. 
+        """
+        f_to_c = list(self.face_to_cell[face_index])
+        f_to_c = filter(lambda x: x >=0, f_to_c)
+        return f_to_c
+        
 
     def is_line_seg_intersect_face(self, face_index, p1, p2):
         """ Returns True if the line segment
@@ -1798,6 +1809,228 @@ class Mesh:
             new_cell_faces = self.get_cell(other_cell)
             new_cell_faces[local_face_index_in_other] = new_face_index
 
+    def construct_polygon_from_segments(self, segments):
+        """ Takes point pairs and constructs a single polygon 
+        from joining all the ends. The pairs are identified 
+        by directly comparing the point locations. 
+        """
+        ## Start by setting the first point. 
+        current_segments = list(segments)
+        
+        new_face = [current_segments[0][0]]
+        point_to_match = current_segments[0][1]
+        
+        current_segments.pop(0)
+
+        while len(current_segments)>0:
+            to_be_removed = None
+            hits = 0
+            for (index, segment) in enumerate(current_segments):
+                if np.linalg.norm(self.get_point(point_to_match)-self.get_point(segment[0])) < 1.e-7:
+                    new_face.append(segment[0])
+                    to_be_removed = index
+                    next_point_to_match = segment[1]
+                    hits += 1
+                elif np.linalg.norm(self.get_point(point_to_match)-self.get_point(segment[1])) < 1.e-7:
+                    new_face.append(segment[1])
+                    to_be_removed = index
+                    next_point_to_match = segment[0]
+                    hits += 1
+            try:
+                assert(hits == 1)
+            except:
+                for seg in current_segments:
+                    print self.get_point(seg[0]), self.get_point(seg[1])
+                raise Exception("Faild at constructing polygon from segments")
+
+            current_segments.pop(to_be_removed)
+            point_to_match = next_point_to_match
+
+        return new_face
+
+    def divide_cell_by_plane(self, cell_index, point_on_plane, plane_normal):
+        """ Divides given cell into two cells 
+        based on a plane specified by a point and normal 
+        on the plane. 
+        """
+        current_cell = self.get_cell(cell_index)
+        interior_face_segments = []
+
+        face_segments_to_be_added = {}
+        for face_index in current_cell:
+            face = self.get_face(face_index)
+            new_face_1 = []
+            new_face_2 = []
+            face_offset = list(face[1:]) + [face[0]]
+            intersection_switch = True
+
+            for (point_index, next_point_index) in zip(face, face_offset):
+                if intersection_switch:
+                    new_face_1.append(point_index)
+                else:
+                    new_face_2.append(point_index)
+                
+                p1 = self.get_point(point_index)
+                p2 = self.get_point(next_point_index)
+                
+                vector = p2 - p1
+                vector /= np.linalg.norm(vector)
+                
+                d = np.dot((point_on_plane - p1), plane_normal)
+                denom = np.dot(vector, plane_normal)
+                
+                if abs(denom) < 1e-10:
+                    pass
+                else:
+                    d /= denom
+                    length = np.linalg.norm(p1-p2)
+                    if d <= length+1.e-8 and  d > 0.-1.e-8:
+                        new_point_index = self.add_point(d*vector+p1)
+                        new_face_1.append(new_point_index)
+                        new_face_2.append(new_point_index)
+                        if intersection_switch:
+                            interior_face_segments.append([new_point_index])
+                        else:
+                            interior_face_segments[-1].append(new_point_index)
+                        intersection_switch = not intersection_switch
+               
+            if len(new_face_2) > 0:
+                self.set_face(face_index, new_face_1)
+                assert(len(new_face_1)>2)
+                (face_1_area, face_1_centroid)  = self.find_face_centroid(face_index)
+                self.set_face_real_centroid(face_index, face_1_centroid)
+                self.set_face_area(face_index, face_1_area)
+
+                for point in new_face_1+[new_face_1[0]]:
+                    current_point = self.get_point(point)
+
+                new_face_index = self.add_face(new_face_2)
+
+                (face_area, face_centroid) = self.find_face_centroid(new_face_index)
+                self.set_face_real_centroid(new_face_index, face_centroid)
+                self.set_face_area(new_face_index, face_area)
+
+                self.set_face_normal(new_face_index,
+                                     self.get_face_normal(face_index))
+
+                faces = self.get_cell(cell_index)
+
+                self.set_cell_faces(cell_index, list(faces)+[new_face_index])
+
+                cell_orientations = self.get_cell_normal_orientation(cell_index)
+                local_face_index  = list(self.get_cell(cell_index)).index(face_index)
+
+                if self.is_boundary_face(face_index, self.get_boundary_markers()):
+                    boundary_marker = self.find_boundary_marker(face_index,
+                                                                self.get_boundary_markers())
+                    self.add_boundary_face(boundary_marker, 
+                                           new_face_index, cell_orientations[local_face_index])
+
+                self.set_cell_orientation(cell_index,
+                                          np.array(list(cell_orientations) + 
+                                                   [cell_orientations[local_face_index]]))
+
+                cell_next_door = list(self.get_face_to_cell(face_index))
+                cell_next_door.remove(cell_index)
+
+                if len(cell_next_door) == 1:
+                    next_door_faces = self.get_cell(cell_next_door[0])
+                    next_door_local_face_index = list(next_door_faces).index(face_index)
+                    next_door_faces = list(next_door_faces) + [new_face_index]
+                    next_door_orientations = self.get_cell_normal_orientation(cell_next_door[0])
+                    next_door_orientations = list(next_door_orientations) + \
+                        [next_door_orientations[next_door_local_face_index]]
+                    next_door_orientations = np.array(next_door_orientations)
+
+                    self.set_cell_faces(cell_next_door[0], next_door_faces)
+                    self.set_cell_orientation(cell_next_door[0], 
+                                              next_door_orientations)
+                    if face_segments_to_be_added.has_key(cell_next_door[0]):
+                        face_segments_to_be_added[cell_next_door[0]] += [interior_face_segments[-1]]
+                    else:
+                        face_segments_to_be_added[cell_next_door[0]] = [interior_face_segments[-1]]
+
+                for point in new_face_2+[new_face_2[0]]:
+                    current_point = self.get_point(point)
+
+        if face_segments_to_be_added.has_key(cell_index):
+            interior_face_segments += face_segments_to_be_added[cell_index]
+ 
+        if len(interior_face_segments) > 0:
+            new_face = self.construct_polygon_from_segments(interior_face_segments)
+
+        stage = 1
+        for i in range(1):
+            v1 = self.get_point(new_face[i+1]) - self.get_point(new_face[i]) 
+            v2 = self.get_point(new_face[i]) - self.get_point(new_face[i-1]) 
+            new_face_normal = np.cross(v2, v1)
+   
+            new_face_normal /= np.linalg.norm(new_face_normal)
+
+        new_face_index = self.add_face(new_face)
+
+        (face_area, face_centroid) = self.find_face_centroid(new_face_index)
+        self.set_face_real_centroid(new_face_index, face_centroid)
+        self.set_face_area(new_face_index, face_area)
+
+        new_face_normal = self.find_face_normal(new_face_index)
+        self.set_face_normal(new_face_index, new_face_normal)
+        
+        cell_faces = self.get_cell(cell_index)
+
+        faces_for_cell_1 = []
+        faces_for_cell_2 = []
+        
+        normals_for_cell_1 = []
+        normals_for_cell_2 = []
+        
+        for face_index in self.get_cell(cell_index):
+            current_center = self.get_face_real_centroid(face_index)
+            plane_to_center = point_on_plane - current_center
+
+            if np.dot(plane_to_center, plane_normal) > 0.:
+                faces_for_cell_1.append(face_index)
+                local_face_index = list(self.get_cell(cell_index)).index(face_index)
+                face_normal = self.get_cell_normal_orientation(cell_index)[local_face_index]
+                normals_for_cell_1.append(face_normal)
+
+            else:
+                faces_for_cell_2.append(face_index)
+                local_face_index = list(self.get_cell(cell_index)).index(face_index)
+                face_normal = self.get_cell_normal_orientation(cell_index)[local_face_index]
+                normals_for_cell_2.append(face_normal)
+
+        faces_for_cell_1.append(new_face_index)
+        faces_for_cell_2.append(new_face_index)
+        
+        if np.dot(new_face_normal, plane_normal)>0.:
+            normals_for_cell_1.append(1)
+            normals_for_cell_2.append(-1)
+
+        else:
+            normals_for_cell_1.append(-1)
+            normals_for_cell_2.append(1)
+            
+        self.set_cell_faces(cell_index, faces_for_cell_1)
+        self.set_cell_orientation(cell_index, normals_for_cell_1)
+        
+        (cell_volume, cell_centroid) = self.find_volume_centroid(cell_index)
+        self.set_cell_real_centroid(cell_index, cell_centroid)
+        self.set_cell_volume(cell_index, cell_volume)
+
+        new_cell_index = self.add_cell(faces_for_cell_2, 
+                                       normals_for_cell_2)
+        
+        (cell_volume, cell_centroid) = self.find_volume_centroid(new_cell_index)
+
+        self.set_cell_volume(new_cell_index, cell_volume)
+        self.set_cell_real_centroid(new_cell_index, cell_centroid)
+
+        self.set_cell_k(new_cell_index, self.get_cell_k(cell_index))
+        
+        return new_cell_index
+        
+
     def build_frac_from_faces(self, faces):
         """ Takes a list of face indices, and
         extrudes them into cells.
@@ -2387,7 +2620,7 @@ class Mesh:
                 bottom_cell = self.face_to_cell[top_res_face_index, 1]
 
                 new_cell_faces = array.array('i', self.get_cell(bottom_cell))
-                local_face_index_in_cell = new_cell_faces.index(top_res_face_index)
+                local_face_index_in_cell = list(new_cell_faces).index(top_res_face_index)
 
                 new_cell_faces[local_face_index_in_cell] = bot_res_face_index
 
