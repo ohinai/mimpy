@@ -2554,7 +2554,7 @@ class Mesh:
                 
                 self.set_face_area(new_face_index, area)
                 
-                if np.dot(normal, centroid -self.get_face_real_centroid(global_face_index))>  0.:
+                if np.dot(current_face_normal, centroid -self.get_face_real_centroid(global_face_index))>  0.:
                     self.add_internal_no_flow(new_face_index, 1)
                 else:
                     self.add_internal_no_flow(new_face_index, -1)
