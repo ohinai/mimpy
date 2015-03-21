@@ -167,7 +167,7 @@ class SinglePhase():
         conditions from function. 
         """
         self.mfd.apply_neumann_from_function(boundary_marker,
-                                             p_function)
+                                             f_function)
         
     def initialize_system(self):
         """ Constructs the initial matrices 
