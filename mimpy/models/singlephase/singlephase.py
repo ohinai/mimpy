@@ -9,29 +9,31 @@ from multiprocessing import Pool
 import itertools
 
 class SinglePhase():
-    """ The class relies on the Mesh and MFD libraries 
-    to solve time dependent slighly-compressible 
-    flow problems (heat equation). 
-    \phi \frac{\partial \rho}{\partial t}  = 
-    -\nabla \cdot \lef( \frac{\rho}{\mu} K (\nabla p)\right) + q
+    """ The class relies on the Mesh and MFD libraries
+    to solve time dependent slighly-compressible
+    flow problems (heat equation).
+    .. math::
+        \phi \frac{\partial \rho}{\partial t}  =
+        -\nabla \cdot \lef( \frac{\rho}{\mu} K (\nabla p)\right) + q
+    
     """
     def __init__(self):
         self.mesh = None
         self.mfd = None
-        
+
         self.initial_pressure = None
         self.current_pressure = None
 
         # Reservoir properties:
         self.porosities = None
-        
+
         # Fluid properties:
         self.viscosity = None
-        
+
         self.ref_pressure = None
         self.ref_density = None
         self.compressibility = None
-        
+
         # Matrix M in coo format 
         # without density or viscosity 
         # data. 
@@ -238,6 +240,7 @@ class SinglePhase():
                                   [self.current_pressure, 
                                    self.mesh.get_cell_domain_all()], 
                                   ["pressure", "domain"])
+
         self.time_step_output(0., 0)
 
         m_multipliers = np.ones(self.mesh.get_number_of_cells())
@@ -257,7 +260,7 @@ class SinglePhase():
                 density *= self.ref_density
 
                 # We multiply by the inverse of \frac{\rho}{\mu}
-                m_multipliers[cell_index] = self.viscosity
+                m_multipliers[cell_index] = self.viscosity/density
 
                 c_entry = self.compressibility
                 c_entry *= self.porosities[cell_index]
