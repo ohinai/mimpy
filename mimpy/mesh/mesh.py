@@ -6,6 +6,7 @@ import array
 import math
 from itertools import islice
 import mimpy.mesh.mesh_cython as mesh_cython
+import mimpy as mimpy
 
 try:
     import matplotlib
@@ -609,7 +610,7 @@ class Mesh:
         """ Saves mesh file in mms format.
         """
         output_file = open(file_name+".mms", 'w')
-        print >> output_file, "0.1"
+        print >> output_file, mimpy.__version__
         print >> output_file, "date"
         print >> output_file, "name"
         print >> output_file, "comments"
