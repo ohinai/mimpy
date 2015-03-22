@@ -1140,7 +1140,7 @@ class Mesh:
         """
         return self.lagrange_to_face_pointers[lagrange_index]
 
-    def get_dirichlet_pointer_for_face(self, face_index):
+    def get_dirichlet_pointer(self, face_index):
         """ Returns the cell_index for
         which the Dirichlet boundary will be set
         implicitly.
@@ -1158,21 +1158,27 @@ class Mesh:
         self.neumann_boundary_pointers[face_index] = \
             (pointer_index, -face_orientation*pointer_orientation)
 
-    def get_neumann_pointer_faces(self):
+    def get_neumann_pointer_all(self):
         """ Returns all the faces with Neumann
         values set by pointing to a cell.
         """
         return self.neumann_boundary_pointers.keys()
 
+    def get_neumann_pointer(self, face_index):
+        """ Returns the face_index  for 
+        which the Neumann boundary will be set 
+        implicitly. 
+        """
+        return self.neumann_boundary_pointers[face_index]
+
     def set_forcing_pointer(self,
                             cell_index,
                             face_indices,
                             face_orientations):
-        """ Sets the value of the forcing function implicity
-        as the sum of the fluxes from list of
-        faces.
-        This approach is used for coupling fractures
-        with a reservoir.
+        """ Sets the value of the forcing function
+        implicity as the sum of the fluxes from list 
+        of faces. This approach is used for coupling 
+        fractures with a reservoir.
         """
         # The function adds a zero entry to the
         # cell_forcing_function dict. This
