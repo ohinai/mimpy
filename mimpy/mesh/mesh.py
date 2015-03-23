@@ -483,10 +483,9 @@ class Mesh:
         """
         raise NotImplementedError
 
-    def load_mesh(self, file_name):
+    def load_mesh(self, input_file):
         """ Loads mesh from mms file.
         """
-        input_file = open(file_name)
         version = input_file.next()
         date = input_file.next()
         name = input_file.next()
@@ -614,6 +613,22 @@ class Mesh:
                 self.internal_no_flow = list(np.loadtxt(
                         islice(input_file, number_of_faces)))
 
+            elif line_split[0] == "FORCING_FUNCTION_POINTERS":
+                number_of_cells = int(line_split[1])
+                for line_index in range(number_of_cells):
+                    current_line = input_file.next()
+                    line_split = current_line.split()
+                    cell_index = int(line_split[0])
+                    entries = map(int, line_split[1:])
+                    face_list = []
+                    orientation_list = []
+                    while entries:
+                        face_list.append(entries.pop(0))
+                        orientation_list.append(entries.pop(0))
+                    self.set_forcing_pointer(cell_index,
+                                             face_list,
+                                             orientation_list)
+
             elif line_split[0] == "FACE_TO_LAGRANGE_POINTERS":
                 number_of_pointers = int(line_split[1])
                 for line_index in range(number_of_pointers):
@@ -639,10 +654,9 @@ class Mesh:
                                                       orientation)
 
 
-    def save_mesh(self, file_name):
+    def save_mesh(self, output_file):
         """ Saves mesh file in mms format.
         """
-        output_file = open(file_name+".mms", 'w')
         print >> output_file, mimpy.__version__
         print >> output_file, "date"
         print >> output_file, "name"
@@ -660,7 +674,7 @@ class Mesh:
         print >> output_file, len(self.faces.pointers)
         np.savetxt(output_file, self.faces.pointers, fmt="%i %i")
 
-        print >> output_file, "FACE_NORMALS", self.get_number_of_faces()
+        print >> output_file, "FACE_NORMALS", len(self.face_normals)
         np.savetxt(output_file, self.face_normals)
 
         print >> output_file, "FACE_AREAS", self.get_number_of_faces()
@@ -727,6 +741,14 @@ class Mesh:
         print >> output_file, len(self.internal_no_flow)
         np.savetxt(output_file, self.internal_no_flow)
 
+        print >> output_file, "FORCING_FUNCTION_POINTERS",
+        print >> output_file, len(self.forcing_function_pointers.keys())
+        for cell_index in self.forcing_function_pointers:
+            print >> output_file, cell_index,
+            for face_index, orientation in self.forcing_function_pointers[cell_index]:
+                print >> output_file, face_index, orientation,
+            print >> output_file, "\n", 
+
         print >> output_file, "FACE_TO_LAGRANGE_POINTERS", 
         print >> output_file, len(self.face_to_lagrange_pointers.keys())
         for key in self.face_to_lagrange_pointers:
@@ -738,11 +760,6 @@ class Mesh:
         for key in self.lagrange_to_face_pointers:
             face_index, orientation = self.lagrange_to_face_pointers[key]
             print >> output_file, key, face_index, orientation
-        
-        
-        
-         
-
         
         output_file.close()
 
