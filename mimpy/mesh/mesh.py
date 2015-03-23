@@ -6,6 +6,7 @@ import array
 import math
 from itertools import islice
 import mimpy.mesh.mesh_cython as mesh_cython
+import mimpy as mimpy
 
 try:
     import matplotlib
@@ -604,12 +605,33 @@ class Mesh:
                                                entries.pop(0),
                                                entries.pop(0))
 
+            elif line_split[0] == "DIRICHLET_BOUNDARY_POINTERS":
+                number_of_pointers = int(line_split[1])
+                for line_index in range(number_of_pointers):
+                    current_line = input_file.next()
+                    line_split = current_line.split()
+                    key = int(line_split[0])
+                    cell_index = int(line_split[1])
+                    orientation = int(line_split[2])
+                    self.set_dirichlet_face_pointer(key, 
+                                                    orientation,
+                                                    cell_index)
+
+            elif line_split[0] == "NEUMANN_BOUNDARY_POINTERS":
+                number_of_pointers = int(line_split[1])
+                for line_index in range(number_of_pointers):
+                    current_line = input_file.next()
+                    line_split = current_line.split()
+                    entries = [int(x) for x in line_split]
+                    boundary_marker = entries.pop(0)
+                    
+                    
 
     def save_mesh(self, file_name):
         """ Saves mesh file in mms format.
         """
         output_file = open(file_name+".mms", 'w')
-        print >> output_file, "0.1"
+        print >> output_file, mimpy.__version__
         print >> output_file, "date"
         print >> output_file, "name"
         print >> output_file, "comments"
@@ -682,6 +704,18 @@ class Mesh:
                     self.get_boundary_faces_by_marker(marker_index):
                 print >> output_file, face_index, face_orientation,
             print >> output_file, "\n",
+
+        print >> output_file, "DIRICHLET_BOUNDARY_POINTERS", 
+        print >> output_file, len(self.dirichlet_boundary_pointers.keys())
+        for key in self.dirichlet_boundary_pointers:
+            cell_index, orientation = self.dirichlet_boundary_pointers[key]
+            print >> output_file, key, cell_index, orientation
+
+        print >> output_file, "NEUMANN_BOUNDARY_POINTERS", 
+        print >> output_file, len(self.neumann_boundary_pointers.keys())
+        for key in self.neumann_boundary_pointers:
+            face_list = self.neumann_boundary_pointers[key]
+            print >> output_file, key, " ".join([str(face) for face in face_list])
 
         output_file.close()
 
@@ -1147,14 +1181,14 @@ class Mesh:
         """
         return self.dirichlet_boundary_pointers[face_index]
 
-    def set_neumann_boundary_pointer_to_face(self, face_index,
+    def set_neumann_boundary_pointer_to_face(self, 
+                                             face_index,
                                              face_orientation,
                                              pointer_index,
                                              pointer_orientation):
         """ Sets a neumann boundary as a pointer to another
         face in the domain.
         """
-        self.neumann_boundary_values[face_index] = 0.
         self.neumann_boundary_pointers[face_index] = \
             (pointer_index, -face_orientation*pointer_orientation)
 
