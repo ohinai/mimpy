@@ -77,6 +77,7 @@ class MFD():
         self.mesh = mesh
         self.cell_forcing_function.resize(self.mesh.get_number_of_cells(),
                                           refcheck=False)
+        self.process_internal_boundaries()
 
     def set_compute_diagonality(self, setting):
         """ During matrix M_x construction, compute how
@@ -574,13 +575,6 @@ class MFD():
             coupling_row.append(face_index)
             coupling_col.append(cell_index+self.mesh.get_number_of_faces())
 
-        for face_index in self.mesh.get_neumann_pointer_all():
-            (pointer_index, relative_orientation) = \
-                self.mesh.get_neumann_pointer(face_index)
-            coupling_data.append(-relative_orientation)
-            coupling_row.append(face_index)
-            coupling_col.append(pointer_index)
-
         for face_index in self.mesh.get_all_face_to_lagrange_pointers():
             (lagrange_index, orientation) = \
                 self.mesh.get_face_to_lagrange_pointer(face_index)
@@ -976,14 +970,16 @@ class MFD():
         to correctly incorporate internal boundary conditions.
         """
         for (face_index, face_orientation) in self.mesh.get_internal_no_flow():
-            cell_index = self.mesh.face_to_cell[boundary_index][0]
+            cell_index = self.mesh.face_to_cell[face_index][0]
             cell_list = list(self.mesh.get_cell(cell_index))
-            local_face_index = cell_list.index(boundary_index)
+            local_face_index = cell_list.index(face_index)
             if self.cell_faces_neumann.has_key(cell_index):
-                self.cell_faces_neumann[cell_index].append(boundary_index)
+                self.cell_faces_neumann[cell_index].append(face_index)
             else:
-                self.cell_faces_neumann[cell_index] = [boundary_index]
-
+                self.cell_faces_neumann[cell_index] = [face_index]
+            
+            self.neumann_boundary_values[face_index] = 0.
+            
     def build_rhs_dirichlet(self):
         """ Construct the entries for the Dirichlet boundaries
         in the RHS.

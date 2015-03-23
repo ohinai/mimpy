@@ -252,18 +252,10 @@ class Mesh:
 
         self.dim = 3
 
-        # For 2D meshes, optional polygon representation of cells.
-        self.two_d_polygons = []
-
         # dict: {face_index: (cell_index, face_orientation), ...}
         # Allows Dirichlet boundaries to be set implicitly
         # based on pressure of cells.
         self.dirichlet_boundary_pointers = {}
-
-        # dict: {face_index: [face_index_1, face_index_2, ...], ...}
-        # Allows Neumann boundaries to be set implicitly
-        # based on fluxes at other faces.
-        self.neumann_boundary_pointers = {}
 
         # Faces designated as no flow, meant for
         # interior boundary conditions not to be
@@ -613,19 +605,39 @@ class Mesh:
                     key = int(line_split[0])
                     cell_index = int(line_split[1])
                     orientation = int(line_split[2])
-                    self.set_dirichlet_face_pointer(key, 
+                    self.set_dirichlet_face_pointer(key,
                                                     orientation,
                                                     cell_index)
 
-            elif line_split[0] == "NEUMANN_BOUNDARY_POINTERS":
+            elif line_split[0] == "INTERNAL_NO_FLOW":
+                number_of_faces = int(line_split[1])
+                self.internal_no_flow = list(np.loadtxt(
+                        islice(input_file, number_of_faces)))
+
+            elif line_split[0] == "FACE_TO_LAGRANGE_POINTERS":
                 number_of_pointers = int(line_split[1])
                 for line_index in range(number_of_pointers):
                     current_line = input_file.next()
                     line_split = current_line.split()
-                    entries = [int(x) for x in line_split]
-                    boundary_marker = entries.pop(0)
-                    
-                    
+                    face_index = int(line_split[0])
+                    lagrange_index = int(line_split[1])
+                    orientation = int(line_split[2])
+                    self.set_face_to_lagrange_pointer(face_index,
+                                                      orientation,
+                                                      lagrange_index)
+
+            elif line_split[0] == "LAGRANGE_TO_FACE_POINTERS":
+                number_of_pointers = int(line_split[1])
+                for line_index in range(number_of_pointers):
+                    current_line = input_file.next()
+                    line_split = current_line.split()
+                    lagrange_index = int(line_split[0])
+                    face_index = int(line_split[1])
+                    orientation = int(line_split[2])
+                    self.set_lagrange_to_face_pointer(lagrange_index,
+                                                      face_index,
+                                                      orientation)
+
 
     def save_mesh(self, file_name):
         """ Saves mesh file in mms format.
@@ -711,12 +723,27 @@ class Mesh:
             cell_index, orientation = self.dirichlet_boundary_pointers[key]
             print >> output_file, key, cell_index, orientation
 
-        print >> output_file, "NEUMANN_BOUNDARY_POINTERS", 
-        print >> output_file, len(self.neumann_boundary_pointers.keys())
-        for key in self.neumann_boundary_pointers:
-            face_list = self.neumann_boundary_pointers[key]
-            print >> output_file, key, " ".join([str(face) for face in face_list])
+        print >> output_file ,"INTERNAL_NO_FLOW", 
+        print >> output_file, len(self.internal_no_flow)
+        np.savetxt(output_file, self.internal_no_flow)
 
+        print >> output_file, "FACE_TO_LAGRANGE_POINTERS", 
+        print >> output_file, len(self.face_to_lagrange_pointers.keys())
+        for key in self.face_to_lagrange_pointers:
+            lagrange_index, orientation = self.face_to_lagrange_pointers[key]
+            print >> output_file, key, lagrange_index, orientation
+        
+        print >> output_file, "LAGRANGE_TO_FACE_POINTERS", 
+        print >> output_file, len(self.lagrange_to_face_pointers.keys())
+        for key in self.lagrange_to_face_pointers:
+            face_index, orientation = self.lagrange_to_face_pointers[key]
+            print >> output_file, key, face_index, orientation
+        
+        
+        
+         
+
+        
         output_file.close()
 
     def set_cell_faces(self, cell_index, faces):
@@ -1136,7 +1163,6 @@ class Mesh:
         # allows the MFD code to build the matrix
         # correctly, and doesn't effect the right-hand
         # side of the problem.
-        self.dirichlet_boundary_values[face_index] = 0.
         self.face_to_lagrange_pointers[face_index] = \
             (lagrange_index, face_orientation)
 
@@ -1154,13 +1180,13 @@ class Mesh:
 
     def set_lagrange_to_face_pointers(self,
                                       lagrange_index,
-                                      face_indices,
-                                      orientations):
+                                      face_index,
+                                      orientation):
         """ Sets the lagrange multiplier to the source faces
         in order to impose zero flux across the boundary.
         """
         self.lagrange_to_face_pointers[lagrange_index] = \
-            zip(face_indices, orientations)
+            [face_index, orientation]
 
     def get_all_lagrange_to_face_pointers(self):
         """ Returns all lagrange face indices that
@@ -1180,30 +1206,6 @@ class Mesh:
         implicitly.
         """
         return self.dirichlet_boundary_pointers[face_index]
-
-    def set_neumann_boundary_pointer_to_face(self, 
-                                             face_index,
-                                             face_orientation,
-                                             pointer_index,
-                                             pointer_orientation):
-        """ Sets a neumann boundary as a pointer to another
-        face in the domain.
-        """
-        self.neumann_boundary_pointers[face_index] = \
-            (pointer_index, -face_orientation*pointer_orientation)
-
-    def get_neumann_pointer_all(self):
-        """ Returns all the faces with Neumann
-        values set by pointing to a cell.
-        """
-        return self.neumann_boundary_pointers.keys()
-
-    def get_neumann_pointer(self, face_index):
-        """ Returns the face_index  for 
-        which the Neumann boundary will be set 
-        implicitly. 
-        """
-        return self.neumann_boundary_pointers[face_index]
 
     def set_forcing_pointer(self,
                             cell_index,
