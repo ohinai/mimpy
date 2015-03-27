@@ -96,7 +96,6 @@ class variable_array():
 
         if len(self.data) > self.next_data_pos+len(data):
             self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
-            print self.data
         else:
             if self.dim == 1:
                 self.data.resize(self.new_size(len(self.data)),
@@ -104,7 +103,6 @@ class variable_array():
             else:
                 self.data.resize((self.new_size(len(self.data)), self.dim),
                                  refcheck=False)
-                print self.data
             self.data[self.next_data_pos:self.next_data_pos+len(data)] = data
 
         self.next_data_pos = len(data)+self.next_data_pos
