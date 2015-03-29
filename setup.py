@@ -2,11 +2,27 @@
 # -*- coding: utf-8 -*-
 
 
+from setuptools import setup
+from distutils.extension import Extension
 try:
-    from setuptools import setup
+    from Cython.Distutils import build_ext
     from Cython.Build import cythonize
 except ImportError:
-    from distutils.core import setup
+    use_cython = False
+else:
+    use_cython = True
+
+ext_modules = [ ]
+cmdclass = { }
+if use_cython:
+    ext_modules += cythonize("mimpy/mesh/*.pyx")
+
+    cmdclass.update({ 'build_ext': build_ext })
+else:
+    ext_modules += [
+        Extension("mimpy.mesh.hexmesh_cython", [ "mimpy/mesh/hexmesh_cython.c"]),
+        Extension("mimpy.mesh.mesh_cython", [ "mimpy/mesh/mesh_cython.c"]),
+    ]
 
 
 with open('README.rst') as readme_file:
@@ -19,8 +35,7 @@ requirements = [
     # TODO: put package requirements here
 ]
 
-test_requirements = [
-    # TODO: put package test requirements here
+test_requirements = ['pytest'
 ]
 
 setup(
@@ -57,7 +72,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    ext_modules = (cythonize("mimpy/mesh/*.pyx")), 
+    ext_modules = ext_modules, 
     test_suite='tests',
     tests_require=test_requirements
 )
