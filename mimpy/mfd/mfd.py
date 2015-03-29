@@ -12,7 +12,7 @@ from multiprocessing import Pool
 try:
     from petsc4py import PETSc
 except:
-    pass
+    print "PETSc not defined"
 
 def sign(x):
     """ Returns the sign of float x.
@@ -77,6 +77,7 @@ class MFD():
         self.mesh = mesh
         self.cell_forcing_function.resize(self.mesh.get_number_of_cells(),
                                           refcheck=False)
+        self.process_internal_boundaries()
 
     def set_compute_diagonality(self, setting):
         """ During matrix M_x construction, compute how
@@ -103,7 +104,7 @@ class MFD():
         self.m_e_construction_method = method_index
 
     def build_div(self, shift=1):
-        """ Build the div and div^T matrices and returns
+        """ Build the div and -div^T matrices and returns
         arrays for constructing a coo sparse matrix
         representation. The lists returned are:
 
@@ -216,14 +217,13 @@ class MFD():
         face_face_orientation = \
             zip(self.mesh.get_cell(cell_index),
                 self.mesh.get_cell_normal_orientation(cell_index))
-            
+
         if k_unity:
             for [face_index, face_orientation] in face_face_orientation:
                 n_e[counter, :] = self.mesh.get_face_normal(face_index)
                 n_e[counter, :] *= face_orientation
                 counter += 1
         else:
-            
             for [face_index, face_orientation] in face_face_orientation:
                 n_e[counter, :] = np.dot(self.mesh.get_cell_k(cell_index),
                                          self.mesh.get_face_normal(face_index))
@@ -298,16 +298,18 @@ class MFD():
         is_ortho = True
         c_e = self.build_c_e(n_e)
 
-        m_e =  r_e.dot(np.linalg.inv(np.dot(r_e.T, n_e)).dot(r_e.T))
+        m_0 =  r_e.dot(np.linalg.inv(np.dot(r_e.T, n_e)).dot(r_e.T))
 
         if self.m_e_construction_method == 0:
             u = np.linalg.inv(np.dot(r_e.T, n_e))
             u = np.dot(np.dot(r_e.T, r_e), u)
-            u = u[0,0]
+            u = u[0, 0]
+            m_e = m_0
             m_e += np.dot(c_e, np.dot(u, np.transpose(c_e)))
 
         elif self.m_e_construction_method == 1:
             u = self.mesh.get_cell_volume(cell_index)/np.trace(current_k)
+            m_e = m_0
             m_e += np.dot(c_e, np.dot(u, np.transpose(c_e)))
 
         elif self.m_e_construction_method == 2:
@@ -320,15 +322,24 @@ class MFD():
                 x_e_min_x_E = self.mesh.get_face_real_centroid(face_index)- \
                     self.mesh.get_cell_real_centroid(cell_index)
                 u += np.dot(x_e_min_x_E.T, np.dot(k_inv, x_e_min_x_E))
-            u *= 1./(self.mesh.dim**2*self.mesh.get_number_of_cell_faces(cell_index))
+            u /= self.mesh.dim**2
+            u /= self.mesh.get_number_of_cell_faces(cell_index)
+            m_e = m_0
             m_e += np.dot(c_e, np.dot(u, c_e.T))
 
         elif self.m_e_construction_method == 3:
             ## Based on Mimetic Finite Difference method
             ## in JCP 2013.
-            lambda_c = .5*np.trace(r_e.dot(np.linalg.inv(r_e.T.dot(n_e)).dot(r_e.T)))
-            m_e += lambda_c*(np.eye(self.mesh.get_number_of_cell_faces(cell_index))\
-                             -(n_e.dot(np.linalg.inv(n_e.T.dot(n_e)))).dot(n_e.T))
+            lambda_c = np.linalg.inv(r_e.T.dot(n_e))
+            lambda_c = lambda_c.dot(r_e.T)
+            lambda_c = r_e.dot(lambda_c)
+            lambda_c = np.trace(lambda_c)
+            lambda_c *= .5
+
+            m_e = np.eye(self.mesh.get_number_of_cell_faces(cell_index))
+            m_e -= (n_e.dot(np.linalg.inv(n_e.T.dot(n_e)))).dot(n_e.T)
+            m_e = lambda_c*(m_e)
+            m_e += m_0
 
         elif self.m_e_construction_method == 4:
             m_e = np.linalg.inv(self.build_w_e(cell_index))
@@ -346,7 +357,7 @@ class MFD():
 
             for i in range(len(self.mesh.get_cell(cell_index))):
                 max_index = absmaxindex(r_e[i, :])
-                diagonal.append(r_e[i, max_index]/n_e[i,max_index])
+                diagonal.append(r_e[i, max_index]/n_e[i, max_index])
 
             m_e = np.diag(diagonal)
 
@@ -498,7 +509,8 @@ class MFD():
             m_start = self.m_e_locations[cell_index]
             m_end = self.m_e_locations[cell_index+1]
 
-            new_m_e = multipliers[cell_index]*self.m_data_for_update[m_start:m_end]
+            new_m_e = multipliers[cell_index]
+            new_m_e *= self.m_data_for_update[m_start:m_end]
 
             m_coo[m_start:m_end] = new_m_e
 
@@ -517,15 +529,19 @@ class MFD():
                 entry = (self.mesh.get_alpha_by_cell(cell_index)*
                          self.mesh.get_cell_volume(cell_index))
                 bottom_right_data.append(entry)
-                bottom_right_row.append(cell_index+self.mesh.get_number_of_faces())
-                bottom_right_col.append(cell_index+self.mesh.get_number_of_faces())
+                bottom_right_row.append(cell_index +
+                                        self.mesh.get_number_of_faces())
+                bottom_right_col.append(cell_index +
+                                        self.mesh.get_number_of_faces())
 
         else:
             for cell_index in range(self.mesh.get_number_of_cells()):
                 entry = alpha * self.mesh.get_cell_volume(cell_index)
                 bottom_right_data.append(entry)
-                bottom_right_row.append(cell_index+self.mesh.get_number_of_faces())
-                bottom_right_col.append(cell_index+self.mesh.get_number_of_faces())
+                bottom_right_row.append(cell_index +
+                                        self.mesh.get_number_of_faces())
+                bottom_right_col.append(cell_index +
+                                        self.mesh.get_number_of_faces())
 
         return [bottom_right_data, bottom_right_row, bottom_right_col]
 
@@ -543,40 +559,42 @@ class MFD():
         coupling_col = array.array('i')
 
         for cell_index in self.mesh.get_forcing_pointer_cells():
-            for (face_index, orientation) in self.mesh.get_forcing_pointers_for_cell(cell_index):
-                coupling_data.append(-self.mesh.get_face_area(face_index)*orientation)
-                coupling_row.append(cell_index+self.mesh.get_number_of_faces())
+            for (face_index, orientation) in \
+                    self.mesh.get_forcing_pointers_for_cell(cell_index):
+                coupling_data.append(-self.mesh.get_face_area(face_index) *
+                                      orientation)
+                coupling_row.append(cell_index +
+                                    self.mesh.get_number_of_faces())
                 coupling_col.append(face_index)
 
         for face_index in self.mesh.get_dirichlet_pointer_faces():
-            (cell_index, orientation) = self.mesh.get_dirichlet_pointer_for_face(face_index)
-            coupling_data.append(self.mesh.get_face_area(face_index)*orientation)
+            (cell_index, orientation) = \
+                self.mesh.get_dirichlet_pointer(face_index)
+            coupling_data.append(self.mesh.get_face_area(face_index) *
+                                 orientation)
             coupling_row.append(face_index)
             coupling_col.append(cell_index+self.mesh.get_number_of_faces())
 
-        for face_index in self.mesh.get_neumann_pointer_faces():
-            (pointer_index, relative_orientation) = self.mesh.get_neumann_pointer_for_face(face_index)
-            coupling_data.append(-relative_orientation)
-            coupling_row.append(face_index)
-            coupling_col.append(pointer_index)
-
         for face_index in self.mesh.get_all_face_to_lagrange_pointers():
-            (lagrange_index, orientation) = self.mesh.get_face_to_lagrange_pointer(face_index)
-            coupling_data.append(self.mesh.get_face_area(face_index)*orientation)
+            (lagrange_index, orientation) = \
+                self.mesh.get_face_to_lagrange_pointer(face_index)
+            coupling_data.append(self.mesh.get_face_area(face_index) *
+                                 orientation)
             coupling_row.append(face_index)
             coupling_col.append(lagrange_index)
 
         for lagrange_index in self.mesh.get_all_lagrange_to_face_pointers():
-            for face_index, orientation in self.mesh.get_lagrange_to_face_pointers(lagrange_index):
-                coupling_data.append(-self.mesh.get_face_area(face_index)*orientation)
+            for (face_index, orientation) in \
+                    self.mesh.get_lagrange_to_face_pointers(lagrange_index):
+                coupling_data.append(-self.mesh.get_face_area(face_index) *
+                                      orientation)
                 coupling_row.append(lagrange_index)
                 coupling_col.append(face_index)
 
         return [coupling_data, coupling_row, coupling_col]
 
     def build_lhs(self, alpha = 0):
-        """
-        Builds the entire saddle point problem,
+        """ Builds the entire saddle point problem,
         |  M    DIV^T |
         |             |
         | DIV     C   |
@@ -678,10 +696,12 @@ class MFD():
         [div_info, div_t_info] = self.build_div()
 
         for index in range(len(div_info[0])):
-            self.lhs[div_info[1][index], div_info[2][index]] = div_info[0][index]
+            self.lhs[div_info[1][index], div_info[2][index]] = \
+                div_info[0][index]
 
         for index in range(len(div_t_info[0])):
-            self.lhs[div_t_info[1][index], div_t_info[2][index]] = div_t_info[0][index]
+            self.lhs[div_t_info[1][index], div_t_info[2][index]] = \
+                div_t_info[0][index]
 
         del div_info
         del div_t_info
@@ -696,14 +716,14 @@ class MFD():
         coupling_info = self.build_coupling_terms()
 
         for index in range(len(coupling_info[0])):
-            self.lhs[coupling_info[1][index], coupling_info[2][index]] = coupling_info[0][index]
+            self.lhs[coupling_info[1][index], coupling_info[2][index]] = \
+                coupling_info[0][index]
 
         del coupling_info
 
 
     def build_lhs_divided(self, alpha = 0):
-        """
-        Builds the saddle point problem,
+        """ Builds the saddle point problem,
         |  M    DIV^T |
         |             |
         | DIV     C   |
@@ -717,22 +737,30 @@ class MFD():
 
         [div_info, div_t_info] = self.build_div(shift=0)
 
-        self.div = sparse.coo_matrix((div_info[0], (div_info[1], div_info[2])))
-        self.div_t = sparse.coo_matrix((div_t_info[0], (div_t_info[1], div_t_info[2])))
+        self.div = sparse.coo_matrix((div_info[0],
+                                      (div_info[1],
+                                       div_info[2])))
+
+        self.div_t = sparse.coo_matrix((div_t_info[0],
+                                        (div_t_info[1],
+                                         div_t_info[2])))
 
         del div_info
         del div_t_info
 
         c_info = self.build_bottom_right(alpha)
 
-        self.c = sparse.coo_matrix((c_info[0], (c_info[1], c_info[2])))
+        self.c = sparse.coo_matrix((c_info[0],
+                                    (c_info[1], c_info[2])))
 
         del c_info
 
         coupling_info = self.build_coupling_terms()
 
         if coupling_info[0]:
-            self.coupling = sparse.coo_matrix((coupling_info[0], (coupling_info[1], coupling_info[2])))
+            self.coupling = sparse.coo_matrix((coupling_info[0],
+                                               (coupling_info[1],
+                                                coupling_info[2])))
         else:
             pass
 
@@ -764,8 +792,9 @@ class MFD():
         for face_index in range(self.mesh.get_number_of_faces()):
             gravity_force[face_index] = self.mesh.get_fluid_density()
             gravity_force[face_index] *= self.mesh.get_gravity_acceleration()
-            gravity_force[face_index] *= np.dot(self.mesh.get_gravity_vector(),
-                                                self.mesh.get_face_normal(face_index))
+            gravity_force[face_index] *= \
+                np.dot(self.mesh.get_gravity_vector(),
+                       self.mesh.get_face_normal(face_index))
 
         [m_data, m_row, m_col] = self.build_m(k_unity = True)
         m_coo = sparse.coo_matrix((np.array(m_data),
@@ -820,7 +849,8 @@ class MFD():
         for [boundary_index, boundary_orientation] in \
                 self.mesh.get_boundary_faces_by_marker(boundary_marker):
             current_normal = self.mesh.get_face_normal(boundary_index)
-            current_grad = grad_u(self.mesh.get_face_real_centroid(boundary_index))
+            current_centroid = self.mesh.get_face_real_centroid(boundary_index)
+            current_grad = grad_u(current_centroid)
             neumann_value = current_grad.dot(current_normal)
 
             self.neumann_boundary_values[boundary_index] = neumann_value
@@ -898,7 +928,8 @@ class MFD():
         """
         for (boundary_index, boundary_orientation) \
                 in self.mesh.get_boundary_faces_by_marker(boundary_marker):
-            dirichlet_value = p_function(self.mesh.get_face_real_centroid(boundary_index))
+            current_centroid = self.mesh.get_face_real_centroid(boundary_index)
+            dirichlet_value = p_function(current_centroid)
             dirichlet_value *= self.mesh.get_face_area(boundary_index)
 
             self.dirichlet_boundary_values[boundary_index] = \
@@ -913,7 +944,8 @@ class MFD():
         The cell centroid is used as a quadrature point.
         """
         for cell_index in range(self.mesh.get_number_of_cells()):
-            forcing_value = forcing_function(self.mesh.get_cell_real_centroid(cell_index))
+            current_centroid = self.mesh.get_cell_real_centroid(cell_index)
+            forcing_value = forcing_function(current_centroid)
             forcing_value *= self.mesh.get_cell_volume(cell_index)
             self.cell_forcing_function[cell_index] = forcing_value
 
@@ -938,14 +970,16 @@ class MFD():
         to correctly incorporate internal boundary conditions.
         """
         for (face_index, face_orientation) in self.mesh.get_internal_no_flow():
-            cell_index = self.mesh.face_to_cell[boundary_index][0]
+            cell_index = self.mesh.face_to_cell[face_index][0]
             cell_list = list(self.mesh.get_cell(cell_index))
-            local_face_index = cell_list.index(boundary_index)
+            local_face_index = cell_list.index(face_index)
             if self.cell_faces_neumann.has_key(cell_index):
-                self.cell_faces_neumann[cell_index].append(boundary_index)
+                self.cell_faces_neumann[cell_index].append(face_index)
             else:
-                self.cell_faces_neumann[cell_index] = [boundary_index]
-
+                self.cell_faces_neumann[cell_index] = [face_index]
+            
+            self.neumann_boundary_values[face_index] = 0.
+            
     def build_rhs_dirichlet(self):
         """ Construct the entries for the Dirichlet boundaries
         in the RHS.
@@ -954,14 +988,20 @@ class MFD():
                 self.get_dirichlet_boundary_values():
             self.rhs[boundary_index] = -boundary_value
 
-    def get_analytical_pressure_solution(self, p_function, quadrature_method = 0):
+    def get_analytical_pressure_solution(self,
+                                         p_function,
+                                         quadrature_method = 0):
         """ Returns the average pressure over each cell computed
         by using the real centroid of the cell as quadrature.
         """
         if quadrature_method == 0:
-            return np.array(map(p_function, self.mesh.get_all_cell_real_centroids()))
+            p_array = [p_function(point) for
+                       point in self.mesh.get_all_cell_real_centroids()]
         elif quadrature_method == 1:
-            return np.array(map(p_function, self.mesh.get_all_cell_shifted_centroids()))
+            p_array = [p_function(point) for
+                       point in self.mesh.get_all_cell_shifted_centroids()]
+
+        return p_array
 
     def get_analytical_velocity_solution(self, grad_p):
         """ Returns the average flux over each face computed
@@ -992,13 +1032,16 @@ class MFD():
 
                 exact_flux = np.dot(grad_p(current_center), current_normal)
 
-                error_flux_numerator += (self.mesh.get_cell_volume(cell_index)*
-                                         (self.solution[face_index]-exact_flux)**2)
+                error_flux_numerator += \
+                    (self.mesh.get_cell_volume(cell_index)*
+                     (self.solution[face_index]-exact_flux)**2)
 
-                error_flux_denominator += (self.mesh.get_cell_volume(cell_index)*
-                                           (exact_flux)**2)
+                error_flux_denominator += \
+                    (self.mesh.get_cell_volume(cell_index)*(exact_flux)**2)
 
-            error_flux[cell_index] = np.sqrt(error_flux_numerator/error_flux_denominator)
+            error_flux[cell_index] = error_flux_numerator/error_flux_denominator
+            error_flux[cell_index] = np.sqrt(error_flux)
+
         return error_flux
 
     def compute_l2_error_velocity(self, grad_p, quadrature_method = 0):
@@ -1013,19 +1056,23 @@ class MFD():
             for face_index in self.mesh.get_cell(cell_index):
                 current_normal = self.mesh.get_face_normal(face_index)
                 if quadrature_method == 0:
-                    current_center = self.mesh.get_face_real_centroid(face_index)
+                    current_center = \
+                        self.mesh.get_face_real_centroid(face_index)
                 elif quadrature_method == 1:
-                    current_center = self.mesh.get_face_shifted_centroid(face_index)
+                    current_center = \
+                        self.mesh.get_face_shifted_centroid(face_index)
                 else:
-                    raise("no quadrature for method" + quadrature_method)
+                    raise Exception("no quadrature for method" +
+                                    str(quadrature_method))
 
                 exact_flux = np.dot(grad_p(current_center), current_normal)
 
-                error_flux_numerator += (self.mesh.get_cell_volume(cell_index)*
-                                         (self.solution[face_index]-exact_flux)**2)
+                error_flux_numerator += \
+                    (self.mesh.get_cell_volume(cell_index)*
+                     (self.solution[face_index]-exact_flux)**2)
 
-                error_flux_denominator += (self.mesh.get_cell_volume(cell_index)*
-                                           (exact_flux)**2)
+                error_flux_denominator += \
+                    (self.mesh.get_cell_volume(cell_index)*(exact_flux)**2)
 
         return np.sqrt(error_flux_numerator)
 
@@ -1033,16 +1080,19 @@ class MFD():
         """ Compute the velocity error in the X norm
         ||| grad_p^I - v_h |||_X
         """
-        grad_p_i_min_v_h = np.zeros(self.mesh.get_number_of_faces()+self.mesh.get_number_of_cells())
+        grad_p_i_min_v_h = np.zeros(self.mesh.get_number_of_faces() +
+                                    self.mesh.get_number_of_cells())
 
         for face_index in range(self.mesh.get_number_of_faces()):
-            grad_p_i_min_v_h[face_index] = np.dot(grad_p(self.mesh.get_face_real_centroid(face_index)),
-                                          self.mesh.get_face_normal(face_index))
+            current_centroid = self.mesh.get_face_real_centroid(face_index)
+            current_normal = self.mesh.get_face_normal(face_index)
+            grad_p_i_min_v_h[face_index] = np.dot(grad_p(current_centroid),
+                                                  current_normal)
 
             grad_p_i_min_v_h[face_index] -= self.solution[face_index]
 
-        error = np.dot(self.lhs.dot(grad_p_i_min_v_h)[:self.mesh.get_number_of_faces()],
-                       grad_p_i_min_v_h[:self.mesh.get_number_of_faces()])
+        error = self.lhs.dot(grad_p_i_min_v_h)[:self.mesh.get_number_of_faces()]
+        error = error.dot(grad_p_i_min_v_h[:self.mesh.get_number_of_faces()])
 
         return np.sqrt(error)
 
@@ -1066,14 +1116,6 @@ class MFD():
                 current_center = self.mesh.get_cell_shifted_centroid(cell_index)
                 exact_pressure = p_function(current_center)
 
-            elif quadrature_method == 2:
-                exact_pressure = 0.
-
-                for (quad_point, quad_weight) in \
-                        zip(self.mesh.get_cell_quadrature_points(cell_index),
-                            self.mesh.get_cell_quadrature_weights(cell_index)):
-                        exact_pressure += p_function(quad_point)*quad_weight
-
             error_numerator += self.mesh.get_cell_volume(cell_index)* \
                 (self.solution[self.mesh.get_number_of_faces()+cell_index]- \
                      exact_pressure)**2
@@ -1087,19 +1129,21 @@ class MFD():
         of the LHS and RHS of the problem. Returns the full
         solution vector.
         """
-        self.solution = np.zeros(self.mesh.get_number_of_faces()+self.mesh.get_number_of_cells())
+        self.solution = np.zeros(self.mesh.get_number_of_faces() +
+                                 self.mesh.get_number_of_cells())
         if solver == 'spsolve':
             self.lhs = self.lhs.tocsc()
             self.solution = linalg.spsolve(self.lhs, self.rhs)
 
         elif solver == 'gmres':
             self.lhs = self.lhs.tocsc()
-            [self.solution, converged] = linalg.gmres(self.lhs, self.rhs, tol=1.e-8)
+            [self.solution, converged] = linalg.gmres(self.lhs,
+                                                      self.rhs,
+                                                      tol=1.e-8)
             if converged > 0:
                 print "did not converge after", converged
 
         return self.solution
-
 
     def cg_inner(self, apply_lhs, b, tol = 1.e-8):
         """ Local implementation of CG algorithm.
@@ -1132,40 +1176,6 @@ class MFD():
             rsold = rsnew
 
         print "\t\t went over max iterations", rsnew
-        return current_x
-
-
-    def cg(self, apply_lhs, b, tol = 1.e-10):
-        """ Local implementation of CG algorithm.
-        Code from example in wikipedia page on CG methods.
-        """
-        current_x = np.zeros(len(b))
-        r = b-apply_lhs(current_x)
-        p = np.array(r)
-
-        rsold = r.dot(r)
-        if rsold<tol:
-            return current_x
-
-        for i in range(3000):
-            print "rsold", rsold
-            Ap = apply_lhs(p)
-            pAp = p.dot(Ap)
-            if pAp<1.e-42:
-                print "return from pAp"
-                return current_x
-
-            alpha = rsold/p.dot(Ap)
-
-            current_x += alpha*p
-            r-=alpha*Ap
-            rsnew = r.dot(r)
-            if rsnew<tol:
-                return current_x
-            p=r+rsnew/rsold*p
-            rsold = rsnew
-
-        print "went over max iterations", rsnew
         return current_x
 
     def solve_divided(self):

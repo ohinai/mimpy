@@ -10,7 +10,6 @@ class TwoPhase:
     Mimetic Finite Difference method. 
     """
     def __init__(self):
-        
         self.mesh = None
         self.mfd = None
         
