@@ -23,6 +23,7 @@ An simple example of using the code can be found in (examples/hexmesh/example1/h
 Run:
 
     .. code-block:: bash
+    
         $ python hexmesh_example_1.py 
 
 If all goes well, you should get a file named (hexmesh_example_1.vtk). Open the file using 
