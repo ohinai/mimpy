@@ -23,23 +23,24 @@ def res_k(point, i, j, k):
 
 mesh.build_mesh(301, 2, 2, res_k, 80., 1., 1.)
 
-##Using SI Units:
-## viscosity        Kg/(m s)
-## permeability     m^2
-## density          Kg/(m^3)
-## time             s
+## Using SI Units:
+##  viscosity        Kg/(m s)
+##  permeability     m^2
+##  density          Kg/(m^3)
+##  time             s
 ## 
 
-mfd.apply_neumann_from_function(0, lambda p:np.array([0.,0.,0.]))
-mfd.apply_dirichlet_from_function(1, lambda p:0.)
-mfd.apply_neumann_from_function(2, lambda p:np.array([0.,0.,0.]))
-mfd.apply_neumann_from_function(3, lambda p:np.array([0.,0.,0.]))
-mfd.apply_neumann_from_function(4, lambda p:np.array([0.,0.,0.]))
-mfd.apply_neumann_from_function(5, lambda p:np.array([0.,0.,0.]))
 
 res_twophase = twophase.TwoPhase()
-res_twophase.set_mesh(mesh)
-res_twophase.set_mfd(mfd)
+res_twophase.set_mesh_mfd(mesh, mfd)
+
+res_twophase.apply_flux_boundary_from_function(0, lambda p:np.array([0.,0.,0.]))
+res_twophase.apply_pressure_boundary_from_function(1, lambda p:0.)
+res_twophase.apply_flux_boundary_from_function(2, lambda p:np.array([0.,0.,0.]))
+res_twophase.apply_flux_boundary_from_function(3, lambda p:np.array([0.,0.,0.]))
+res_twophase.apply_flux_boundary_from_function(4, lambda p:np.array([0.,0.,0.]))
+res_twophase.apply_flux_boundary_from_function(5, lambda p:np.array([0.,0.,0.]))
+
 
 res_twophase.set_initial_p_o(np.array([100.]*mesh.get_number_of_cells()))
 res_twophase.set_initial_u_t(np.array([0.]*mesh.get_number_of_faces()))

@@ -114,18 +114,14 @@ class TwoPhase:
         """
         self.output_frequency = frequency
 
-    def set_mesh(self, mesh):
+    def set_mesh_mfd(self, mesh, mfd):
         """ Sets the computational mesh 
         to be used. 
         """
         self.mesh = mesh
-        
-    def set_mfd(self, mfd):
-        """ Sets the instance of 
-        MFD to be used. 
-        """
         self.mfd = mfd
-
+        self.mfd.set_mesh(mesh)
+        
     def set_compressibility_water(self, compressibility_water):
         """ Sets water compressilibity. 
         """
@@ -242,6 +238,25 @@ class TwoPhase:
         """ Sets porosity for cell_index. 
         """
         self.porosities[cell_index] = porosity
+
+    def apply_pressure_boundary_from_function(self, 
+                                              boundary_marker, 
+                                              p_function):
+        """ Applies static pressure (dirichlet) boundary 
+        conditions from function. 
+        """
+        self.mfd.apply_dirichlet_from_function(boundary_marker, 
+                                               p_function)
+
+    def apply_flux_boundary_from_function(self,
+                                          boundary_marker, 
+                                          f_function):
+        """ Applies static flux (neumann) boundary 
+        conditions from function. 
+        """
+        self.mfd.apply_neumann_from_function(boundary_marker,
+                                             f_function)
+
 
     def set_saturation_boundaries(self, boundary_marker, saturation_function):
         """ Sets the saturation boundaries for pressure 
