@@ -120,12 +120,10 @@ This problem can be rewritten as a linear system of equations:
    
 .. note::
     Notice that matrix :math:`M` is dependent on :math:`\frac{\rho}{\mu}K`. Since the density 
-    term :math:`\rho` is function of pressure, we technically have a nonlinear system of equations. 
+    term :math:`\rho` is a function of pressure, we technically have a nonlinear system of equations. 
     However, since the compressibility is so small, its effects on the velocity term can be 
     negligable. For this reason, the calculation of density used for building :math:`M` is lagged 
     from the previous time step: :math:`M(\frac{\rho(p^n)}{\mu}K)`. 
-     
-    
 
 
 Nomenclature:

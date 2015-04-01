@@ -17,6 +17,8 @@ Contents:
    contributing
    authors
    history
+   singlephase
+
 
 Indices and tables
 ==================

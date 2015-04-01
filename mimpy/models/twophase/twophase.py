@@ -396,6 +396,41 @@ class TwoPhase:
         # RHS construction is for Neumann and Dirichlet 
         # boundaries specified by the mesh. 
         self.rhs_mfd = self.mfd.build_rhs()
+
+    def start_solving(self):
+        """ Starts solving the problem. 
+        The two-phase system solves for p_o and s_w. Using IMPES, 
+        we start by solving the pressure system using the update_
+        pressure routine. After that, the saturations are updated 
+        explicitly. 
+        """
+        self.mesh.output_vtk_mesh(self.model_name + "0", 
+                                  [self.current_p_o, 
+                                   self.mesh.get_cell_domain_all(), 
+                                   range(self.mesh.get_number_of_cells()), 
+                                   ], 
+                                  ["pressure", "domain", "cell_number"])
+
+        
+        for time_step in range(1,self.number_of_time_steps+1):
+            # update p_o and u_t (current pressure total flux) 
+            self.time_step = time_step
+            self.update_pressure()
+
+            if time_step == 1 or time_step%10==0:
+                self.find_upwinding_direction()
+            for saturation_time_step in range(self.saturation_time_steps):
+                print "\t\t satuation step ", saturation_time_step
+                self.update_saturation()
+            
+            if time_step%self.output_frequency == 0:
+                self.mesh.output_vtk_mesh(self.model_name + str(time_step), 
+                                          [self.current_s_w, self.current_p_o], 
+                                          ["sw", "POIL"])
+                print "mimetic sum sw = ", sum(self.current_s_w)
+
+            self.current_time = time_step*self.delta_t
+            print time_step
         
     def update_pressure(self):
         """ Solve the pressure system for p_o. self.current_p_o and 

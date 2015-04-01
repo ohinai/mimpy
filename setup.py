@@ -37,6 +37,7 @@ setup(
         "mimpy.mfd",
         "mimpy.models",
         "mimpy.models.singlephase", 
+        "mimpy.models.twophase",
     ],
     package_dir={'mimpy':
                  'mimpy'},
