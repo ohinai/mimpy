@@ -412,6 +412,14 @@ class TwoPhase:
         # boundaries specified by the mesh. 
         self.rhs_mfd = self.mfd.build_rhs()
 
+    def time_step_output(self, current_time, time_step):
+        """ Function to be defined by user 
+        that will be run at each output interval
+        during time-stepping. The function 
+        is intended for complex output. 
+        """
+        pass
+  
     def start_solving(self):
         """ Starts solving the problem. 
         The two-phase system solves for p_o and s_w. Using IMPES, 
@@ -443,6 +451,8 @@ class TwoPhase:
                                           [self.current_s_w, self.current_p_o], 
                                           ["sw", "POIL"])
                 print "mimetic sum sw = ", sum(self.current_s_w)
+
+                self.time_step_output(current_time, time_step)
 
             self.current_time = time_step*self.delta_t
             print time_step
