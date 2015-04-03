@@ -568,7 +568,7 @@ class TwoPhase:
         ## loops. However, for flow into the cell, we must find 
         ## the saturation from the cell it points to. 
         for face_index in self.mesh.get_dirichlet_pointer_faces():
-            (cell_index, orientation) = self.mesh.get_dirichlet_pointer_for_face(face_index)
+            (cell_index, orientation) = self.mesh.get_dirichlet_pointer(face_index)
             if self.current_u_t[face_index]*orientation<0.:
                 self.upwinded_face_cell.append([face_index, cell_index])
 

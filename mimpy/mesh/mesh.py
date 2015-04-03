@@ -694,6 +694,9 @@ class Mesh:
             for face_index in range(self.get_number_of_faces()):
                 print >> output_file, self.get_face_real_centroid(face_index)
 
+        print >> output_file, "FACE_TO_CELL", len(self.face_to_cell)
+        np.savetxt(output_file, self.face_to_cell)
+
         print >> output_file, "CELLS", self.get_number_of_cells()
         print >> output_file, len(self.cells.data)
         np.savetxt(output_file, self.cells.data,  fmt='%i')
