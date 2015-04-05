@@ -26,7 +26,7 @@ The best way to get the code right now is to clone the git repo and run the setu
         $ git clone https://github.com/ohinai/mimpy.git
         $ python setup.py install 
 
-An simple example of using the code can be found in (examples/hexmesh/example1/hexmesh_example_1.py).
+A simple example can be found in hexmesh_example_1.py_.
 Run:
 
     .. code-block:: bash
@@ -41,6 +41,6 @@ Paraview and plot "MFDPressure." You should see something like this:
 
 
 
-
+.. _hexmesh_example_1.py: https://github.com/ohinai/mimpy/blob/master/examples/hexmesh/example1/hexmesh_example_1.py
 
 
