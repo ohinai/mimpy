@@ -10,8 +10,9 @@ the diffusion equation:
 
 .. image:: diff_eq.gif
 
-Diffusion is a "kernel" problem for lots of physical phenomena, like heat and 
-underground fluid flow. 
+Because diffusion is a "kernel" for many physical phenomena, 
+mimpy can also solve problems like the heat equation and multi-phase flow
+through porous media. 
 
 Mimpy is based on the Mimetic Finite Difference method, which allows 
 it to solve over general polyhedral elements. That includes hexahedra, 
