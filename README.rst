@@ -14,7 +14,7 @@ Diffusion is a "kernel" problem for lots of physical phenomena, like heat and
 underground fluid flow. 
 
 Mimpy is based on the Mimetic Finite Difference method, which allows 
-it to solve over general polyhedral elements. That include hexahedra, 
+it to solve over general polyhedral elements. That includes hexahedra, 
 tetrahedra and Voronoi elements:
 
 .. image:: three_solutions.png
