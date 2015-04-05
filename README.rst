@@ -5,10 +5,17 @@ mimpy
 .. image:: https://api.travis-ci.org/ohinai/mimpy.png?branch=master
     :target: https://travis-ci.org/ohinai/mimpy
 
-Mimpy is a Python based library for solving elliptic PDE using the Mimetic Finite 
-Difference Method. Most numerical codes are limited to tetrahedral or hexahedral 
-meshes. The advantage of mimpy is the ability to naturally solve over a very general set of 
-of three dimensional polyhedral meshes:
+Mimpy is a Python based library for solving
+the diffusion equation:
+
+.. image:: diff_eqn.gif
+
+Diffusion is a "kernel" problem for lots of physical phenomena, like heat and 
+underground fluid flow. 
+
+Mimpy is based on the Mimetic Finite Difference method, which allows 
+it to solve over general polyhedral elements. That include hexahedra, 
+tetrahedra and Voronoi elements:
 
 .. image:: three_solutions.png
 
@@ -30,9 +37,6 @@ If all goes well, you should get a file named (hexmesh_example_1.vtk). Open the 
 Paraview and plot "MFDPressure." You should see something like this:
 
 .. image:: hexmesh_solution.png
-
-Congratulations! You've just approximated the solution to a Partial Differential Equation using the 
-Mimetic Finite Difference method. 
 
 
 
