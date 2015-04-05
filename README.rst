@@ -8,7 +8,7 @@ mimpy
 Mimpy is a Python based library for solving
 the diffusion equation:
 
-.. image:: diff_eqn.gif
+.. image:: diff_eq.gif
 
 Diffusion is a "kernel" problem for lots of physical phenomena, like heat and 
 underground fluid flow. 
