@@ -19,7 +19,7 @@ def u(p):
 def f(x):
     return -6.
 
-#set the mesh and an instance of the HexMesh class
+#set the mesh as an instance of the HexMesh class
 res_mesh = hexmesh.HexMesh()
 
 #The modification function is applied to the points of the mesh. 
@@ -27,6 +27,7 @@ res_mesh = hexmesh.HexMesh()
 def mod_function(p, i, j, k):
     return p
 
+# Build a 10x10x10 mesh over the square domain 1.x1.x1.:
 res_mesh.build_mesh(10, 10,  10, K, 1., 1., 1., mod_function)
 
 #Connect the MFD instance to the new mesh. 
