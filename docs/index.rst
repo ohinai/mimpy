@@ -6,14 +6,18 @@
 Welcome to mimpy's documentation!
 ======================================
 
+Mimpy is a Python code for solving the diffusion equation and related problems. 
+The code uses the Mimetic Finite Difference method, which allows it to use 
+very general polyhedral meshes. 
+
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   readme
    installation
-   usage
+   codeoverview
    contributing
    authors
    history
