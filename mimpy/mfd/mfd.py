@@ -361,6 +361,26 @@ class MFD():
 
             m_e = np.diag(diagonal)
 
+        elif self.m_e_construction_method == 6:
+            m_e =  r_e.dot(np.linalg.inv(np.dot(r_e.T, n_e)).dot(r_e.T))
+            diagonal = []        
+            for (face_index, orientation) in \
+                    zip(self.mesh.get_cell(cell_index), 
+                        self.mesh.get_cell_normal_orientation(cell_index)):
+                    normal = orientation*self.mesh.get_face_normal(face_index)
+                    entry = normal.dot(np.linalg.inv(current_k).dot(normal))
+                    entry *= self.mesh.get_face_area(face_index)
+                    entry *= np.linalg.norm(self.mesh.get_face_real_centroid(face_index)-
+                                            self.mesh.get_cell_real_centroid(cell_index))
+                    diagonal.append(entry)
+                    
+            diagonal=  np.diag(diagonal)
+            print m_e
+            print 
+            m_e += diagonal.dot(c_e.dot(c_e.T))
+            print m_e
+            print "***************************"
+
         if self.check_m_e:
             if np.linalg.norm(np.dot(m_e, n_e)-r_e) > 1.e-6:
                 print "M_E N ne R"
