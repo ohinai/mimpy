@@ -193,16 +193,17 @@ class TwoPhase:
     def water_mobility(self, water_saturation, water_pressure):
         """ Returns water mobility
         """
-        mobility = self.ref_density_water*(1.+self.compressibility_water*water_pressure)
-        mobility *= self.krw(self.sefromsw(water_saturation))/self.viscosity_water
+        mobility = self.krw(self.sefromsw(water_saturation))/self.viscosity_water
+        mobility *= self.ref_density_water*(1.+self.compressibility_water*water_pressure)
 
         return mobility
         
     def oil_mobility(self, water_saturation, oil_pressure):
         """ Returns oil mobility. 
         """   
-        mobility = self.ref_density_oil*(1.+self.compressibility_oil*oil_pressure)
-        mobility *= self.kro(self.sefromsw(water_saturation))/self.viscosity_oil
+        mobility = self.kro(self.sefromsw(water_saturation))/self.viscosity_oil
+        mobility *= self.ref_density_oil*(1.+self.compressibility_oil*oil_pressure)
+
 
         return mobility
 
@@ -491,29 +492,22 @@ class TwoPhase:
         newton_step = 0
 
         while abs(newton_residual > self.newton_threshold):
-            current_total_mobility = np.array(map(lambda x:1./(self.water_mobility(x[0], x[1]) + 
-                                                               self.oil_mobility(x[0], x[1])), 
-                                                  zip(self.current_s_w, po_k)))
-
-            current_c_matrix = np.array(map(lambda cell_index: 
-                                            (self.ref_density_water*self.compressibility_water*
-                                             self.current_s_w[cell_index]+\
-                                                 self.ref_density_oil*self.compressibility_oil*
-                                             (1.-self.current_s_w[cell_index]))*
-                                            self.porosities[cell_index]\
-                                                *self.mesh.get_cell_volume(cell_index)/self.delta_t, 
-                                            range(self.mesh.get_number_of_cells())))
+            current_total_mobility = self.water_mobility(self.current_s_w, po_k)
+            current_total_mobility += self.oil_mobility(self.current_s_w, po_k)
+            current_total_mobility = 1./current_total_mobility
             
-            
+            current_c_matrix =  self.ref_density_water*self.compressibility_water*self.current_s_w
+            current_c_matrix += self.ref_density_oil*self.compressibility_oil*(1.-self.current_s_w)
+            current_c_matrix *= self.porosities*self.mesh.cell_volume[:self.mesh.get_number_of_cells()]
+            current_c_matrix /= self.delta_t
+           
             self.mfd.update_m(self.lhs_coo.data[:self.m_x_coo_length], current_total_mobility)
 
             
             for (cell_index, pressure_pi) in zip(self.pressure_wells, 
                                                  self.pressure_wells_pi): 
-                current_c_matrix[cell_index] += pressure_pi*\
-                    (self.water_mobility(self.current_s_w[cell_index], po_k[cell_index])+  \
-                     self.oil_mobility(self.current_s_w[cell_index], po_k[cell_index]))
 
+                current_c_matrix[cell_index] += pressure_pi*1./current_total_mobility[cell_index]
                 
             self.lhs_coo.data[self.c_start:self.c_end] = current_c_matrix
 
@@ -525,30 +519,31 @@ class TwoPhase:
             rhs = -self.mfd.build_rhs()
             rhs += lhs.dot(ut_k_po_k_combo)
 
-            for cell_index in range(self.mesh.get_number_of_cells()):
-                f2sum1 = 1.
-                f2sum1 *= self.ref_density_water * self.current_s_w[cell_index]
-                f2sum1 *= self.porosities[cell_index]/self.delta_t
-                f2sum1 *= self.mesh.get_cell_volume(cell_index)
+            f2sum_l = np.ones(self.mesh.get_number_of_cells())
+            f2sum_l *= self.ref_density_water*self.current_s_w
+            f2sum_l *= self.porosities/self.delta_t
+            f2sum_l *= self.mesh.cell_volume[:self.mesh.get_number_of_cells()]
 
-                f2sum2 = 1.
-                f2sum2 *= self.ref_density_oil
-                f2sum2 *= 1.-self.current_s_w[cell_index]
-                f2sum2 *= self.porosities[cell_index]/self.delta_t*self.mesh.get_cell_volume(cell_index)
+            f2sum2_l = np.ones(self.mesh.get_number_of_cells())
+            f2sum2_l *= self.ref_density_oil
+            f2sum2_l *= 1.-self.current_s_w
+            f2sum2_l *= self.porosities/self.delta_t
+            f2sum2_l *= self.mesh.cell_volume[:self.mesh.get_number_of_cells()]
 
-                f2sum3 = self.ref_density_water*(1.+self.compressibility_water*
-                                                 (self.current_p_o[cell_index]))
-                f2sum3 *= self.current_s_w[cell_index]
-                f2sum3 += self.ref_density_oil*(1+self.compressibility_oil*self.current_p_o[cell_index])\
-                    *(1.-self.current_s_w[cell_index])
+            f2sum3_l = np.zeros(self.mesh.get_number_of_cells())
+            f2sum3_l += self.ref_density_water*(1.+self.compressibility_water*
+                                                (self.current_p_o[cell_index]))
+            f2sum3_l *= self.current_s_w
+            f2sum3_l += self.ref_density_oil*(1+self.compressibility_oil*self.current_p_o)\
+                *(1.-self.current_s_w)
 
-                f2sum3 *= self.porosities[cell_index]/self.delta_t*self.mesh.get_cell_volume(cell_index)
+            f2sum3_l *= self.porosities/self.delta_t
+            f2sum3_l *= self.mesh.cell_volume[:self.mesh.get_number_of_cells()]
 
-                rhs[cell_index+self.mesh.get_number_of_faces()] += f2sum1
-                rhs[cell_index+self.mesh.get_number_of_faces()] += f2sum2
+            rhs[self.mesh.get_number_of_faces():] += f2sum_l
+            rhs[self.mesh.get_number_of_faces():] += f2sum2_l
+            rhs[self.mesh.get_number_of_faces():] -= f2sum3_l
 
-                rhs[cell_index+self.mesh.get_number_of_faces()] -= f2sum3
-  
             for (well_index, cell_index) in enumerate(self.rate_wells):
                 rhs[cell_index+self.mesh.get_number_of_faces()] += -self.get_well_rate_water(well_index)
                 rhs[cell_index+self.mesh.get_number_of_faces()] += -self.get_well_rate_oil(well_index)
@@ -557,8 +552,7 @@ class TwoPhase:
                                                       self.pressure_wells_bhp, 
                                                       self.pressure_wells_pi): 
                 rhs[cell_index+self.mesh.get_number_of_faces()] -= \
-                    pressure_pi*bhp*(self.water_mobility(self.current_s_w[cell_index], po_k[cell_index]) +  
-                                     self.oil_mobility(self.current_s_w[cell_index], po_k[cell_index]))
+                    pressure_pi*bhp*1./current_total_mobility[cell_index]
                 
             newton_residual = np.linalg.norm(rhs)/np.linalg.norm(np.ones(len(rhs)))
 
@@ -609,13 +603,11 @@ class TwoPhase:
         """
         sat_delta_t = self.delta_t/float(self.saturation_time_steps)
 
+        water_mob = self.water_mobility(self.current_s_w, self.current_p_o)
+        oil_mob = self.oil_mobility(self.current_s_w, self.current_p_o)
+
         for [face_index, cell_index] in self.upwinded_face_cell:
-            water_mob = self.water_mobility(self.current_s_w[cell_index], 
-                                            self.current_p_o[cell_index])
-            oil_mob = self.oil_mobility(self.current_s_w[cell_index], 
-                                        self.current_p_o[cell_index])
-                    
-            self.current_f_w[face_index] = water_mob/(water_mob+oil_mob)
+            self.current_f_w[face_index] = water_mob[cell_index]/(water_mob[cell_index]+oil_mob[cell_index])
        
         # Update saturation for faces on the boundary.         
         for boundary_marker in self.saturation_boundaries.keys():
@@ -696,16 +688,16 @@ class TwoPhase:
                                                           self.pressure_wells_pi, 
                                                           self.production_files):
             water_production = pressure_pi*(bhp-self.current_p_o[cell_index])*sat_delta_t
-            water_production *= self.water_mobility(self.current_s_w[cell_index], 
-                                                    self.current_p_o[cell_index])
+            water_production *= water_mob[cell_index]
+
             water_production /= self.porosities[cell_index]*self.ref_density_water*\
                 (1.+self.compressibility_water*\
                      current_p_w[cell_index])
             water_production /= self.mesh.get_cell_volume(cell_index)
 
             oil_production = pressure_pi*(bhp-self.current_p_o[cell_index])*sat_delta_t
-            oil_production *= self.oil_mobility(self.current_s_w[cell_index], 
-                                                    self.current_p_o[cell_index])
+            oil_production *= oil_mob[cell_index]
+
             oil_production /= self.porosities[cell_index]*self.ref_density_oil*\
                 (1.+self.compressibility_oil*\
                      self.current_p_o[cell_index])
