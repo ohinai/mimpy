@@ -64,12 +64,20 @@ res_twophase.set_residual_saturation_water(.0)
 res_twophase.set_residual_saturation_oil(.2)
 
 def krw(se):
-    return se**2
-    return .9 * se*se
+    return_array = np.zeros(len(se))
+    return_array += se
+    return_array[return_array<0.] = 0.
+    return_array[return_array>1.] = 1.
+    return_array = return_array**2
+    return return_array
 
 def kro(se):
-    return (1.-se)**2
-    return .5 *(1.- se)**2
+    return_array = np.zeros(len(se))
+    return_array += se
+    return_array[return_array<0.] = 0.
+    return_array[return_array>1.] = 1.
+    return_array = (1.0-return_array)**2
+    return return_array
 
 res_twophase.set_kro(kro)
 res_twophase.set_krw(krw)
