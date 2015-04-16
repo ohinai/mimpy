@@ -504,13 +504,7 @@ class TwoPhase:
                                                 *self.mesh.get_cell_volume(cell_index)/self.delta_t, 
                                             range(self.mesh.get_number_of_cells())))
             
-
-            current_c_matrix_2 =  self.ref_density_water*self.compressibility_water*self.current_s_w
-            current_c_matrix_2 +=  self.ref_density_oil*self.compressibility_oil*(1.-self.current_s_w)
-            current_c_matrix_2 *= self.porosities*self.mesh.cell_volume[:self.mesh.get_number_of_cells()]
-            current_c_matrix_2 /= self.delta_t
-
-
+            
             self.mfd.update_m(self.lhs_coo.data[:self.m_x_coo_length], current_total_mobility)
 
             
