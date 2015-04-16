@@ -83,15 +83,17 @@ class TwoPhase:
         self.rate_wells_rate_water = []
         self.rate_wells_rate_oil = []
         self.rate_wells_name = []
+        self.pressure_files = []
 
         # Pressure wells cell location
         self.pressure_wells = []
         self.pressure_wells_bhp = []
         self.pressure_wells_pi = []
         self.pressure_wells_name = []
+        self.production_files = []
         
         # Files for outputting pressure well production/injection.  
-        self.pressure_well_outputs = []
+        #self.pressure_well_outputs = []
 
         # Newton solve parameters. 
         self.newton_threshold = 1.e-6
@@ -99,6 +101,7 @@ class TwoPhase:
         # Sets how often to output 
         # solution by time step number. 
         self.output_frequency = 1
+        self.prod_output_frequency = 1
 
         # Model Name 
         self.model_name = "model"
@@ -273,6 +276,7 @@ class TwoPhase:
         self.rate_wells_rate_water.append(injection_rate_water)
         self.rate_wells_rate_oil.append(injection_rate_oil)
         self.rate_wells_name.append(well_name)
+        self.pressure_files.append(open(well_name+".inj", 'w'))
         return len(self.rate_wells)-1
 
     def reset_wells(self):
@@ -298,6 +302,7 @@ class TwoPhase:
         self.pressure_wells_bhp.append(bhp)
         self.pressure_wells_pi.append(PI)
         self.pressure_wells_name.append(well_name)
+        self.production_files.append(open(well_name+".prod", 'w'))
         return len(self.pressure_wells)-1
 
 
@@ -336,7 +341,7 @@ class TwoPhase:
         used to construct the saddle-point 
         problem. 
         """
-        self.pressure_well_outputs = map(lambda n:open(n+".dat", 'w'), self.pressure_wells_name)
+        #self.pressure_well_outputs = map(lambda n:open(n+".dat", 'w'), self.pressure_wells_name)
 
         self.mfd.set_mesh(self.mesh)
         [[div_data, div_row, div_col], 
@@ -439,23 +444,36 @@ class TwoPhase:
             # update p_o and u_t (current pressure total flux) 
             self.time_step = time_step
             self.update_pressure()
+            
 
             if time_step == 1 or time_step%10==0:
                 self.find_upwinding_direction()
             for saturation_time_step in range(self.saturation_time_steps):
-                print "\t\t satuation step ", saturation_time_step
-                self.update_saturation()
+                #print "\t\t satuation step ", saturation_time_step
+                self.update_saturation(time_step)
+                
+            
+            if time_step%self.prod_output_frequency == 0:
+                for (cell_index, output) in zip(self.rate_wells,                                                           
+                                            self.pressure_files):
+
+                    print >> output, time_step, self.current_p_o[cell_index], self.current_s_w[cell_index]
+
             
             if time_step%self.output_frequency == 0:
+
+
+
                 self.mesh.output_vtk_mesh(self.model_name + str(time_step), 
                                           [self.current_s_w, self.current_p_o], 
                                           ["sw", "POIL"])
-                print "mimetic sum sw = ", sum(self.current_s_w)
+                #print "mimetic sum sw = ", sum(self.current_s_w)
+                print "time step", time_step
 
-                self.time_step_output(current_time, time_step)
+                self.time_step_output(self.current_time, time_step)
 
             self.current_time = time_step*self.delta_t
-            print time_step
+            #print time_step
         
     def update_pressure(self):
         """ Solve the pressure system for p_o. self.current_p_o and 
@@ -485,6 +503,7 @@ class TwoPhase:
                                             self.porosities[cell_index]\
                                                 *self.mesh.get_cell_volume(cell_index)/self.delta_t, 
                                             range(self.mesh.get_number_of_cells())))
+            
             
             self.mfd.update_m(self.lhs_coo.data[:self.m_x_coo_length], current_total_mobility)
 
@@ -544,7 +563,7 @@ class TwoPhase:
             newton_residual = np.linalg.norm(rhs)/np.linalg.norm(np.ones(len(rhs)))
 
             if newton_residual > self.newton_threshold:
-                print "solving..."
+                #print "solving..."
                 newton_solution = dsolve.spsolve(lhs, -rhs)
                 delta_po_k = newton_solution[self.mesh.get_number_of_faces():]
                 delta_ut_k = newton_solution[:self.mesh.get_number_of_faces()]
@@ -552,7 +571,7 @@ class TwoPhase:
                 po_k += delta_po_k
                 ut_k += delta_ut_k
 
-            print "\t\t", newton_step, newton_residual 
+            #print "\t\t", newton_step, newton_residual 
             newton_step += 1
             
         self.previous_p_o = np.array(self.current_p_o)
@@ -585,7 +604,7 @@ class TwoPhase:
         self.current_f_w = np.zeros(self.mesh.get_number_of_faces())
         self.current_u_w = np.zeros(self.mesh.get_number_of_faces())
 
-    def update_saturation(self):
+    def update_saturation(self, time_step):
         """ Updates water satuation based on the current p_o and u_t. 
         """
         sat_delta_t = self.delta_t/float(self.saturation_time_steps)
@@ -672,9 +691,10 @@ class TwoPhase:
                         
                 next_s_w[cell_index] += new_s_w
 
-        for (cell_index, bhp, pressure_pi) in zip(self.pressure_wells, 
-                                                  self.pressure_wells_bhp, 
-                                                  self.pressure_wells_pi):
+        for (cell_index, bhp, pressure_pi, output) in zip(self.pressure_wells, 
+                                                          self.pressure_wells_bhp, 
+                                                          self.pressure_wells_pi, 
+                                                          self.production_files):
             water_production = pressure_pi*(bhp-self.current_p_o[cell_index])*sat_delta_t
             water_production *= self.water_mobility(self.current_s_w[cell_index], 
                                                     self.current_p_o[cell_index])
@@ -691,6 +711,12 @@ class TwoPhase:
                      self.current_p_o[cell_index])
             oil_production /= self.mesh.get_cell_volume(cell_index)
             
+            if time_step%self.prod_output_frequency == 0:
+                oil_production_modified = oil_production * (-1)
+                water_production_modified = water_production * (-1)
+                
+                print >> output, time_step, oil_production_modified, water_production_modified
+
             next_s_w[cell_index] += water_production
             
         self.current_s_w[:] = next_s_w[:]
