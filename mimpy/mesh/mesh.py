@@ -821,11 +821,14 @@ class Mesh:
         if self.has_alpha:
             self.cell_alpha.append(None)
 
+        len(self.cell_shifted_centroid)
         if self.has_cell_shifted_centroid:
             if len(self.cell_shifted_centroid)-1<new_cell_index:
                 new_size = self.memory_extension(
                     len(self.cell_shifted_centroid))
                 self.cell_shifted_centroid.resize((new_size, 3))
+            ## TEMP
+
 
         return new_cell_index
 

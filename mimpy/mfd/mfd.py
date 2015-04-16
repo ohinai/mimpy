@@ -12,7 +12,7 @@ from multiprocessing import Pool
 try:
     from petsc4py import PETSc
 except:
-    print "PETSc not defined"
+    pass
 
 def sign(x):
     """ Returns the sign of float x.
@@ -165,7 +165,6 @@ class MFD():
             cell_centroid = self.mesh.get_cell_shifted_centroid(cell_index)
         else:
             cell_centroid = self.mesh.get_cell_real_centroid(cell_index)
-
         if self.mesh.dim == 3:
             for face_index in self.mesh.get_cell(cell_index):
                 if self.mesh.is_using_face_shifted_centroid():
@@ -182,24 +181,6 @@ class MFD():
 
                 r_e[counter][2] = self.mesh.get_face_area(face_index)
                 r_e[counter][2] *= (face_centroid[2]-cell_centroid[2])
-
-                counter += 1
-
-        elif self.mesh.dim == 2:
-            for face_index in self.mesh.get_cell(cell_index):
-                for face_index in self.mesh.get_cell(cell_index):
-                    if self.mesh.is_using_face_shifted_centroid():
-                        face_centroid = \
-                            self.mesh.get_face_shifted_centroid(face_index)
-                    else:
-                        face_centroid = \
-                            self.mesh.get_face_real_centroid(face_index)
-
-                r_e[counter][0] = self.mesh.get_face_area(face_index)
-                r_e[counter][0] *= (face_centroid[0]-cell_centroid[0])
-
-                r_e[counter][1] = self.mesh.get_face_area(face_index)
-                r_e[counter][1] *= (face_centroid[1]-cell_centroid[1])
 
                 counter += 1
 
@@ -373,22 +354,18 @@ class MFD():
                     entry *= np.linalg.norm(self.mesh.get_face_real_centroid(face_index)-
                                             self.mesh.get_cell_real_centroid(cell_index))
                     diagonal.append(entry)
-                    
+
             diagonal=  np.diag(diagonal)
-            print m_e
-            print 
             m_e += diagonal.dot(c_e.dot(c_e.T))
-            print m_e
-            print "***************************"
 
         if self.check_m_e:
             if np.linalg.norm(np.dot(m_e, n_e)-r_e) > 1.e-6:
-                print "M_E N ne R"
+                print "M_E N ne R", np.linalg.norm(np.dot(m_e, n_e)-r_e)
 
         if self.compute_diagonality:
             self.diagonality_index_list[cell_index] = \
                 np.linalg.norm(m_e-np.diag(np.diag(m_e)))/np.linalg.norm(m_e)
-
+            
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
         return m_e
@@ -1070,7 +1047,6 @@ class MFD():
         grad_p.
         """
         error_flux_numerator = 0.
-        error_flux_denominator = 0.
 
         for cell_index in range(self.mesh.get_number_of_cells()):
             for face_index in self.mesh.get_cell(cell_index):
@@ -1090,9 +1066,6 @@ class MFD():
                 error_flux_numerator += \
                     (self.mesh.get_cell_volume(cell_index)*
                      (self.solution[face_index]-exact_flux)**2)
-
-                error_flux_denominator += \
-                    (self.mesh.get_cell_volume(cell_index)*(exact_flux)**2)
 
         return np.sqrt(error_flux_numerator)
 
