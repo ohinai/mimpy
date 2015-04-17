@@ -642,21 +642,23 @@ class TwoPhase:
         previous_p_w = self.previous_p_o
 
         next_s_w = np.zeros(self.mesh.get_number_of_cells())
-        
-        for cell_index in range(self.mesh.get_number_of_cells()):
-            new_s_w = (self.ref_density_water*(1+self.compressibility_water*
-                                               previous_p_w[cell_index]))*self.current_s_w[cell_index]
-            new_s_w /= (self.ref_density_water*(1.+self.compressibility_water * current_p_w[cell_index]))
-            next_s_w[cell_index] += new_s_w  
-          
-            new_s_w = -sat_delta_t
-            new_s_w /= self.porosities[cell_index]
-            new_s_w /= self.ref_density_water
-            new_s_w /= (1.+self.compressibility_water*current_p_w[cell_index])
-            new_s_w /= self.mesh.get_cell_volume(cell_index)
-            new_s_w *= div_uw[cell_index]
 
-            next_s_w[cell_index] += new_s_w            
+        new_s_w_l = previous_p_w*self.compressibility_water+1.
+        new_s_w_l *= self.ref_density_water
+        new_s_w_l *= self.current_s_w
+        new_s_w_l /= self.ref_density_water
+        new_s_w_l /= 1.+self.compressibility_water*current_p_w
+
+        next_s_w += new_s_w_l
+        
+        new_s_w_l = 1./self.porosities
+        new_s_w_l /= self.ref_density_water
+        new_s_w_l /= (1.+self.compressibility_water*current_p_w)
+        new_s_w_l /= self.mesh.cell_volume[:self.mesh.get_number_of_cells()]
+        new_s_w_l *= div_uw[:self.mesh.get_number_of_cells()]
+        new_s_w_l *= -sat_delta_t
+
+        next_s_w += new_s_w_l
 
         for cell_index in self.rate_wells:
             well_index = self.rate_wells.index(cell_index)
