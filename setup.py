@@ -16,12 +16,14 @@ ext_modules = [ ]
 cmdclass = { }
 if use_cython:
     ext_modules += cythonize("mimpy/mesh/*.pyx")
+    ext_modules += cythonize("mimpy/mfd/*.pyx")
 
     cmdclass.update({ 'build_ext': build_ext })
 else:
     ext_modules += [
         Extension("mimpy.mesh.hexmesh_cython", [ "mimpy/mesh/hexmesh_cython.c"]),
         Extension("mimpy.mesh.mesh_cython", [ "mimpy/mesh/mesh_cython.c"]),
+        Extension("mimpy.mfd.mfd_cython", [ "mimpy/mfd/mfd_cython.c"]),
     ]
 
 

@@ -3,11 +3,15 @@ import numpy as np
 import sys
 import copy
 import array
+import mimpy.mfd.mfd_cython as mfd_cython
 
 from scipy import sparse, diag
 import scipy.sparse.linalg.dsolve as dsolve
 import scipy.sparse.linalg as linalg
 from multiprocessing import Pool
+
+
+
 
 try:
     from petsc4py import PETSc
@@ -428,6 +432,7 @@ class MFD():
 
         if save_update_info:
             self.m_data_for_update = np.array(m_data)
+            self.m_e_locations = np.array(self.m_e_locations)
 
         return [m_data, m_row, m_col]
 
@@ -486,6 +491,7 @@ class MFD():
 
         print "All Ortho = ", self.all_ortho
 
+
         if save_update_info:
             self.m_data_for_update = np.array(m_data)
 
@@ -500,16 +506,13 @@ class MFD():
         to True while running build_m function.
         The MFD instance saves the original m_e
         matrices used to construct the full Mx
-        matrix in coo format, and used
+        matrix in coo format.
         """
-        for cell_index in range(self.mesh.get_number_of_cells()):
-            m_start = self.m_e_locations[cell_index]
-            m_end = self.m_e_locations[cell_index+1]
-
-            new_m_e = multipliers[cell_index]
-            new_m_e *= self.m_data_for_update[m_start:m_end]
-
-            m_coo[m_start:m_end] = new_m_e
+        mfd_cython.update_m_fast(m_coo, 
+                                 multipliers, 
+                                 self.m_data_for_update,
+                                 self.m_e_locations, 
+                                 self.mesh.get_number_of_cells())
 
     def build_bottom_right(self, alpha = 0.):
         """ Build the matrix C in the global
