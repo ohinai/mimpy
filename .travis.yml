@@ -6,5 +6,4 @@ install:
     - pip install --install-option="--no-cython-compile" Cython
     - pip install tox
 script:
-    - tox
-    - tox -e py34
+    - tox -e $TOX_ENV
