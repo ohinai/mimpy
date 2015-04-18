@@ -204,7 +204,6 @@ class TwoPhase:
         mobility = self.kro(self.sefromsw(water_saturation))/self.viscosity_oil
         mobility *= self.ref_density_oil*(1.+self.compressibility_oil*oil_pressure)
 
-
         return mobility
 
     def set_initial_p_o(self, p_o):
@@ -502,7 +501,6 @@ class TwoPhase:
             current_c_matrix /= self.delta_t
            
             self.mfd.update_m(self.lhs_coo.data[:self.m_x_coo_length], current_total_mobility)
-
             
             for (cell_index, pressure_pi) in zip(self.pressure_wells, 
                                                  self.pressure_wells_pi): 
