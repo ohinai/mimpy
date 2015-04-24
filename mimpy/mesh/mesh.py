@@ -1341,6 +1341,20 @@ class Mesh:
         """
         return self.gravity_acceleration
 
+    def find_basis_for_face(self, face_index):
+        """ Finds two non collinear vectors 
+        in face to serve as basis for plane. 
+        """
+        face = self.get_face(face_index)
+        for i in range(len(face)):
+            v1 = self.get_point(face[i+1]) - self.get_point(face[i])
+            v2 = self.get_point(face[i]) - self.get_point(face[i-1])
+            v2 /= np.linalg.norm(v2)
+            v1 /= np.linalg.norm(v1)
+            if 1.-abs(v1.dot(v2)) > 1.e-6:
+                return (v1, v2)
+        raise Exception("Couldn't compute basis for face " + str(face_index))
+
     def find_face_normal(self, face_index):
         """ Finds the face normal based on
         rotation around the face boundary.
@@ -1369,8 +1383,7 @@ class Mesh:
         polygon = map(lambda x: np.array(self.get_point(x)),
                       self.get_face(face_index))
 
-        v1 = polygon[1]-polygon[0]
-        v2 = polygon[-1]-polygon[0]
+        (v1, v2) = self.find_basis_for_face(face_index)
 
         assert(np.linalg.norm(v2) >1.e-12)
         assert(np.linalg.norm(v1) >1.e-12)
