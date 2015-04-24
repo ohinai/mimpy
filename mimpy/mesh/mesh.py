@@ -35,7 +35,7 @@ class variable_array():
     The structure allows the user to modify the entries
     as well as extend the data as needed.
     """
-    def __init__(self, dtype=np.dtype('f'), size=(1, 1), dim = 1):
+    def __init__(self, dtype=np.dtype('f'), size=(2, 2), dim = 1):
         self.pointer_capacity = size[0]
         self.data_capacity  = size[1]
         self.dim = dim
@@ -653,7 +653,43 @@ class Mesh:
                                                       face_index,
                                                       orientation)
 
+    def save_cell(self, cell_index, output_file):
+        """ Saves individual cell in mms format. 
+        """
+        glob_to_loc_points = {}
 
+        temp_mesh = self.__class__()
+
+        current_cell = []
+        current_cell_orientations = []
+
+        for (face_index, orientation) in zip(self.get_cell(cell_index),
+                              self.get_cell_normal_orientation(cell_index)):
+            current_face = []
+            for point_index in self.get_face(face_index):
+                if glob_to_loc_points.has_key(point_index):
+                    current_face.append(glob_to_loc_points[point_index])
+                else:
+                    local_index = temp_mesh.add_point(self.get_point(point_index))
+                    glob_to_loc_points[point_index] = local_index
+                    current_face.append(local_index)
+
+            new_face_index = temp_mesh.add_face(current_face)
+            temp_mesh.set_face_area(new_face_index, self.get_face_area(face_index))
+            temp_mesh.set_face_normal(new_face_index,
+                                      self.get_face_normal(face_index))
+            temp_mesh.set_face_real_centroid(new_face_index,
+                                             self.get_face_real_centroid(face_index))
+            current_cell.append(new_face_index)
+            current_cell_orientations.append(orientation)
+
+        temp_mesh.add_cell(current_cell, current_cell_orientations)
+        temp_mesh.set_cell_k(0, self.get_cell_k(cell_index))
+        temp_mesh.set_cell_volume(0, self.get_cell_volume(cell_index))
+        temp_mesh.set_cell_real_centroid(0, self.get_cell_real_centroid(cell_index))
+
+        temp_mesh.save_mesh(output_file)
+        
     def save_mesh(self, output_file):
         """ Saves mesh file in mms format.
         """
@@ -695,7 +731,7 @@ class Mesh:
                 print >> output_file, self.get_face_real_centroid(face_index)
 
         print >> output_file, "FACE_TO_CELL", len(self.face_to_cell)
-        np.savetxt(output_file, self.face_to_cell)
+        np.savetxt(output_file, self.face_to_cell, fmt="%i %i")
 
         print >> output_file, "CELLS", self.get_number_of_cells()
         print >> output_file, len(self.cells.data)
