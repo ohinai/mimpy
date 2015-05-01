@@ -6,10 +6,8 @@ Code Overview
 "I have made this longer than usual because I have not had time to make it shorter."
 -- Blaise Pascal
 
-Mimpy is designed to be a very simple library, with transparent data structures and 
-methods. 
-
-
+Mimpy is designed to be a very simple library, with a very transparent set of data structures and 
+methods.
 There are two main classes, **Mesh** and **MFD**: 
 
 .. image:: mesh_mfd.svg
