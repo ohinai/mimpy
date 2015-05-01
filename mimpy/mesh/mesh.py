@@ -293,6 +293,10 @@ class Mesh:
         representing the cartesian point coodrinates,
         and appends the point to the end of the point list.
         Returns the index of the new point.
+        
+        :param ndarray new_point: New point to be added to mesh. 
+        :return: Index of new point. 
+        :rtype: int
         """
         if self.number_of_points < len(self.points):
             self.points[self.number_of_points] = new_point
@@ -307,15 +311,23 @@ class Mesh:
     def get_point(self, point_index):
         """ Takes a point index and returns
         a Numpy array of point coodrinates.
+
+        :param int point_index: 
+        
+        :return: The the point coordinates. 
+        :rtype: ndarray
         """
         return self.points[point_index]
 
     def get_number_of_points(self):
         """ Returns the total number of points.
+
+        :return: Total number of points in mesh.
+        :rtype: int 
         """
         return self.number_of_points
 
-    def memory_extension(self, size):
+    def _memory_extension(self, size):
         """ Function for finding size of memory
         extension jumps.
         """
@@ -329,29 +341,35 @@ class Mesh:
         relative to the face normal. In 2D, a
         face is represnted by two points.
         Returns the index of the new face.
+
+        :param list list_of_points: List of point indices
+             making up the new face.
+
+        :return: Index of new face.
+        :rtype: int
         """
         new_face_index = self.faces.add_entry(list_of_points)
 
         if len(self.face_normals)-1 < new_face_index:
-            new_size = self.memory_extension(len(self.face_normals))
+            new_size = self._memory_extension(len(self.face_normals))
             self.face_normals.resize((new_size, 3), refcheck=False)
 
         if len(self.face_areas)-1 < new_face_index:
-            new_size = self.memory_extension(len(self.face_areas))
+            new_size = self._memory_extension(len(self.face_areas))
             self.face_areas.resize(new_size, refcheck=False)
 
         if len(self.face_real_centroids)-1 < new_face_index:
-            new_size = self.memory_extension(len(self.face_real_centroids))
+            new_size = self._memory_extension(len(self.face_real_centroids))
             self.face_real_centroids.resize((new_size, 3), refcheck=False)
 
         if len(self.face_to_cell)-1 < new_face_index:
-            new_size = self.memory_extension(len(self.face_to_cell))
+            new_size = self._memory_extension(len(self.face_to_cell))
             self.face_to_cell.resize((new_size, 2))
             self.face_to_cell[new_face_index:, :] = -1
 
         if self.has_face_shifted_centroid:
             if len(self.face_shifted_centroids)-1 < new_face_index:
-                new_size = self.memory_extension(
+                new_size = self._memory_extension(
                     len(self.face_shifted_centroids))
                 self.face_shifted_centroids.resize((new_size, 3))
 
@@ -359,12 +377,22 @@ class Mesh:
 
     def set_face(self, face_index, points):
         """ Sets a new set of points for a given face_index.
+
+        :param int face_index: Face index of face to be set. 
+        :param list points: New list of points making up face. 
+
+        :return: None
         """
         self.faces[face_index] = points
 
     def remove_from_face_to_cell(self, face_index, cell_index):
         """ Removes the cell_index from face_to_cell map
         at for face_index.
+        
+        :param int face_index: Face index. 
+        :param int cell_index: Cell index. 
+        
+        :return: None
         """
         if self.face_to_cell[face_index, 0] == cell_index:
             self.face_to_cell[face_index, 0] = -1
@@ -393,6 +421,10 @@ class Mesh:
         of the face_index, and adds the face to the
         bottom of the face list. The function
         returns the new face index.
+
+        :param int face_index: Face index to be duplicated. 
+        :return: Face index of new duplicated face. 
+        :rtype: int
         """
         # Proper duplication requires duplicating
         # all the properties fo the face.
@@ -404,12 +436,20 @@ class Mesh:
         """ Given a face index, returns the
         list of point indices that make
         up the face.
+
+        :param int face_index: Face index. 
+        :return: List of points making up face. 
+        :rtype: ndarray('i')
         """
         return self.faces[face_index]
 
     def get_number_of_face_points(self, face_index):
         """ Returns the number of points that make
         up a given face.
+
+        :param int face_index: Face index.
+        :return: Number of point making up the face. 
+        :rtype: int
         """
         return len(self.faces[face_index])
 
@@ -417,6 +457,9 @@ class Mesh:
         """ Returns the total number of faces
         in the mesh. This corresponds to the
         number of velocity degrees of freedom.
+
+        :return: Total number of faces in the mesh.
+        :rtype: int
         """
         return self.faces.number_of_entries
 
@@ -830,11 +873,11 @@ class Mesh:
         self.cell_normal_orientation.add_entry(list_of_orientations)
 
         if len(self.cell_volume)-1<new_cell_index:
-            new_size = self.memory_extension(len(self.cell_volume))
+            new_size = self._memory_extension(len(self.cell_volume))
             self.cell_volume.resize(new_size, refcheck=False)
 
         if len(self.cell_k)-1<new_cell_index:
-            new_size = self.memory_extension(len(self.cell_k))
+            new_size = self._memory_extension(len(self.cell_k))
             self.cell_k.resize((new_size, 9), refcheck=False)
 
         for face_index in list_of_faces:
@@ -844,11 +887,11 @@ class Mesh:
                 self.face_to_cell[face_index][1] = new_cell_index
 
         if len(self.cell_domain)-1<new_cell_index:
-            new_size = self.memory_extension(len(self.cell_domain))
+            new_size = self._memory_extension(len(self.cell_domain))
             self.cell_domain.resize(new_size, refcheck=False)
 
         if len(self.cell_real_centroid)-1<new_cell_index:
-            new_size = self.memory_extension(len(self.cell_real_centroid))
+            new_size = self._memory_extension(len(self.cell_real_centroid))
             self.cell_real_centroid.resize((new_size, 3))
 
         if self.has_two_d_polygons:
@@ -860,7 +903,7 @@ class Mesh:
         len(self.cell_shifted_centroid)
         if self.has_cell_shifted_centroid:
             if len(self.cell_shifted_centroid)-1<new_cell_index:
-                new_size = self.memory_extension(
+                new_size = self._memory_extension(
                     len(self.cell_shifted_centroid))
                 self.cell_shifted_centroid.resize((new_size, 3))
             ## TEMP
