@@ -465,21 +465,34 @@ class Mesh:
 
     def get_number_of_cell_faces(self, cell_index):
         """ Returns the number of faces for cell_index
+
+        :param int cell_index: Cell index. 
+        :return: Number of faces in cell. 
+        :rtype: int.
         """
         return len(self.cells[cell_index])
 
     def get_face_to_cell(self, face_index):
         """ Get list of cells connected with 
-        face_index. 
+        face_index.
+
+        :param int face_index: Face index.
+        :return: List of cell indices connected to the face.
+        :rtype: list
         """
         f_to_c = list(self.face_to_cell[face_index])
         f_to_c = filter(lambda x: x >=0, f_to_c)
         return f_to_c
         
-
     def is_line_seg_intersect_face(self, face_index, p1, p2):
         """ Returns True if the line segment
         intersects with a face.
+
+        :param int face_index: Face index.
+        :param ndarray p1: Coorindates of first point.
+        :param ndarray p2: Coorindates of second point.
+        :return: True if line segments intersects face.
+        :rtype: bool
         """
         vector = p2 - p1
         vector /= np.linalg.norm(vector)
@@ -528,6 +541,9 @@ class Mesh:
 
     def load_mesh(self, input_file):
         """ Loads mesh from mms file.
+
+        :param file intput_file: Mesh file (mms).
+        :return: None
         """
         version = input_file.next()
         date = input_file.next()
@@ -697,7 +713,12 @@ class Mesh:
                                                       orientation)
 
     def save_cell(self, cell_index, output_file):
-        """ Saves individual cell in mms format. 
+        """ Saves individual cell in mms format.
+
+        :param int cell_index: Cell index.
+        :param file output_file: File to output cell to.
+
+        :return: None
         """
         glob_to_loc_points = {}
 
@@ -735,6 +756,8 @@ class Mesh:
         
     def save_mesh(self, output_file):
         """ Saves mesh file in mms format.
+
+        :param file output_file: File to save mesh to.
         """
         print >> output_file, mimpy.__version__
         print >> output_file, "date"
@@ -847,6 +870,11 @@ class Mesh:
 
     def set_cell_faces(self, cell_index, faces):
         """ Sets the cell faces.
+
+        :param int cell_index: Cell index.
+        :param list faces: Faces making up cell.
+
+        :return: None
         """
         self.cells[cell_index] = faces
         for face_index in faces:
@@ -854,7 +882,12 @@ class Mesh:
                 self.add_to_face_to_cell(face_index, cell_index)
 
     def set_cell_orientation(self, cell_index, orientation):
-        """ Sets the cell orientation.
+        """ Sets the cell orientation of faces.
+
+        :param int cell_index: Cell index. 
+        :paramt list orientation: List of new cell face orientations.
+        
+        :return: None
         """
         self.cell_normal_orientation[cell_index] = orientation
 
@@ -868,6 +901,13 @@ class Mesh:
         of the face normal relative to the cell: 1 means it
         points out, -1 means it points in to the cell.
         Returns the index of the new cell.
+
+        :param list list_of_faces: List of face indices making up new cell.
+        :param list list_of_orientations: List of (1,-1) indicating
+            whether normals are pointing out (1) or in (-1) of cell.
+
+        :return: New cell index.
+        :rtype: int
         """
         new_cell_index = self.cells.add_entry(list_of_faces)
         self.cell_normal_orientation.add_entry(list_of_orientations)
