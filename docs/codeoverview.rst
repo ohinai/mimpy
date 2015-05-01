@@ -23,24 +23,18 @@ that make the task much easier. The user can also use files generated using stan
    :align: center
 
 The second class is called **MFD**, and stands for Mimetic Finite Difference. **MFD** takes a **Mesh** instance 
-and constructs the appropriate linear system of equations for solving the diffusion problem. 
+and constructs the discretization matrices. 
 The **MFD** class can set Dirichlet (pressure), Neumann (flux) boundary conditions, and forcing terms. 
 
-The **Mesh** and **MFD** are sufficient for solving the diffusion equation. However, once you can solve that, you can 
-also solve more complex physical problems. For this, we have a module of **models**. The **models** take an instance of 
-**MFD** and **Mesh** and use them to solve physical phenomena like single-phase and two-phase flow.
+The **Mesh** and **MFD** together are sufficient for solving the diffusion equation. 
+For solving more complex physical problems, the module  **models** contains classes that 
+solve more complex systems such as single-phase and two-phase flow equations. 
 
+.. image:: models.svg
+   :align: center
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+The three branches of the code, **Mesh**, **MFD** and **models**,  
+are orthogonal entities. For example, 
+the single-phase model is not aware of the specific 
+kind of mesh used, and will work with tetrahedral meshes as well Voronoi meshes. 
+ 
