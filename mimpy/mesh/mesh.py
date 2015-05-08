@@ -1,26 +1,15 @@
 """ Mesh module.
 """
 import numpy as np
-import os
 import array
-import math
 from itertools import islice
 import mimpy.mesh.mesh_cython as mesh_cython
 import mimpy as mimpy
 
-try:
-    import matplotlib
-    from matplotlib.patches import Circle, Wedge, Polygon
-    from matplotlib.collections import PatchCollection
-    import pylab
-
-except ImportError:
-    print "matplotlib not installed."
-
 class variable_array():
     """ The class is an efficient reprenstation of variable
     lenght two dimensional arrays. It can represent
-    basic data types such as ints and floats and allows
+    basic data types such as ints and floats and allows variable
     lengths on entries. That is:
 
     a[0] = [1, 2, 3, 4,]
@@ -60,6 +49,10 @@ class variable_array():
     def set_pointer_capacity(self, capacity):
         """ Sets the maximum number of entries in
         the data structure.
+
+        :param int capacity: Number of expected entries.
+
+        :return: None
         """
         self.pointer_capacity = capacity
         self.pointers.resize((self.pointer_capacity, 2), refcheck = False)
@@ -67,6 +60,10 @@ class variable_array():
     def set_data_capacity(self, capacity):
         """ Sets the maximum number of entries in
         the data structure.
+
+        :param int capacity: Total data entries.
+
+        :return: None
         """
         self.data_capacity = capacity
         if self.dim == 1:
@@ -78,11 +75,23 @@ class variable_array():
         """ Calculates the new size of the array
         given the old in case there is a need
         for extending the array.
+
+        :param int size: Old data size.
+        :param int minimum: Sets minimum new data size.
+
+        :return: New data structure size.
+        :rtype: int
         """
         return max(size+size/2+2, minimum)
 
     def add_entry(self, data):
         """ Adds new data to end of the list.
+
+        :param  dtype data: Generic data to be added. Usually
+        either scalar type (float, int ...) or ndarray type.
+
+        :return: Index of the new entry.
+        :rtype: int
         """
         if self.number_of_entries < len(self.pointers):
             self.pointers[self.number_of_entries, 0] = self.next_data_pos
@@ -157,7 +166,7 @@ class variable_array():
                                      refcheck=False)
                     self.data[self.next_data_pos:
                                   self.next_data_pos+len(data)] = data
-            
+
             self.pointers[index, 0] = self.next_data_pos
             self.pointers[index, 1] = len(data)
             self.next_data_pos += len(data)
@@ -215,7 +224,6 @@ class Mesh:
         self.has_face_shifted_centroid = False
         self.has_cell_shifted_centroid = False
 
-        self.has_two_d_polygons = False
         self.has_alpha = False
 
         self.boundary_markers = []
@@ -293,9 +301,9 @@ class Mesh:
         representing the cartesian point coodrinates,
         and appends the point to the end of the point list.
         Returns the index of the new point.
-        
-        :param ndarray new_point: New point to be added to mesh. 
-        :return: Index of new point. 
+
+        :param ndarray new_point: New point to be added to mesh.
+        :return: Index of new point.
         :rtype: int
         """
         if self.number_of_points < len(self.points):
@@ -312,9 +320,9 @@ class Mesh:
         """ Takes a point index and returns
         a Numpy array of point coodrinates.
 
-        :param int point_index: 
-        
-        :return: The the point coordinates. 
+        :param int point_index:
+
+        :return: The the point coordinates.
         :rtype: ndarray
         """
         return self.points[point_index]
@@ -323,7 +331,7 @@ class Mesh:
         """ Returns the total number of points.
 
         :return: Total number of points in mesh.
-        :rtype: int 
+        :rtype: int
         """
         return self.number_of_points
 
@@ -378,8 +386,8 @@ class Mesh:
     def set_face(self, face_index, points):
         """ Sets a new set of points for a given face_index.
 
-        :param int face_index: Face index of face to be set. 
-        :param list points: New list of points making up face. 
+        :param int face_index: Face index of face to be set.
+        :param list points: New list of points making up face.
 
         :return: None
         """
@@ -388,10 +396,10 @@ class Mesh:
     def remove_from_face_to_cell(self, face_index, cell_index):
         """ Removes the cell_index from face_to_cell map
         at for face_index.
-        
-        :param int face_index: Face index. 
-        :param int cell_index: Cell index. 
-        
+
+        :param int face_index: Face index.
+        :param int cell_index: Cell index.
+
         :return: None
         """
         if self.face_to_cell[face_index, 0] == cell_index:
@@ -422,8 +430,8 @@ class Mesh:
         bottom of the face list. The function
         returns the new face index.
 
-        :param int face_index: Face index to be duplicated. 
-        :return: Face index of new duplicated face. 
+        :param int face_index: Face index to be duplicated.
+        :return: Face index of new duplicated face.
         :rtype: int
         """
         # Proper duplication requires duplicating
@@ -437,8 +445,8 @@ class Mesh:
         list of point indices that make
         up the face.
 
-        :param int face_index: Face index. 
-        :return: List of points making up face. 
+        :param int face_index: Face index.
+        :return: List of points making up face.
         :rtype: ndarray('i')
         """
         return self.faces[face_index]
@@ -448,7 +456,7 @@ class Mesh:
         up a given face.
 
         :param int face_index: Face index.
-        :return: Number of point making up the face. 
+        :return: Number of point making up the face.
         :rtype: int
         """
         return len(self.faces[face_index])
@@ -466,14 +474,14 @@ class Mesh:
     def get_number_of_cell_faces(self, cell_index):
         """ Returns the number of faces for cell_index
 
-        :param int cell_index: Cell index. 
-        :return: Number of faces in cell. 
+        :param int cell_index: Cell index.
+        :return: Number of faces in cell.
         :rtype: int.
         """
         return len(self.cells[cell_index])
 
     def get_face_to_cell(self, face_index):
-        """ Get list of cells connected with 
+        """ Get list of cells connected with
         face_index.
 
         :param int face_index: Face index.
@@ -483,7 +491,7 @@ class Mesh:
         f_to_c = list(self.face_to_cell[face_index])
         f_to_c = filter(lambda x: x >=0, f_to_c)
         return f_to_c
-        
+
     def is_line_seg_intersect_face(self, face_index, p1, p2):
         """ Returns True if the line segment
         intersects with a face.
@@ -734,26 +742,29 @@ class Mesh:
                 if glob_to_loc_points.has_key(point_index):
                     current_face.append(glob_to_loc_points[point_index])
                 else:
-                    local_index = temp_mesh.add_point(self.get_point(point_index))
+                    current_point = self.get_point(point_index)
+                    local_index = temp_mesh.add_point(current_point)
                     glob_to_loc_points[point_index] = local_index
                     current_face.append(local_index)
 
             new_face_index = temp_mesh.add_face(current_face)
-            temp_mesh.set_face_area(new_face_index, self.get_face_area(face_index))
+            temp_mesh.set_face_area(new_face_index,
+                                    self.get_face_area(face_index))
             temp_mesh.set_face_normal(new_face_index,
                                       self.get_face_normal(face_index))
-            temp_mesh.set_face_real_centroid(new_face_index,
-                                             self.get_face_real_centroid(face_index))
+            current_centroid = self.get_face_real_centroid(face_index)
+            temp_mesh.set_face_real_centroid(new_face_index, current_centroid)
             current_cell.append(new_face_index)
             current_cell_orientations.append(orientation)
 
         temp_mesh.add_cell(current_cell, current_cell_orientations)
         temp_mesh.set_cell_k(0, self.get_cell_k(cell_index))
         temp_mesh.set_cell_volume(0, self.get_cell_volume(cell_index))
-        temp_mesh.set_cell_real_centroid(0, self.get_cell_real_centroid(cell_index))
+        current_centroid = self.get_cell_real_centroid(cell_index)
+        temp_mesh.set_cell_real_centroid(0, current_centroid)
 
         temp_mesh.save_mesh(output_file)
-        
+
     def save_mesh(self, output_file):
         """ Saves mesh file in mms format.
 
@@ -781,7 +792,7 @@ class Mesh:
 
         print >> output_file, "FACE_AREAS", self.get_number_of_faces()
         for face_index in range(self.get_number_of_faces()):
-            print >>output_file, self.get_face_area(face_index)
+            print >> output_file, self.get_face_area(face_index)
 
         print >> output_file, "FACE_REAL_CENTROIDS", self.get_number_of_faces()
         for face_index in range(self.get_number_of_faces()):
@@ -836,13 +847,13 @@ class Mesh:
                 print >> output_file, face_index, face_orientation,
             print >> output_file, "\n",
 
-        print >> output_file, "DIRICHLET_BOUNDARY_POINTERS", 
+        print >> output_file, "DIRICHLET_BOUNDARY_POINTERS",
         print >> output_file, len(self.dirichlet_boundary_pointers.keys())
         for key in self.dirichlet_boundary_pointers:
             cell_index, orientation = self.dirichlet_boundary_pointers[key]
             print >> output_file, key, cell_index, orientation
 
-        print >> output_file ,"INTERNAL_NO_FLOW", 
+        print >> output_file, "INTERNAL_NO_FLOW",
         print >> output_file, len(self.internal_no_flow)
         np.savetxt(output_file, self.internal_no_flow)
 
@@ -850,22 +861,23 @@ class Mesh:
         print >> output_file, len(self.forcing_function_pointers.keys())
         for cell_index in self.forcing_function_pointers:
             print >> output_file, cell_index,
-            for face_index, orientation in self.forcing_function_pointers[cell_index]:
+            for face_index, orientation in \
+                    self.forcing_function_pointers[cell_index]:
                 print >> output_file, face_index, orientation,
-            print >> output_file, "\n", 
+            print >> output_file, "\n",
 
-        print >> output_file, "FACE_TO_LAGRANGE_POINTERS", 
+        print >> output_file, "FACE_TO_LAGRANGE_POINTERS",
         print >> output_file, len(self.face_to_lagrange_pointers.keys())
         for key in self.face_to_lagrange_pointers:
             lagrange_index, orientation = self.face_to_lagrange_pointers[key]
             print >> output_file, key, lagrange_index, orientation
-        
-        print >> output_file, "LAGRANGE_TO_FACE_POINTERS", 
+
+        print >> output_file, "LAGRANGE_TO_FACE_POINTERS",
         print >> output_file, len(self.lagrange_to_face_pointers.keys())
         for key in self.lagrange_to_face_pointers:
             face_index, orientation = self.lagrange_to_face_pointers[key]
             print >> output_file, key, face_index, orientation
-        
+
         output_file.close()
 
     def set_cell_faces(self, cell_index, faces):
@@ -884,9 +896,9 @@ class Mesh:
     def set_cell_orientation(self, cell_index, orientation):
         """ Sets the cell orientation of faces.
 
-        :param int cell_index: Cell index. 
+        :param int cell_index: Cell index.
         :paramt list orientation: List of new cell face orientations.
-        
+
         :return: None
         """
         self.cell_normal_orientation[cell_index] = orientation
@@ -934,9 +946,6 @@ class Mesh:
             new_size = self._memory_extension(len(self.cell_real_centroid))
             self.cell_real_centroid.resize((new_size, 3))
 
-        if self.has_two_d_polygons:
-            self.two_d_polygons.append(None)
-
         if self.has_alpha:
             self.cell_alpha.append(None)
 
@@ -946,8 +955,6 @@ class Mesh:
                 new_size = self._memory_extension(
                     len(self.cell_shifted_centroid))
                 self.cell_shifted_centroid.resize((new_size, 3))
-            ## TEMP
-
 
         return new_cell_index
 
@@ -1043,40 +1050,13 @@ class Mesh:
         """ Return permeability tensor k
         (Numpy matrix) for cell_index.
         """
-        return self.cell_k[cell_index].reshape((3,3))
+        return self.cell_k[cell_index].reshape((3, 3))
 
     def get_all_k(self):
         """ Returns a list of all cell
         permeability tensors.
         """
         return self.cell_k
-
-    def use_two_d_polygons(self):
-        """ This function must be called in order to
-        set polygon representations
-        of cells in 2D meshes.
-
-        2D polygons represents the
-        cell as set of the point indices
-        that make up a cell. This data structure
-        is useful when computing the area of the cell
-        as well as for visualization purposes.
-        However, it is no necessary for construction
-        of in the MFD class.
-        """
-        self.has_two_d_polygons = True
-
-    def set_two_d_polygon(self, cell_index, polygon):
-        """ Set the 2D polygon for cell_index.
-        polygon = [p_1, p_2, ... p_n]
-        """
-        self.two_d_polygons[cell_index] = polygon
-
-    def get_2d_polygon(self, cell_index):
-        """ Returns the 2D polygon for
-        cell_index.
-        """
-        return self.two_d_polygons[cell_index]
 
     def use_alpha(self):
         """ Activates the ability to set the
@@ -1248,17 +1228,6 @@ class Mesh:
 
         return number_of_boundary_faces
 
-    def set_dirichlet_by_face(self,
-                              face_index,
-                              face_orientation,
-                              value):
-        """ Directly sets Dirichlet value to face_index.
-        The input *value* corresponding to the
-        integral of the pressure over the face.
-        """
-        self.dirichlet_boundary_values[face_index] = value * \
-            self.get_face_area(face_index)*face_orientation
-
     def add_internal_no_flow(self, face_index, face_orientation):
         """ Sets face as interior no flow boundary condition.
         """
@@ -1318,7 +1287,7 @@ class Mesh:
         """ Returns the lagrange multiplier index
         and the face normal orientation.
         """
-        return self.face_to_lagrange_pointer[face_index]
+        return self.face_to_lagrange_pointers[face_index]
 
     def set_lagrange_to_face_pointers(self,
                                       lagrange_index,
@@ -1354,8 +1323,8 @@ class Mesh:
                             face_indices,
                             face_orientations):
         """ Sets the value of the forcing function
-        implicity as the sum of the fluxes from list 
-        of faces. This approach is used for coupling 
+        implicity as the sum of the fluxes from list
+        of faces. This approach is used for coupling
         fractures with a reservoir.
         """
         # The function adds a zero entry to the
@@ -1425,8 +1394,8 @@ class Mesh:
         return self.gravity_acceleration
 
     def find_basis_for_face(self, face_index):
-        """ Finds two non collinear vectors 
-        in face to serve as basis for plane. 
+        """ Finds two non collinear vectors
+        in face to serve as basis for plane.
         """
         face = self.get_face(face_index)
         for i in range(len(face)):
@@ -1704,43 +1673,6 @@ class Mesh:
 
         return (volume, centroid)
 
-    def add_scalar_to_matplotlib(self, cell_data):
-        """ Method for visualizing scalar data in
-        general 2D meshes using matplotlib.
-        """
-        fig = pylab.figure()
-        ax = fig.add_subplot(111)
-        patches = map(lambda x:Polygon(x, True), self.two_d_polygons)
-        p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=1.0)
-        p.set_array(cell_data)
-        ax.add_collection(p)
-        p.set_clim([min(cell_data), max(cell_data)])
-        pylab.colorbar(p)
-
-    def add_vector_to_matplotlib(self, face_data):
-        """ Method for visualizing vector data in
-        general 2D meshes using matplotlib.
-        """
-        max_velocity = max(map(abs, face_data))
-        min_edge_length = min(self.face_areas)
-        vector_scale = max_velocity/min_edge_length*.5
-        vectors = map(lambda x: x[0]*x[1], zip(face_data, self.face_normals))
-        pylab.quiver(map(lambda x: x[0], self.face_real_centroids),
-                     map(lambda x: x[1], self.face_real_centroids),
-                     map(lambda x: x[0], vectors),
-                     map(lambda x: x[1], vectors),
-                     angles='xy',scale = vector_scale,color='r')
-
-    def show_matplotlib(self, file_name = None):
-        """ Displays the 2D mesh data that was set using
-        add_scalar_to_matplotlib and add_vector_to_matplotlib.
-        If no file_name is specified, the plot will show
-        as a pop up during runtime.
-        """
-        if file_name is not None:
-            pylab.savefig(file_name)
-        pylab.show()
-
     def output_vector_field(self,
                             file_name,
                             vector_magnitudes = [],
@@ -2007,16 +1939,16 @@ class Mesh:
             new_cell_faces[local_face_index_in_other] = new_face_index
 
     def construct_polygon_from_segments(self, segments):
-        """ Takes point pairs and constructs a single polygon 
-        from joining all the ends. The pairs are identified 
-        by directly comparing the point locations. 
+        """ Takes point pairs and constructs a single polygon
+        from joining all the ends. The pairs are identified
+        by directly comparing the point locations.
         """
-        ## Start by setting the first point. 
+        ## Start by setting the first point.
         current_segments = list(segments)
-        
+
         new_face = [current_segments[0][0]]
         point_to_match = current_segments[0][1]
-        
+
         current_segments.pop(0)
 
         while len(current_segments)>0:
@@ -2046,9 +1978,9 @@ class Mesh:
         return new_face
 
     def divide_cell_by_plane(self, cell_index, point_on_plane, plane_normal):
-        """ Divides given cell into two cells 
-        based on a plane specified by a point and normal 
-        on the plane. 
+        """ Divides given cell into two cells
+        based on a plane specified by a point and normal
+        on the plane.
         """
         current_cell = self.get_cell(cell_index)
         interior_face_segments = []
@@ -2066,16 +1998,16 @@ class Mesh:
                     new_face_1.append(point_index)
                 else:
                     new_face_2.append(point_index)
-                
+
                 p1 = self.get_point(point_index)
                 p2 = self.get_point(next_point_index)
-                
+
                 vector = p2 - p1
                 vector /= np.linalg.norm(vector)
-                
+
                 d = np.dot((point_on_plane - p1), plane_normal)
                 denom = np.dot(vector, plane_normal)
-                
+
                 if abs(denom) < 1e-10:
                     pass
                 else:
@@ -2090,16 +2022,13 @@ class Mesh:
                         else:
                             interior_face_segments[-1].append(new_point_index)
                         intersection_switch = not intersection_switch
-               
+
             if len(new_face_2) > 0:
                 self.set_face(face_index, new_face_1)
                 assert(len(new_face_1)>2)
                 (face_1_area, face_1_centroid)  = self.find_face_centroid(face_index)
                 self.set_face_real_centroid(face_index, face_1_centroid)
                 self.set_face_area(face_index, face_1_area)
-
-                for point in new_face_1+[new_face_1[0]]:
-                    current_point = self.get_point(point)
 
                 new_face_index = self.add_face(new_face_2)
 
@@ -2120,11 +2049,11 @@ class Mesh:
                 if self.is_boundary_face(face_index, self.get_boundary_markers()):
                     boundary_marker = self.find_boundary_marker(face_index,
                                                                 self.get_boundary_markers())
-                    self.add_boundary_face(boundary_marker, 
+                    self.add_boundary_face(boundary_marker,
                                            new_face_index, cell_orientations[local_face_index])
 
                 self.set_cell_orientation(cell_index,
-                                          np.array(list(cell_orientations) + 
+                                          np.array(list(cell_orientations) +
                                                    [cell_orientations[local_face_index]]))
 
                 cell_next_door = list(self.get_face_to_cell(face_index))
@@ -2140,28 +2069,25 @@ class Mesh:
                     next_door_orientations = np.array(next_door_orientations)
 
                     self.set_cell_faces(cell_next_door[0], next_door_faces)
-                    self.set_cell_orientation(cell_next_door[0], 
+                    self.set_cell_orientation(cell_next_door[0],
                                               next_door_orientations)
                     if face_segments_to_be_added.has_key(cell_next_door[0]):
                         face_segments_to_be_added[cell_next_door[0]] += [interior_face_segments[-1]]
                     else:
                         face_segments_to_be_added[cell_next_door[0]] = [interior_face_segments[-1]]
 
-                for point in new_face_2+[new_face_2[0]]:
-                    current_point = self.get_point(point)
 
         if face_segments_to_be_added.has_key(cell_index):
             interior_face_segments += face_segments_to_be_added[cell_index]
- 
+
         if len(interior_face_segments) > 0:
             new_face = self.construct_polygon_from_segments(interior_face_segments)
 
-        stage = 1
         for i in range(1):
-            v1 = self.get_point(new_face[i+1]) - self.get_point(new_face[i]) 
-            v2 = self.get_point(new_face[i]) - self.get_point(new_face[i-1]) 
+            v1 = self.get_point(new_face[i+1]) - self.get_point(new_face[i])
+            v2 = self.get_point(new_face[i]) - self.get_point(new_face[i-1])
             new_face_normal = np.cross(v2, v1)
-   
+
             new_face_normal /= np.linalg.norm(new_face_normal)
 
         new_face_index = self.add_face(new_face)
@@ -2172,15 +2098,13 @@ class Mesh:
 
         new_face_normal = self.find_face_normal(new_face_index)
         self.set_face_normal(new_face_index, new_face_normal)
-        
-        cell_faces = self.get_cell(cell_index)
 
         faces_for_cell_1 = []
         faces_for_cell_2 = []
-        
+
         normals_for_cell_1 = []
         normals_for_cell_2 = []
-        
+
         for face_index in self.get_cell(cell_index):
             current_center = self.get_face_real_centroid(face_index)
             plane_to_center = point_on_plane - current_center
@@ -2199,7 +2123,7 @@ class Mesh:
 
         faces_for_cell_1.append(new_face_index)
         faces_for_cell_2.append(new_face_index)
-        
+
         if np.dot(new_face_normal, plane_normal)>0.:
             normals_for_cell_1.append(1)
             normals_for_cell_2.append(-1)
@@ -2207,26 +2131,26 @@ class Mesh:
         else:
             normals_for_cell_1.append(-1)
             normals_for_cell_2.append(1)
-            
+
         self.set_cell_faces(cell_index, faces_for_cell_1)
         self.set_cell_orientation(cell_index, normals_for_cell_1)
-        
+
         (cell_volume, cell_centroid) = self.find_volume_centroid(cell_index)
         self.set_cell_real_centroid(cell_index, cell_centroid)
         self.set_cell_volume(cell_index, cell_volume)
 
-        new_cell_index = self.add_cell(faces_for_cell_2, 
+        new_cell_index = self.add_cell(faces_for_cell_2,
                                        normals_for_cell_2)
-        
+
         (cell_volume, cell_centroid) = self.find_volume_centroid(new_cell_index)
 
         self.set_cell_volume(new_cell_index, cell_volume)
         self.set_cell_real_centroid(new_cell_index, cell_centroid)
 
         self.set_cell_k(new_cell_index, self.get_cell_k(cell_index))
-        
+
         return new_cell_index
-        
+
 
     def build_frac_from_faces(self, faces):
         """ Takes a list of face indices, and
@@ -2254,12 +2178,12 @@ class Mesh:
                         point_2_2 = self.get_point(current_face_points_2[local_point_index_2+1])
 
                         if np.linalg.norm(abs(point_1-point_1_2)+abs(point_2-point_2_2))< 1.e-12:
-                            connections.append([local_face_index, 
-                                                local_face_index_2, 
+                            connections.append([local_face_index,
+                                                local_face_index_2,
                                                 local_point_index,
                                                 local_point_index+1,
-                                                local_point_index_2, 
-                                                local_point_index_2+1, 
+                                                local_point_index_2,
+                                                local_point_index_2+1,
                                                 1])
 
                             if local_point_index in non_connected_edges[local_face_index]:
@@ -2268,14 +2192,14 @@ class Mesh:
                                 non_connected_edges[local_face_index_2].remove(local_point_index_2)
 
                         if np.linalg.norm(abs(point_2-point_1_2)+abs(point_1-point_2_2))< 1.e-12:
-                            connections.append([local_face_index, 
-                                                local_face_index_2, 
+                            connections.append([local_face_index,
+                                                local_face_index_2,
                                                 local_point_index,
                                                 local_point_index+1,
                                                 local_point_index_2,
                                                 local_point_index_2+1,
                                                 0])
-                            
+
                             if local_point_index in non_connected_edges[local_face_index]:
                                 non_connected_edges[local_face_index].remove(local_point_index)
                             if local_point_index_2 in non_connected_edges[local_face_index_2]:
@@ -2284,13 +2208,13 @@ class Mesh:
         ##Find edges that have more than two connections
         multiple_connection_indices = []
         multiple_connection_groups = []
-        
+
         for (connection_index, connection) in enumerate(connections):
 
             first_face = self.get_face(faces[connection[0]])
             point1 = self.get_point(first_face[connection[2]])
             point2 = self.get_point(first_face[connection[3]%len(first_face)])
-            
+
             multiple_connection_groups.append([])
             for remote_connection_index in range(connection_index+1, len(connections)):
                 if remote_connection_index not in multiple_connection_indices:
@@ -2302,7 +2226,7 @@ class Mesh:
                     if np.linalg.norm(abs(point1-point1_remote)+abs(point2-point2_remote))< 1.e-10 or\
                          np.linalg.norm(abs(point2-point1_remote)+abs(point1-point2_remote))< 1.e-10:
                         if len(multiple_connection_groups[-1]) == 0:
-                            multiple_connection_groups[-1].append(connection_index) 
+                            multiple_connection_groups[-1].append(connection_index)
                             multiple_connection_groups[-1].append(remote_connection_index)
                             multiple_connection_indices.append(connection_index)
                             multiple_connection_indices.append(remote_connection_index)
@@ -2318,7 +2242,7 @@ class Mesh:
             new_multiple_connection_groups.append([])
             for connection_index in group:
                 new_multiple_connection_groups[-1].append(list(connections[connection_index]))
-                
+
         multiple_connection_groups = new_multiple_connection_groups
         connections_without_multiple = []
 
@@ -2327,8 +2251,8 @@ class Mesh:
                 connections_without_multiple.append(connections[connection_index])
 
         subface_connections = []
-        ## For multiple connections, the joining faces must be divided 
-        ## to two, a top and a bottom face. 
+        ## For multiple connections, the joining faces must be divided
+        ## to two, a top and a bottom face.
         for group in multiple_connection_groups:
             done_faces = []
             for connection in group:
@@ -2340,7 +2264,7 @@ class Mesh:
                 home_vector = current_centroid-(point1+point2)/2.
                 home_vector /= np.linalg.norm(home_vector)
                 norm1 = self.get_face_normal(faces[current_face])
-                max_top_angle = -999 
+                max_top_angle = -999
                 max_top_connection_index =  None
                 max_bot_angle = -999
                 max_bot_connection_index = None
@@ -2358,12 +2282,12 @@ class Mesh:
                             top_angle += 2
                         else:
                             bottom_angle = top_angle+2
-                            top_angle = -top_angle  
+                            top_angle = -top_angle
 
                         if top_angle > max_top_angle:
                             max_top_angle = top_angle
                             max_top_connection_index = connection_index
-                        
+
                         if bottom_angle > max_bot_angle:
                             max_bot_angle = bottom_angle
                             max_bot_connection_index = connection_index
@@ -2373,34 +2297,34 @@ class Mesh:
 
                 if ((current_face, 'TOP')) not in done_faces:
                     subface_connections.append(group[max_top_connection_index]+['TOP'])
-                    done_faces.append((current_face, 'TOP')) 
+                    done_faces.append((current_face, 'TOP'))
                     if group[max_top_connection_index][6] == 0:
-                        done_faces.append((face2_top, 'TOP')) 
+                        done_faces.append((face2_top, 'TOP'))
                     else:
-                        done_faces.append((face2_top, 'BOT')) 
+                        done_faces.append((face2_top, 'BOT'))
 
                 if ((current_face, 'BOT')) not in done_faces:
-                    subface_connections.append(group[max_bot_connection_index]+['BOT'])        
+                    subface_connections.append(group[max_bot_connection_index]+['BOT'])
                     done_faces.append((current_face, 'BOT'))
                     if group[max_bot_connection_index][6] == 0:
                         done_faces.append((face2_bot, 'BOT'))
                     else:
-                        done_faces.append((face2_bot, 'TOP')) 
+                        done_faces.append((face2_bot, 'TOP'))
 
         connections = connections_without_multiple
 
-        ## Loop through all the connections, and find out which 
-        ## faces are to contribute to the normal calculation. 
+        ## Loop through all the connections, and find out which
+        ## faces are to contribute to the normal calculation.
         for connection in connections:
-            ## The two faces already there 
+            ## The two faces already there
             face_1 = connection[0]
             face_2 = connection[1]
-            faces_for_point_1 = set([(connection[0], 0), 
+            faces_for_point_1 = set([(connection[0], 0),
                                      (connection[1], connection[6])])
-            faces_for_point_2 = set([(connection[0], 0), 
+            faces_for_point_2 = set([(connection[0], 0),
                                      (connection[1], connection[6])])
-            ## Loop through all the connections, and find overlap 
-            ## between the local point indices. 
+            ## Loop through all the connections, and find overlap
+            ## between the local point indices.
             for remote_connection in connections:
                 if remote_connection[0] == face_1 and \
                         remote_connection[1] == face_2:
@@ -2409,7 +2333,7 @@ class Mesh:
 
                     if remote_connection[0] == face_1:
                         if connection[2] in remote_connection[2:4]:
-                            faces_for_point_1.add((remote_connection[1], 
+                            faces_for_point_1.add((remote_connection[1],
                                                    remote_connection[6]))
 
                         if connection[3] in remote_connection[2:4]:
@@ -2418,68 +2342,68 @@ class Mesh:
 
                     if remote_connection[1] == face_1:
                         if connection[2] in remote_connection[4:6]:
-                            faces_for_point_1.add((remote_connection[0], 
+                            faces_for_point_1.add((remote_connection[0],
                                                    remote_connection[6]))
 
                         if connection[3] in remote_connection[4:6]:
-                            faces_for_point_2.add((remote_connection[0], 
+                            faces_for_point_2.add((remote_connection[0],
                                                    remote_connection[6]))
 
                     if remote_connection[0] == face_2:
                         if connection[4] in remote_connection[2:4]:
                             if connection[6] == 1:
-                                faces_for_point_1.add((remote_connection[1], 
+                                faces_for_point_1.add((remote_connection[1],
                                                        remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_2.add((remote_connection[1], 
+                            else:
+                                faces_for_point_2.add((remote_connection[1],
                                                        remote_connection[6]^connection[6]))
 
                         if connection[5] in remote_connection[2:4]:
                             if connection[6] == 1:
-                                faces_for_point_2.add((remote_connection[0], 
+                                faces_for_point_2.add((remote_connection[0],
                                                        remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_1.add((remote_connection[0], 
+                            else:
+                                faces_for_point_1.add((remote_connection[0],
                                                        remote_connection[6]^connection[6]))
 
                     if remote_connection[1] == face_2:
                         if connection[4] in remote_connection[4:6]:
                             if connection[6] == 1:
-                                faces_for_point_1.add((remote_connection[1], 
+                                faces_for_point_1.add((remote_connection[1],
                                                        remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_2.add((remote_connection[1], 
+                            else:
+                                faces_for_point_2.add((remote_connection[1],
                                                        remote_connection[6]^connection[6]))
 
                         if connection[5] in remote_connection[4:6]:
                             if connection[6] == 1:
-                                faces_for_point_2.add((remote_connection[0], 
+                                faces_for_point_2.add((remote_connection[0],
                                                        remote_connection[6]^connection[6]))
-                            else: 
-                                faces_for_point_1.add((remote_connection[0], 
+                            else:
+                                faces_for_point_1.add((remote_connection[0],
                                                        remote_connection[6]^connection[6]))
 
             connection += [faces_for_point_1, faces_for_point_2]
-        
-        ## Loop through all the connections, and find out which 
-        ## faces are to contribute to the normal calculation. 
+
+        ## Loop through all the connections, and find out which
+        ## faces are to contribute to the normal calculation.
         for connection in subface_connections:
-            ## The two faces already there 
+            ## The two faces already there
             face_1 = connection[0]
             face_2 = connection[1]
-            faces_for_point_1 = set([(connection[0], 0), 
+            faces_for_point_1 = set([(connection[0], 0),
                                      (connection[1], connection[6])])
-            faces_for_point_2 = set([(connection[0], 0), 
+            faces_for_point_2 = set([(connection[0], 0),
                                      (connection[1], connection[6])])
 
             connection += [faces_for_point_1, faces_for_point_2]
 
 
-        # Build the faces. 
+        # Build the faces.
         new_faces = []
-        ## Maps the cells to the walls that make them. 
-        ## The cells are identified by the index of the 
-        ## generating face. 
+        ## Maps the cells to the walls that make them.
+        ## The cells are identified by the index of the
+        ## generating face.
         face_to_walls = {}
         top_points = []
         bot_points = []
@@ -2489,22 +2413,22 @@ class Mesh:
             top_points.append([-1]*len(self.get_face(faces[face])))
             bot_points.append([-1]*len(self.get_face(faces[face])))
             mid_points.append([-1]*len(self.get_face(faces[face])))
-                
+
         for connection in connections:
             norm1 = np.zeros(3)
             for (local_face_index, orientation) in connection[7]:
-                if orientation == 0: 
+                if orientation == 0:
                     norm1 += self.get_face_normal(faces[local_face_index])
                 else:
                     norm1 -= self.get_face_normal(faces[local_face_index])
 
             norm2 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
-                if orientation == 0: 
+                if orientation == 0:
                     norm2 += self.get_face_normal(faces[local_face_index])
                 else:
                     norm2 -= self.get_face_normal(faces[local_face_index])
-            
+
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
 
@@ -2514,17 +2438,17 @@ class Mesh:
             point2 = -width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
             point3 = width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
             point4 = width*norm1+self.get_point(full_face[connection[2]])
-            
+
             point_1_index = self.add_point(point1)
             point_2_index = self.add_point(point2)
             point_3_index = self.add_point(point3)
             point_4_index = self.add_point(point4)
-            
-            new_face_index = self.add_face([point_1_index, 
-                                            point_2_index, 
-                                            point_3_index, 
+
+            new_face_index = self.add_face([point_1_index,
+                                            point_2_index,
+                                            point_3_index,
                                             point_4_index,])
-            
+
             (area, centroid) =  self.find_face_centroid(new_face_index)
             current_face_normal = self.find_face_normal(new_face_index)
             self.set_face_normal(new_face_index, current_face_normal)
@@ -2551,7 +2475,7 @@ class Mesh:
                 top_points[connection[1]][connection[5]%
                                       len(self.get_face(faces[connection[1]]))]=point_4_index
                 top_points[connection[1]][connection[4]]=point_3_index
-                
+
                 bot_points[connection[1]][connection[5]%
                                           len(self.get_face(faces[connection[1]]))]=point_1_index
                 bot_points[connection[1]][connection[4]]=point_2_index
@@ -2560,30 +2484,30 @@ class Mesh:
                 bot_points[connection[1]][connection[4]]=point_4_index
                 bot_points[connection[1]][connection[5]%
                                       len(self.get_face(faces[connection[1]]))]=point_3_index
-                
+
                 top_points[connection[1]][connection[4]]=point_1_index
                 top_points[connection[1]][connection[5]%
                                       len(self.get_face(faces[connection[1]]))]=point_2_index
 
             new_faces.append(new_face_index)
 
-                
-        ## Build the subfaces. 
+
+        ## Build the subfaces.
         for connection in subface_connections:
             norm1 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
-                if orientation == 0: 
+                if orientation == 0:
                     norm1 += self.get_face_normal(faces[local_face_index])
                 else:
                     norm1 -= self.get_face_normal(faces[local_face_index])
 
             norm2 = np.zeros(3)
             for (local_face_index, orientation) in connection[8]:
-                if orientation == 0: 
+                if orientation == 0:
                     norm2 += self.get_face_normal(faces[local_face_index])
                 else:
                     norm2 -= self.get_face_normal(faces[local_face_index])
-            
+
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
 
@@ -2598,7 +2522,7 @@ class Mesh:
 
             elif connection[7] == 'BOT':
                 full_face = self.get_face(faces[connection[0]])
-                point1 = -width*norm1+self.get_point(self.get_face(faces[connection[0]])[connection[2]]) 
+                point1 = -width*norm1+self.get_point(self.get_face(faces[connection[0]])[connection[2]])
                 point2 = -width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
                 point3 = self.get_point(full_face[connection[3]%len(full_face)])
                 point4 = self.get_point(full_face[connection[2]])
@@ -2607,20 +2531,20 @@ class Mesh:
             point_2_index = self.add_point(point2)
             point_3_index = self.add_point(point3)
             point_4_index = self.add_point(point4)
-                
-            new_face_index = self.add_face([point_1_index, 
-                                            point_2_index, 
-                                            point_3_index, 
+
+            new_face_index = self.add_face([point_1_index,
+                                            point_2_index,
+                                            point_3_index,
                                             point_4_index,])
 
             (area, centroid) =  self.find_face_centroid(new_face_index)
             current_face_normal = self.find_face_normal(new_face_index)
             self.set_face_normal(new_face_index, current_face_normal)
             self.set_face_real_centroid(new_face_index, centroid)
-            
+
             if self.has_face_shifted_centroid:
                 self.set_face_shifted_centroid(new_face_index, centroid)
-            
+
             self.set_face_area(new_face_index, area)
 
             face_to_walls[connection[0]].append((new_face_index, 1))
@@ -2651,17 +2575,17 @@ class Mesh:
                                               len(self.get_face(faces[connection[1]]))]=point_4_index
                     top_points[connection[1]][connection[4]%
                                               len(self.get_face(faces[connection[1]]))]=point_3_index
-                    
+
                     mid_points[connection[1]][connection[5]%
                                               len(self.get_face(faces[connection[1]]))]=point_1_index
                     mid_points[connection[1]][connection[4]%
                                               len(self.get_face(faces[connection[1]]))]=point_2_index
-                    
+
                 else:
                     bot_points[connection[1]][connection[4]]=point_4_index
                     bot_points[connection[1]][connection[5]%
                                               len(self.get_face(faces[connection[1]]))]=point_3_index
-                    
+
                     mid_points[connection[1]][connection[4]]=point_1_index
                     mid_points[connection[1]][connection[5]%
                                               len(self.get_face(faces[connection[1]]))]=point_2_index
@@ -2671,29 +2595,29 @@ class Mesh:
                     mid_points[connection[1]][connection[5]%
                                               len(self.get_face(faces[connection[1]]))]=point_4_index
                     mid_points[connection[1]][connection[4]]=point_3_index
-                    
+
                     bot_points[connection[1]][connection[5]%
                                               len(self.get_face(faces[connection[1]]))]=point_1_index
                     bot_points[connection[1]][connection[4]]=point_2_index
-                    
+
                 else:
                     mid_points[connection[1]][connection[4]]=point_4_index
                     mid_points[connection[1]][connection[5]%
                                               len(self.get_face(faces[connection[1]]))]=point_3_index
-                    
+
                     top_points[connection[1]][connection[4]%
                                               len(self.get_face(faces[connection[1]]))]=point_1_index
                     top_points[connection[1]][connection[5]%
                                               len(self.get_face(faces[connection[1]]))]=point_2_index
 
-                
+
             new_faces.append(new_face_index)
 
         for (local_face_index, face) in enumerate(non_connected_edges):
             for point1 in face:
                 global_face_index = faces[local_face_index]
                 point2 = (point1+1)%len(self.get_face(global_face_index))
-                
+
                 new_face_points = []
                 norm = self.get_face_normal(global_face_index)
                 width = .005
@@ -2712,12 +2636,12 @@ class Mesh:
                     bot_points[local_face_index][point2] = point_2_index
                 else:
                     point_2_index = bot_points[local_face_index][point2]
-                    
+
                 new_face_points.append(point_2_index)
 
                 if mid_points[local_face_index][point2] != -1:
                     new_face_points.append(mid_points[local_face_index][point2])
-                
+
                 if top_points[local_face_index][point2] == -1:
                     new_point = width*norm+self.get_point(self.get_face(global_face_index)[point2])
                     point_3_index = self.add_point(new_point)
@@ -2725,7 +2649,7 @@ class Mesh:
                 else:
                     point_3_index = top_points[local_face_index][point2]
 
-                new_face_points.append(point_3_index)                
+                new_face_points.append(point_3_index)
 
                 if top_points[local_face_index][point1] == -1:
                     new_point = width*norm+self.get_point(self.get_face(global_face_index)[point1])
@@ -2742,15 +2666,15 @@ class Mesh:
                 new_face_index = self.add_face(new_face_points)
                 current_face_normal = self.find_face_normal(new_face_index)
                 self.set_face_normal(new_face_index, current_face_normal)
-                                     
+
                 (area, centroid) =  self.find_face_centroid(new_face_index)
                 self.set_face_real_centroid(new_face_index, centroid)
-                                            
+
                 if self.has_face_shifted_centroid:
                     self.set_face_shifted_centroid(new_face_index, centroid)
-                
+
                 self.set_face_area(new_face_index, area)
-                
+
                 if np.dot(current_face_normal, centroid -self.get_face_real_centroid(global_face_index))>  0.:
                     self.add_internal_no_flow(new_face_index, 1)
                 else:
@@ -2761,7 +2685,7 @@ class Mesh:
                 new_faces.append(new_face_index)
 
 
-        ## Adds the top and bottom faces. 
+        ## Adds the top and bottom faces.
         for local_face_index in range(len(faces)):
             new_face_points = top_points[local_face_index]
             new_face_index = self.add_face(new_face_points)
@@ -2775,7 +2699,7 @@ class Mesh:
 
             if self.has_face_shifted_centroid:
                 self.set_face_shifted_centroid(new_face_index, centroid)
-                
+
             self.set_face_area(new_face_index, area)
 
             new_faces.append(new_face_index)
@@ -2798,17 +2722,17 @@ class Mesh:
             self.set_face_area(new_face_index, area)
 
             new_faces.append(new_face_index)
-        
-        # Duplicate reservoir face for interior dirichlet boundary. 
+
+        # Duplicate reservoir face for interior dirichlet boundary.
         for face in face_to_walls:
             top_res_face_index = faces[face]
 
             if self.face_to_cell[top_res_face_index, 0] >= 0 and \
-                    self.face_to_cell[top_res_face_index, 1] >= 0 : 
+                    self.face_to_cell[top_res_face_index, 1] >= 0 :
                 bot_res_face_index = self.add_face(list(self.get_face(top_res_face_index)))
                 self.set_face_area(bot_res_face_index, self.get_face_area(top_res_face_index))
                 self.set_face_normal(bot_res_face_index, self.get_face_normal(top_res_face_index))
-                self.set_face_real_centroid(bot_res_face_index, 
+                self.set_face_real_centroid(bot_res_face_index,
                                             self.get_face_real_centroid(top_res_face_index))
                 if self.has_face_shifted_centroid:
                     self.set_face_shifted_centroid(bot_res_face_index,
@@ -2830,11 +2754,11 @@ class Mesh:
                 self.set_cell_faces(bottom_cell, new_cell_faces)
             else:
                 raise Exception("Face on boundary encountered")
-                
-            new_cell_index = self.add_cell(array.array('i', [x[0] for x in face_to_walls[face]]), 
+
+            new_cell_index = self.add_cell(array.array('i', [x[0] for x in face_to_walls[face]]),
                                            array.array('i', [x[1] for x in face_to_walls[face]]))
             self.set_cell_domain(new_cell_index, 1)
-            
+
             (volume, centroid) = self.find_volume_centroid(new_cell_index)
             self.set_cell_volume(new_cell_index, volume)
             self.set_cell_real_centroid(new_cell_index, centroid)
@@ -2843,30 +2767,21 @@ class Mesh:
 
             self.set_cell_k(new_cell_index, np.eye(3)*1.)
 
-            self.set_forcing_pointer(new_cell_index, 
-                                     [top_res_face_index, bot_res_face_index], 
+            self.set_forcing_pointer(new_cell_index,
+                                     [top_res_face_index, bot_res_face_index],
                                      [top_res_face_orientation, -top_res_face_orientation])
 
-            self.set_dirichlet_face_pointer(top_res_face_index, 
-                                            top_res_face_orientation, 
-                                            new_cell_index) 
-            self.set_dirichlet_face_pointer(bot_res_face_index, 
-                                            -top_res_face_orientation, 
+            self.set_dirichlet_face_pointer(top_res_face_index,
+                                            top_res_face_orientation,
+                                            new_cell_index)
+            self.set_dirichlet_face_pointer(bot_res_face_index,
+                                            -top_res_face_orientation,
                                             new_cell_index)
 
         self.output_vtk_faces("new_faces", new_faces)
 
     def build_mesh(self):
-        """ Base class function for constructing the mesh. 
+        """ Base class function for constructing the mesh.
         """
         raise NotImplementedError
-
-
-    
-
-    
-    
-    
-        
-
 
