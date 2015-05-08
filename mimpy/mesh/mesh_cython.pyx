@@ -15,7 +15,9 @@ def all_cell_volumes_centroids(int[:,:] cell_pointer,
                                float [:, :] normals, 
                                int [:, :] face_to_cell, 
                                ):
-
+    """ Computes and sets all the cell volumes and real
+    cell centroids for mesh.
+    """
     cdef float[:] current_normal
     cdef int[:] current_face
     cdef int face_index 

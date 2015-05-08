@@ -171,24 +171,14 @@ class variable_array():
             self.pointers[index, 1] = len(data)
             self.next_data_pos += len(data)
 
-
 class Mesh:
-    """ The *Mesh* class is the basic intereface for accessing
-    the data needed from a mesh to build an MFD discretization.
-    When correctly populated, an instance of Mesh
-    would lead to a correctly constructed saddle-point
-    system using the MFD class. It stores basic information
-    about the geometry of the mesh as well cell and face
-    properties. The class is generic enough to represent
-    both 2 and 3 dimensional meshes. The class also
-    contains basic functions for plotting and
-    visualization.
-
-    The Mesh class is not intended to be used on its own,
-    rather it should be subclassed for a specific type of
-    mesh. For example, when building a 3 dimensional
-    hexahedral mesh, a sublcass HexMesh inherits
-    from Mesh, and adds the appropriate functionality.
+    """ The **Mesh** class is a common representation of polygonal
+    meshes in Mimpy. In addition to the mesh data structure,
+    it provides commonly used mesh functions as such
+    calculating volumes and centroids as well as basic visualization. 
+    The **Mesh** class serves as base implementation, 
+    with the specific mesh types (such as hexahedra,
+    tetrahedra and Voronoi) inherting from it.
     """
     def __init__(self):
         # List of points used to construct mesh faces.
@@ -915,8 +905,8 @@ class Mesh:
         Returns the index of the new cell.
 
         :param list list_of_faces: List of face indices making up new cell.
-        :param list list_of_orientations: List of (1,-1) indicating
-            whether normals are pointing out (1) or in (-1) of cell.
+        :param list list_of_orientations: List consisting of 1s and -1s
+            indicating whether normals are pointing out (1) or in (-1) of cell.
 
         :return: New cell index.
         :rtype: int
@@ -961,22 +951,42 @@ class Mesh:
     def get_cell(self, cell_index):
         """ Given a cell_index, it returns the list of faces
         that make up that cell.
+
+        :param int cell_index: Cell index of interest.
+        :return: List of faces making up cell.
+        :rtype: list
         """
         return self.cells[cell_index]
-
-    def get_number_of_cells(self):
-        """ Returns total number of cells in mesh.
-        """
-        return len(self.cells)
 
     def get_cell_normal_orientation(self, cell_index):
         """ Given a cell index, returns a list of face
         orientations for that cell.
+
+        :param int cell_index: Index of cell.
+        :return: List of faces orientations in cell. The
+        list is made up of 1s and -1s, 1 if the corresponding
+        face normal is pointing out of the cell, and -1 if the
+        corresponding face normal is pointing into the cell.
+
+        :rtype: list
         """
         return self.cell_normal_orientation[cell_index]
 
+    def get_number_of_cells(self):
+        """ Returns total number of cells in mesh.
+
+        :return: Number of cells in mesh.
+        :rtype: int
+        """
+        return len(self.cells)
+
     def set_cell_real_centroid(self, cell_index, centroid):
         """ Sets the array of the cell centroid.
+
+        :param int cell_index: Index of cell.
+        :param ndarray centroid: New cell centroid.
+        
+        :return: None
         """
         self.cell_real_centroid[cell_index] = centroid
 
@@ -987,51 +997,78 @@ class Mesh:
 
     def get_all_cell_real_centroids(self):
         """ Returns list of all cell centroids.
+        
+        :return: List of all the cell centroids.
+        :rtype: ndarray
         """
         return self.cell_real_centroid[:self.get_number_of_cells()]
 
     def get_all_cell_shifted_centroids(self):
         """ Returns list of all cell centroids.
+
+        :return: List of all shifted cell centroid.
+        :rtype: ndarray
         """
         return self.cell_shifted_centroid[:self.get_number_of_cells()]
 
     def set_cell_shifted_centroid(self, cell_index, centroid):
-        """ Sets the shifted centroid. Since the shifted centroid
-        is a optional,
+        """ Sets the shifted centroid for cell_index.
+
+        :param int cell_index: Index of cell.
+        :param ndarray centroid: Shifted centroid point.
+
+        :return: None
         """
         self.cell_shifted_centroid[cell_index] = centroid
 
     def use_face_shifted_centroid(self):
-        """ Informs the MFD class to use the shifted centriod
-        rather than the real face centroid.
+        """ Sets whether a shifted face centroid will be used
+        for mesh.
         """
         self.has_face_shifted_centroid = True
 
     def is_using_face_shifted_centroid(self):
-        """ Returns True if MFD is to use the shifted
-        face centroids, False otherwise.
+        """ Returns if shifted face centroids are used
+        and set in mesh.
+
+        :return: Whether face shifted centroids are set
+        and used.
+        :rtype: bool
         """
         return self.has_face_shifted_centroid
 
     def use_cell_shifted_centroid(self):
-        """ Informs the MFD class to use the shifted centriod
-        rather than the real cell centroid.
+        """ Sets whether a shifted cell centroid will be used
+        for mesh.
         """
         self.has_cell_shifted_centroid = True
 
     def is_using_cell_shifted_centroid(self):
-        """ Returns True if MFD is to use the shifted
-        cell centroids, False otherwise.
+        """ Returns if shifted face centroids are used
+        and set in mesh.
+
+        :return: Whether cell shifted centroids are set
+        and used.
+        :rtype: bool
         """
         return self.has_cell_shifted_centroid
 
     def get_cell_shifted_centroid(self, cell_index):
-        """ Returns the shifted cell centroid for cell_index
+        """ Returns the shifted cell centroid for cell_index.
+
+        :param int cell_index: Index of cell.
+        :return: Cell shifted point.
+        :rtype: ndarray
         """
         return self.cell_shifted_centroid[cell_index]
 
     def set_cell_volume(self, cell_index, volume):
         """ Sets cell volume for cell_index.
+
+        :param int cell_index: Index of cell.
+        :param float volume: New volume to be set for cell.
+
+        :return: None
         """
         self.cell_volume[cell_index]  = volume
 
@@ -1168,24 +1205,46 @@ class Mesh:
                           face_index,
                           face_orientation):
         """ Assign face_index to a certain boundary_marker grouping.
-        the face_orientation indicated whether the normal of that
+        the face_orientation indicates whether the normal of that
         face points in (-1) or out (1) of the cell the face
         belongs to.
 
         A face should never be associated with more than one marker.
+
+        :param int boundary_marker: Boundary marker index face.
+        :param int face_index: Index of face.
+        :param  int face_orientation: Orientation of face normal
+             relative to the domain. (1) if pointing out, (-1) if
+             if pointing in.
+
+        :return: None
         """
         self.boundary_faces[boundary_marker].append([face_index,
                                                      face_orientation])
 
-    def set_boundary_faces(self, boundary_marker,
+    def set_boundary_faces(self, 
+                           boundary_marker,
                            face_orientation_list):
         """ Takes a boundary_marker index, and sets the entire list
         of tuples for that boundary marker.
+
+        :param int boundary_marker: Boundary marker to be set.
+        :param list face_orienation_list: A list of tuples of the form
+             [face_index, orientation] to be associated with the
+             indicated boundary marker.
+
+        :return: None
         """
         self.boundary_faces[boundary_marker] = face_orientation_list
 
     def get_boundary_faces_by_marker(self, boundary_marker):
         """ Returns a list of all the faces associated with a boundary_marker.
+
+        :param int boundary_marker: Boundary marker index. 
+        
+        :return: List of tupes [face_index, orientation] associated with
+             boundary_marker. 
+        :rtype: list
         """
         return self.boundary_faces[boundary_marker]
 
