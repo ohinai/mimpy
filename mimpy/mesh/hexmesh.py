@@ -10,8 +10,9 @@ class HexMesh(mesh.Mesh):
         """ Calculates an approximate normal for a
         face that might not planar.
 
-        :ivar int face_index: index of face.
-        :return: ndarray
+        :param int face_index: index of face.
+        :return: The face normal.
+        :rtype: ndarray
         """
         face = self.get_face(face_index)
         v1 = self.get_point(face[1]) - self.get_point(face[0])
@@ -24,8 +25,9 @@ class HexMesh(mesh.Mesh):
         """ Calculates an approximate centroid for a
         face that might not planar.
 
-        :ivar int face_index: index of face.
-        :return: ndarray
+        :param int face_index: index of face.
+        :return: Face centroid.
+        :rtype: ndarray
         """
         face = self.get_face(face_index)
         p1 = self.get_point(face[0])
@@ -83,8 +85,10 @@ class HexMesh(mesh.Mesh):
         """ Calculates an approximate area for a
         face that might not planar.
 
-        :ivar int face_index: index of face.
-        :return: float
+        :param int face_index: index of face.
+
+        :return: Face area.
+        :rtype: float
         """
         face = self.get_face(face_index)
         area = 0.
@@ -129,7 +133,8 @@ class HexMesh(mesh.Mesh):
         """ Return the dimension of the domain
         in the X direction.
 
-        :return: float
+        :return: Domain x dimension.
+        :rtype: float
         """
         return self.dim_x
 
@@ -137,7 +142,8 @@ class HexMesh(mesh.Mesh):
         """ Return the dimension of the domain
         in the Y direction.
 
-        :return: float
+        :return: Domain y dimension.
+        :rtype: float
         """
         return self.dim_y
 
@@ -145,16 +151,20 @@ class HexMesh(mesh.Mesh):
         """ Return the dimension of the domain
         in the Z direction.
 
-        :return: float
+        :return: Domain z dimension.
+        :rtype: float
         """
         return self.dim_z
 
     def _build_faces(self, ni, nj, nk):
         """ Function to build the mesh faces.
 
-        :ivar int ni: Number of faces in the x-direction.
-        :ivar int nj: Number of faces in the y-direction.
-        :ivar int nk: Number of faces in the z-direction.
+        :param int ni: Number of faces in the x-direction.
+        :param int nj: Number of faces in the y-direction.
+        :param int nk: Number of faces in the z-direction.
+
+        :return: Dictionary mapping ijka to index.
+        :rtype: dict
         """
         count = 0
         polygon_ijka_to_index = {}
@@ -224,14 +234,14 @@ class HexMesh(mesh.Mesh):
     def ijk_to_index(i, j, k):
         """ Returns cell index number for an i, j, k numbering.
 
-        :ivar int i: index in x-direction.
-        :ivar int j: index in y-direction.
-        :ivar int k: index in z-direction.
+        :param int i: index in x-direction.
+        :param int j: index in y-direction.
+        :param int k: index in z-direction.
         """
         pass
 
     def __init__(self):
-        """ Initialize hexmesh. 
+        """ Initialize hexmesh.
         """
         mesh.Mesh.__init__(self)
         self.dim_x = 0.0
@@ -248,7 +258,7 @@ class HexMesh(mesh.Mesh):
         :param int ni: Number of cells in the x-direction.
         :param int nj: Number of cells in the y-direction.
         :param int nk: Number of cells in the z-direction.
-        :param function K: Permeability map function. 
+        :param function K: Permeability map function.
              K(point, i, j, k ) -> 3x3 Matrix.
         :param float dim_x: Size of domain in the x-direction.
         :param float dim_y: Size of domain in the y-direction.
@@ -262,7 +272,6 @@ class HexMesh(mesh.Mesh):
         self.dim_x = dim_x
         self.dim_y = dim_y
         self.dim_z = dim_z
-
 
         dx = dim_x/(ni-1.)
         dy = dim_y/(nj-1.)
