@@ -1,3 +1,4 @@
+.. _codeoverview:
 
 Code Overview
 ==============

@@ -1,7 +1,7 @@
 
 import mimpy.mesh.hexmesh as hexmesh
 import mimpy.mfd.mfd as mfd
-import mimpy.models.singlephase.singlephase as singlephase 
+import mimpy.models.singlephase as singlephase 
 import numpy as np
 
 #Define the permeability function
@@ -16,13 +16,10 @@ def mod_function(p, i, j, k):
 res_mesh = hexmesh.HexMesh()
 
 ## Build the mesh 
-res_mesh.build_mesh(10, 10, 10, K, 100., 100., 100., mod_function)
+res_mesh.build_mesh(10, 10, 10, 100., 100., 100., K, mod_function)
 
 ## Initialize the MFD class
 res_mfd = mfd.MFD()
-res_mfd.set_compute_diagonality(True)
-res_mfd.set_m_e_construction_method(0)
-
 
 ## Initialize the singlephase model
 res_singlephase = singlephase.SinglePhase()
@@ -31,15 +28,15 @@ res_singlephase = singlephase.SinglePhase()
 res_singlephase.set_mesh_mfd(res_mesh, res_mfd)
 
 # Apply Dirichlet boundary conditions to all 6 faces. 
-res_singlephase.apply_pressure_boundary_from_function(0, lambda p:0.)
-res_singlephase.apply_pressure_boundary_from_function(1, lambda p:0.)
-res_singlephase.apply_pressure_boundary_from_function(2, lambda p:0.)
-res_singlephase.apply_pressure_boundary_from_function(3, lambda p:0.)
-res_singlephase.apply_pressure_boundary_from_function(4, lambda p:0.)
-res_singlephase.apply_pressure_boundary_from_function(5, lambda p:0.)
+res_singlephase.apply_pressure_boundary_from_function(0, lambda p: 0.)
+res_singlephase.apply_pressure_boundary_from_function(1, lambda p: 0.)
+res_singlephase.apply_pressure_boundary_from_function(2, lambda p: 0.)
+res_singlephase.apply_pressure_boundary_from_function(3, lambda p: 0.)
+res_singlephase.apply_pressure_boundary_from_function(4, lambda p: 0.)
+res_singlephase.apply_pressure_boundary_from_function(5, lambda p: 0.)
 
 ## Initial pressure 
-res_singlephase.set_initial_pressure(np.array([0.]*res_mesh.get_number_of_cells()))
+res_singlephase.set_initial_pressure(np.zeros(res_mesh.get_number_of_cells()))
 
 ## Porosity of the rock 
 res_singlephase.set_porosities(np.array([.3]*res_mesh.get_number_of_cells()))

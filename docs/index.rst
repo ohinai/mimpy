@@ -6,14 +6,22 @@
 Welcome to mimpy's documentation!
 ======================================
 
+Mimpy is a Python based library for solving certain Partial Differential Equations using 
+the Mimetic Finite Difference method. 
+Mimpy can be used for solving sub-surface flow equations.
+The code includes a class for representing, generating and 
+processing  general polyhedral meshes. 
+
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
-   
-   installation
+
    intro
+   installation
    codeoverview
+   singlephaseexample
    contributing
    authors
    history
