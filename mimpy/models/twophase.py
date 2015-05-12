@@ -3,6 +3,7 @@ import numpy as np
 from scipy import sparse, diag
 from scipy import interpolate
 import scipy.sparse.linalg.dsolve as dsolve
+import scipy.sparse.linalg as linalg
 
 class TwoPhase:
     """ Model class for solving two-phase, immiscible, 
@@ -27,6 +28,8 @@ class TwoPhase:
         # Rock properties 
         self.porosities = None
         
+        self.newton_solution = None
+
         # Fluid properties
         self.viscosity_water = None
         self.viscosity_oil = None
@@ -91,7 +94,7 @@ class TwoPhase:
         self.pressure_wells_pi = []
         self.pressure_wells_name = []
         self.production_files = []
-        
+
         # Files for outputting pressure well production/injection.  
         #self.pressure_well_outputs = []
 
@@ -110,7 +113,7 @@ class TwoPhase:
         """ Sets model name used for output. 
         """
         self.model_name = name
-        
+
     def set_output_frequency(self, frequency):
         """ Sets how often to output the solution 
         by iteration number. x
@@ -124,7 +127,7 @@ class TwoPhase:
         self.mesh = mesh
         self.mfd = mfd
         self.mfd.set_mesh(mesh)
-        
+
     def set_compressibility_water(self, compressibility_water):
         """ Sets water compressilibity. 
         """
@@ -134,7 +137,7 @@ class TwoPhase:
         """ Sets oil compressilibity. 
         """
         self.compressibility_oil = compressibility_oil
-    
+
     def set_ref_density_oil(self, ref_density_oil):
         """ Sets reference density of oil at reference pressure.
         """
@@ -416,6 +419,9 @@ class TwoPhase:
         # RHS construction is for Neumann and Dirichlet 
         # boundaries specified by the mesh. 
         self.rhs_mfd = self.mfd.build_rhs()
+        
+        self.newton_solution = np.zeros(self.mesh.get_number_of_cells()+
+                                        self.mesh.get_number_of_faces())
 
     def time_step_output(self, current_time, time_step):
         """ Function to be defined by user 
@@ -424,7 +430,7 @@ class TwoPhase:
         is intended for complex output. 
         """
         pass
-  
+    
     def start_solving(self):
         """ Starts solving the problem. 
         The two-phase system solves for p_o and s_w. Using IMPES, 
@@ -443,7 +449,7 @@ class TwoPhase:
         for time_step in range(1,self.number_of_time_steps+1):
             # update p_o and u_t (current pressure total flux) 
             self.time_step = time_step
-            self.update_pressure()
+            self.update_pressure(time_step)
             
 
             if time_step == 1 or time_step%10==0:
@@ -475,7 +481,7 @@ class TwoPhase:
             self.current_time = time_step*self.delta_t
             #print time_step
         
-    def update_pressure(self):
+    def update_pressure(self, time_step):
         """ Solve the pressure system for p_o. self.current_p_o and 
         self.current_u_t are considered the pressure and velocity 
         at time n, and routine computes these quantities for time 
@@ -530,7 +536,7 @@ class TwoPhase:
 
             f2sum3_l = np.zeros(self.mesh.get_number_of_cells())
             f2sum3_l += self.ref_density_water*(1.+self.compressibility_water*
-                                                (self.current_p_o[cell_index]))
+                                                (self.current_p_o))
             f2sum3_l *= self.current_s_w
             f2sum3_l += self.ref_density_oil*(1+self.compressibility_oil*self.current_p_o)\
                 *(1.-self.current_s_w)
@@ -555,15 +561,14 @@ class TwoPhase:
             newton_residual = np.linalg.norm(rhs)/np.linalg.norm(np.ones(len(rhs)))
 
             if newton_residual > self.newton_threshold:
-                #print "solving..."
-                newton_solution = dsolve.spsolve(lhs, -rhs)
-                delta_po_k = newton_solution[self.mesh.get_number_of_faces():]
-                delta_ut_k = newton_solution[:self.mesh.get_number_of_faces()]
+                self.newton_solution = dsolve.spsolve(lhs, -rhs)
+                delta_po_k = self.newton_solution[self.mesh.get_number_of_faces():]
+                delta_ut_k = self.newton_solution[:self.mesh.get_number_of_faces()]
                 
                 po_k += delta_po_k
                 ut_k += delta_ut_k
 
-            #print "\t\t", newton_step, newton_residual 
+            print "\t\t", newton_step, newton_residual 
             newton_step += 1
             
         self.previous_p_o = np.array(self.current_p_o)

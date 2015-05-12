@@ -13,19 +13,18 @@ The code includes a class for representing, generating and
 processing  general polyhedral meshes. 
 
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
 
    intro
    installation
-   codeoverview
    singlephaseexample
+   singlephase
+   codeoverview
+   examplegallery
    contributing
    authors
-   history
-   singlephase
+
 
 
 Indices and tables

@@ -10,7 +10,7 @@ Mimpy solves equations like the diffusion problem:
      - \nabla \cdot K \nabla p = f
      \end{align}
 
-using the Mimetic Finite Difference (MFD) method.
+using the Mimetic Finite Difference (MFD) method [BLS2005]_.
 MFD, like many other discretization_ methods, 
 requires the construction of a mesh. However, unlike most methods that require a specific 
 kind of mesh (like tetrahedra or hexahedra), the MFD method can use general polyhedral meshes. This means 
@@ -23,11 +23,10 @@ the user may not have control over mesh generation. In addition, the mesh flexib
 users to first validate models against simple rectangular grids, and then move on to more complex 
 problems.  
 
-
-Mimpy is organized into three main parts:
+Mimpy follows a very simple organization through out, just remember the three "m"s:
 
 - **mesh**: A representation of general polyhedral meshes and some basic operations on them. 
-- **matrix** : The discretization matrices used for solving the equations.
+- **matrix** : The linear systems of equations produced from the MFD discretization. 
 - **model**: Physical problems such as single-phase flow, the transport equation and two-phase flow.
 
 For more information on the software, check out the :ref:`codeoverview`. 
@@ -36,8 +35,8 @@ For more information on the software, check out the :ref:`codeoverview`.
 .. _discretization: http://en.wikipedia.org/wiki/Numerical_partial_differential_equations
 
 
-
-
+.. [BLS2005] Brezzi, Franco, Konstantin Lipnikov, and Mikhail Shashkov. "Convergence of the mimetic finite difference method 
+     for diffusion problems on polyhedral meshes." SIAM Journal on Numerical Analysis 43.5 (2005): 1872-1896.
 
 
 

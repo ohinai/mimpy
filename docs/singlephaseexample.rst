@@ -1,7 +1,7 @@
 
 
-Single-Phase Example
-====================
+Single-Phase Walk-Through
+=================================
 
 
 We'll now take a walk-through example for solving the single-phase flow problem:
