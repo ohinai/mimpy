@@ -10,9 +10,6 @@ import scipy.sparse.linalg.dsolve as dsolve
 import scipy.sparse.linalg as linalg
 from multiprocessing import Pool
 
-
-
-
 try:
     from petsc4py import PETSc
 except:
@@ -282,7 +279,7 @@ class MFD():
             current_k = self.mesh.get_cell_k(cell_index)
         is_ortho = True
         c_e = self.build_c_e(n_e)
-
+        
         m_0 =  r_e.dot(np.linalg.inv(np.dot(r_e.T, n_e)).dot(r_e.T))
 
         if self.m_e_construction_method == 0:
