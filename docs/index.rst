@@ -7,11 +7,11 @@ Welcome to mimpy's documentation!
 ======================================
 
 Mimpy is a Python based library for solving certain Partial Differential Equations using 
-the Mimetic Finite Difference method. 
-Mimpy can be used for solving sub-surface flow equations.
-The code includes a class for representing, generating and 
-processing  general polyhedral meshes. 
+the Mimetic Finite Difference method. The code provides three main functions:
 
+- Basic polyehdral mesh representation and processing. 
+- Construction of Mimetic Finite Difference matrices. 
+- Solution to sub-sufrace flow equations (Single-Phase flow, Two-Phase flow and the transport equation). 
 
 .. toctree::
    :maxdepth: 2
