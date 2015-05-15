@@ -1,11 +1,10 @@
 
-""" Two Phase Buckely-Leverett problem. 
+""" Two Phase Buckely-Leverett problem.
 """
-
 
 import mimpy.mesh.hexmesh as hexmesh
 import mimpy.mfd.mfd as mfd
-import mimpy.models.twophase as twophase 
+import mimpy.models.twophase as twophase
 import numpy as np
 
 mfd = mfd.MFD()
@@ -14,7 +13,7 @@ mesh = hexmesh.HexMesh()
 def res_k(point, i, j, k):
     return 1.e-12 * np.eye(3) * 1.e-3
 
-mesh.build_mesh(301, 2, 2, 80., 1., 1., res_k)
+mesh.build_mesh(300, 1, 1, 80., 1., 1., res_k)
 
 res_twophase = twophase.TwoPhase()
 res_twophase.set_mesh_mfd(mesh, mfd)
@@ -75,18 +74,3 @@ res_twophase.set_number_of_time_steps(1000)
 
 res_twophase.initialize_system()
 res_twophase.start_solving()
-
-    
-        
-    
-            
-    
-
-                
-                
-
-                
-                
-                
-
-    
