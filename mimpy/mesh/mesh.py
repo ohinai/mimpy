@@ -1463,7 +1463,7 @@ class Mesh:
             v2 /= np.linalg.norm(v2)
             v1 /= np.linalg.norm(v1)
             if 1.-abs(v1.dot(v2)) > 1.e-6:
-                return (v1, v2)
+                return (v1, v2, face[i])
         raise Exception("Couldn't compute basis for face " + str(face_index))
 
     def find_face_normal(self, face_index):
@@ -1520,49 +1520,98 @@ class Mesh:
         """ Returns centroid coordinates for face_index.
         This function assumes planarity of the face.
         and is currently intended for use with three dimensional
-        meshes. It uses the first two edges of the face as
-        vectors, and the rest of the face is projected onto
-        the 2D surface defined by those two edges.
+        meshes. 
         The function returns the area of the face, as well
         as the x, y, z coordinates of its center.
         """
-        
-        ## Check it's not planar in an axis:
-        is_constant = [True, True, True]
-        ref_point = self.get_point(self.get_face(face_index)[0])
-        for point_index in self.get_face(face_index):
-            current_point = self.get_point(point_index)
-            if abs(current_point[0]-ref_point[0])>1.e-9:
-                is_constant[0] = False
-
-            if abs(current_point[1]-ref_point[1])>1.e-9:
-                is_constant[1] = False
-
-            if abs(current_point[2]-ref_point[2])>1.e-9:
-                is_constant[2] = False
-                
-        if is_constant[0]:
-           (area, c1, c2)= self.find_centroid_for_coordinates(face_index, [1, 2])
-           return (abs(area), np.array([ref_point[0], c1, c2]))
-
-        if is_constant[1]:
-           (area, c1, c2)= self.find_centroid_for_coordinates(face_index, [0, 2])
-           return (abs(area), np.array([c1, ref_point[1], c2]))
-
-        if is_constant[2]:
-           (area, c1, c2)= self.find_centroid_for_coordinates(face_index, [0, 1])
-           return (abs(area), np.array([c1, c2, ref_point[2]]))
-        
-        (area1, cx1, cy1)= self.find_centroid_for_coordinates(face_index, [0, 1])
-        (area2, cx2, cz1)= self.find_centroid_for_coordinates(face_index, [0, 2])
-
+        (v1, v2, origin_index) = self.find_basis_for_face(face_index)
         polygon = map(lambda x: np.array(self.get_point(x)),
-                      list(self.get_face(face_index)))
-        (v1, v2) = self.find_basis_for_face(face_index)
-        area = self.compute_polygon_area(polygon_projected)        
+                      self.get_face(face_index))
 
-        return (area, np.array([cx1, cy1, cz1]))
+        assert(np.linalg.norm(v2) >1.e-12)
+        assert(np.linalg.norm(v1) >1.e-12)
 
+        v1 = v1/np.linalg.norm(v1)
+
+        v_temp = np.cross(v1, v2)
+        v2 = np.cross(v_temp, v1)
+
+        if np.linalg.norm(v2)< 1.e-10:
+            v2 = polygon[-2]-polygon[-1]
+            v_temp = np.cross(v1, v2)
+            v2 = np.cross(v_temp, v1)
+
+        v2 = v2/np.linalg.norm(v2)
+
+        origin = self.get_point(origin_index)
+
+        transposed_polygon = map(lambda x: x - origin, polygon)
+        polygon_projected_v1 = map(lambda x: np.dot(x, v1),
+                                   transposed_polygon)
+        polygon_projected_v2 = map(lambda x: np.dot(x, v2),
+                                   transposed_polygon)
+        polygon_projected =  zip(polygon_projected_v1,
+                                 polygon_projected_v2)
+
+        area = self.compute_polygon_area(polygon_projected)
+
+        centroid_x = 0.
+        centroid_y = 0.
+
+        N = len(polygon_projected)
+
+        for i in range(N-1):
+            centroid_x += ((polygon_projected[i][0]+
+                            polygon_projected[i+1][0])*
+                           (polygon_projected[i][0]*
+                            polygon_projected[i+1][1]-
+                            polygon_projected[i+1][0]*
+                            polygon_projected[i][1]))
+
+            centroid_y += ((polygon_projected[i][1]+
+                            polygon_projected[i+1][1])*
+                           (polygon_projected[i][0]*
+                            polygon_projected[i+1][1]-
+                            polygon_projected[i+1][0]*
+                            polygon_projected[i][1]))
+
+        centroid_x += ((polygon_projected[N-1][0]+
+                        polygon_projected[0][0])*
+                       (polygon_projected[N-1][0]*
+                        polygon_projected[0][1]-
+                        polygon_projected[0][0]*
+                        polygon_projected[N-1][1]))
+
+        centroid_y += ((polygon_projected[N-1][1]+
+                        polygon_projected[0][1])*
+                       (polygon_projected[N-1][0]*
+                        polygon_projected[0][1]-
+                        polygon_projected[0][0]*
+                        polygon_projected[N-1][1]))
+
+        centroid_x = centroid_x/(6.*area)
+        centroid_y = centroid_y/(6.*area)
+
+        centroid_3d_x = 0.
+        centroid_3d_y = 0.
+        centroid_3d_z = 0.
+
+        centroid_3d_x += polygon[0][0]
+        centroid_3d_y += polygon[0][1]
+        centroid_3d_z += polygon[0][2]
+
+        centroid_3d_x += centroid_x * v1[0]
+        centroid_3d_y += centroid_x * v1[1]
+        centroid_3d_z += centroid_x * v1[2]
+
+        centroid_3d_x += centroid_y * v2[0]
+        centroid_3d_y += centroid_y * v2[1]
+        centroid_3d_z += centroid_y * v2[2]
+
+        centroid = np.array([centroid_3d_x, centroid_3d_y, centroid_3d_z])
+
+        return (abs(area), centroid)        
+                           
     def compute_polygon_area(self, polygon, dims = [0, 1]):
         """ Computes the area of a polygon. A polygon is
         represented by a list of Numpy array coordinates
@@ -1586,7 +1635,7 @@ class Mesh:
 
         area *= .5
         # The function returns the absolute value of the area.
-        return abs(area)
+        return area
 
     def find_volume_centroid_all(self):
         """ Computes the cell centroids and volumes
