@@ -28,7 +28,7 @@ def mod_function(p, i, j, k):
     return p
 
 # Build a 10x10x10 mesh over the square domain 1.x1.x1.:
-res_mesh.build_mesh(10, 10,  10, K, 1., 1., 1., mod_function)
+res_mesh.build_mesh(10, 10, 10, 1., 1., 1., K, mod_function)
 
 #Connect the MFD instance to the new mesh. 
 res_mfd.set_mesh(res_mesh)

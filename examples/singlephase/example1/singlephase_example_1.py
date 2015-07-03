@@ -1,6 +1,5 @@
 
 import mimpy.mesh.hexmesh as hexmesh
-import mimpy.mfd.mfd as mfd
 import mimpy.models.singlephase as singlephase 
 import numpy as np
 
@@ -18,14 +17,11 @@ res_mesh = hexmesh.HexMesh()
 ## Build the mesh 
 res_mesh.build_mesh(10, 10, 10, 100., 100., 100., K, mod_function)
 
-## Initialize the MFD class
-res_mfd = mfd.MFD()
-
 ## Initialize the singlephase model
 res_singlephase = singlephase.SinglePhase()
 
-## Assign the mesh and mfd objects to singlephase
-res_singlephase.set_mesh_mfd(res_mesh, res_mfd)
+## Assign the mesh objects to singlephase
+res_singlephase.set_mesh(res_mesh)
 
 # Apply Dirichlet boundary conditions to all 6 faces. 
 res_singlephase.apply_pressure_boundary_from_function(0, lambda p: 0.)
