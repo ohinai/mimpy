@@ -1,6 +1,6 @@
 
 
-Single-Phase Walk-Through
+Single-Phase Example Walk Through
 =================================
 
 
@@ -24,19 +24,10 @@ Next, we'll need the following from Mimpy:
 .. code-block:: python
 
      import mimpy.mesh.hexmesh as hexmesh
-     import mimpy.mfd.mfd as mfd
      import mimpy.models.singlephase.singlephase as singlephase 
 
-Here we find the three main components of Mimpy: (1) **mesh**, (2) **matrix** and (3) **model**. The mesh 
-we'll be using is a structured hexahedral mesh from the :mod:`mimpy.mesh.hexmesh` module.
-For matrix construction, we use the :mod:`mimpy.mfd.mfd` module. And finally, the model 
-we use is in the :mod:`mimpy.models.singlephase` module. 
-
-The first two parts (**mesh** and **matrix**) are common to all models, and the last part 
-is specific to the single-phase model. 
-
-(1) **mesh**
-
+We just imported the :mod:`mimpy.mesh.hexmesh` module so we can build a hexahedral mesh, and 
+the :mod:`mimpy.models.singlephase` module so that we can solve the single-phase flow problem. 
 
 The first thing we'll need to do is construct the mesh. We start by initiating 
 a mesh object:
@@ -71,33 +62,18 @@ The build_mesh command looks like:
 
 We now have a rectangular 3D mesh we can use! 
 
-(2) **matrix**
-
-
-We next need to define an MFD objects for constructing the matrices. This is surprisingly 
-short:
-
-.. code-block:: python
-
-    res_mfd = mfd.MFD()
-
-
-(3) **model**
-
-
-Finally, we can start working on the model. First, we initate a 
+We now start working on the model. First, we initate a 
 single-phase object:
 
 .. code-block:: python
     
     res_singlephase = singlephase.SinglePhase()
 
-
-We next link our mesh and MFD objects to it:
+We next pass our mesh object to it:
 
 .. code-block:: python 
  
-    res_singlephase.set_mesh_mfd(res_mesh, res_mfd)
+    res_singlephase.set_mesh(res_mesh)
 
 
 We now want to set parameters and boundary conditions for our model. The single-phase 

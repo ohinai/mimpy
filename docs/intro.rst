@@ -13,17 +13,23 @@ Mimpy solves equations like the diffusion problem:
 using the Mimetic Finite Difference (MFD) method [BLS2005]_.
 MFD, like many other discretization_ methods, 
 requires the construction of a mesh. However, unlike most methods that require a specific 
-kind of mesh (like tetrahedra or hexahedra), the MFD method can use general polyhedral meshes. This means 
+kind of mesh (like tetrahedra or hexahedra), the MFD method accepts general polyhedral elements. This means 
 that it can naturally solve using traditional meshes like tetrahedra, hexahedra and Voronoi:
 
 .. image:: three_solutions.png
- 
-as well as hybrids of these meshes and many more. This feature is very uselful since often times 
-the user may not have control over mesh generation. In addition, the mesh flexibility allows  
-users to first validate models against simple rectangular grids, and then move on to more complex 
-problems.  
 
-Mimpy follows a very simple organization through out, just remember the three "m"s:
+and many more. This feature is uselful since:
+
+- Users don't always have control over the mesh they use.
+- The element flexibility allows for  modeling complex features such as fractures. 
+- It allows model developers to debug their models on simple rectangular meshes 
+  first, and then move on to more complex geometries.
+- Polyhedral elements make for a natural way to resolve local grid refinements. 
+
+The diffusion equation is often referred to a "kernel" problem for many more complex sets of 
+equations. An prime example of such equations are the ones related to porous media flows.
+
+Mimpy follows a very simple organization, just remember the three "m"s:
 
 - **mesh**: A representation of general polyhedral meshes and some basic operations on them. 
 - **matrix** : The linear systems of equations produced from the MFD discretization. 
