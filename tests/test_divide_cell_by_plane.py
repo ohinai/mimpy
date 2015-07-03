@@ -19,7 +19,7 @@ class TestCellDivide(unittest.TestCase):
                    
         for normal in normals:
             single_cell = hexmesh.HexMesh()
-            single_cell.build_mesh(2, 2, 2, lambda x, i, j, k:np.eye(3), 1., 1., 1.)
+            single_cell.build_mesh(1, 1, 1, 1., 1., 1., lambda x, i, j, k: np.eye(3))
             single_cell.divide_cell_by_plane(0, np.array([.5, .5, .5]), normal)
             
             assert(single_cell.get_number_of_cells()==2)
@@ -36,7 +36,7 @@ class TestCellDivide(unittest.TestCase):
                    
         for normal in normals:
             single_cell = hexmesh.HexMesh()
-            single_cell.build_mesh(2, 2, 2, lambda x, i, j, k:np.eye(3), 1., 1., 1.)
+            single_cell.build_mesh(1, 1, 1, 1., 1., 1., lambda x, i, j, k: np.eye(3))
             single_cell.divide_cell_by_plane(0, np.array([.5, .5, .5]), normal)
             
             assert(single_cell.get_number_of_cells()==2)
@@ -51,7 +51,7 @@ class TestCellDivide(unittest.TestCase):
                    
         for normal in normals:
             single_cell = hexmesh.HexMesh()
-            single_cell.build_mesh(4, 4, 4, lambda x, i, j, k:np.eye(3), 1., 1., 1.)
+            single_cell.build_mesh(3, 3, 3, 1., 1., 1., lambda x, i, j, k: np.eye(3))
             cell_index = single_cell.find_cell_near_point(np.array([.5, .5, .5]))
             single_cell.divide_cell_by_plane(cell_index, np.array([.5, .5, .5]), normal)
             assert(single_cell.get_number_of_cells()==28)

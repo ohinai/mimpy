@@ -8,6 +8,8 @@ import os
 from multiprocessing import Pool
 import itertools
 
+import mimpy.mfd.mfd as mfd
+
 class SinglePhase():
     """ The class relies on the Mesh and MFD libraries
     to solve time dependent slighly-compressible
@@ -15,7 +17,7 @@ class SinglePhase():
     .. math::
         \phi \frac{\partial \rho}{\partial t}  =
         -\nabla \cdot \lef( \frac{\rho}{\mu} K (\nabla p)\right) + q
-    
+
     """
     def __init__(self):
         self.mesh = None
@@ -79,12 +81,12 @@ class SinglePhase():
         """
         self.output_frequency = frequency
 
-    def set_mesh_mfd(self, mesh, mfd):
+    def set_mesh(self, mesh):
         """ Sets the computational mesh 
         to be used. 
         """
         self.mesh = mesh
-        self.mfd = mfd
+        self.mfd = mfd.MFD()
         self.mfd.set_mesh(mesh)
         
     def set_compressibility(self, compressibility):

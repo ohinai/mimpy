@@ -11,6 +11,8 @@ import scipy.sparse.linalg as linalg
 from multiprocessing import Pool
 
 try:
+    import petsc4py 
+    petsc4py.init(sys.argv)
     from petsc4py import PETSc
 except:
     pass
@@ -35,6 +37,13 @@ class MFD():
         self.lhs = None
         self.rhs = None
         self.solution = None
+
+        self.flux_dof = 0
+        self.pressure_dof = 0
+        self.total_dof = 0
+        self.remove_flux_dof = False
+        self.face_to_flux = None
+        self.neumann_needs_updating = True
 
         self.check_m_e = False
 
@@ -80,6 +89,24 @@ class MFD():
                                           refcheck=False)
         self.process_internal_boundaries()
 
+    def get_flux_dof(self):
+        """ Returns number of flux 
+        degrees of freedom.
+        """
+        return self.flux_dof
+
+    def get_pressure_dof(self):
+        """ Returns number of pressure
+        degrees of freedom.
+        """
+        return self.pressure_dof
+
+    def get_total_dof(self):
+        """ Returns number of total
+        degrees of freedom.
+        """
+        return self.total_dof
+
     def set_compute_diagonality(self, setting):
         """ During matrix M_x construction, compute how
         diagonal the local stiffness matrices
@@ -104,7 +131,27 @@ class MFD():
         """
         self.m_e_construction_method = method_index
 
-    def build_div(self, shift=1):
+    def renumber_for_neumann(self):
+        """ Renumbers the neumann faces
+        in order to remove them as degrees
+        of freedom in final matrix.
+        """
+        index_offset = 0
+        self.face_to_flux = np.zeros(shape=(self.mesh.get_number_of_faces(), 1), 
+                                     dtype=np.dtype("i"))
+
+        for face_index in range(self.mesh.get_number_of_faces()):
+            if self.is_neumann_face(face_index):
+                index_offset+=1
+                self.face_to_flux[face_index, 0] = -1
+            else:
+                self.face_to_flux[face_index, 0] = face_index-index_offset
+
+        self.flux_dof = self.mesh.get_number_of_faces()-index_offset
+        
+        self.neumann_needs_updating = False
+                
+    def build_div_full(self, shift=1):
         """ Build the div and -div^T matrices and returns
         arrays for constructing a coo sparse matrix
         representation. The lists returned are:
@@ -148,6 +195,54 @@ class MFD():
         return [[div_data, div_row, div_col],
                 [div_t_data, div_t_row, div_t_col]]
 
+
+    def build_div(self, shift=1):
+        """ Build the div and -div^T matrices and returns
+        arrays for constructing a coo sparse matrix
+        representation. The lists returned are:
+
+        [[div_data, div_row, div_col],
+        [div_t_data, div_t_row, div_t_col]]
+        """
+        div_data = array.array('f')
+        div_row = array.array('i')
+        div_col = array.array('i')
+
+        div_t_data = array.array('f')
+        div_t_row = array.array('i')
+        div_t_col = array.array('i')
+
+        if self.neumann_needs_updating:
+            self.renumber_for_neumann()
+
+        neumaan_boundary_indices = map(lambda x: x[0],
+                                       self.get_neumann_boundary_values())
+        for current_cell_index in range(self.mesh.get_number_of_cells()):
+            current_cell = self.mesh.get_cell(current_cell_index)
+            current_cell_orientations = \
+                self.mesh.get_cell_normal_orientation(current_cell_index)
+
+            neumann_faces = self.get_cell_faces_neumann(current_cell_index)
+
+            for [face_index, face_orientation] in \
+                    zip(current_cell, current_cell_orientations):
+
+                new_entry = face_orientation*self.mesh.get_face_area(face_index)
+
+                if face_index not in neumann_faces:
+                    div_data.append(new_entry)
+                    div_row.append(current_cell_index+
+                                   shift*self.flux_dof)
+                    div_col.append(self.face_to_flux[face_index, 0])
+
+                    div_t_data.append(-new_entry)
+                    div_t_row.append(self.face_to_flux[face_index, 0])
+                    div_t_col.append(current_cell_index+
+                                     shift*self.flux_dof)
+
+        return [[div_data, div_row, div_col],
+                [div_t_data, div_t_row, div_t_col]]
+
     def build_r_e(self, cell_index):
         """ Build matrix R_E for construction of
         local stiffness matrix M_E.
@@ -158,7 +253,7 @@ class MFD():
         is_using_cell_shifted_centroid.
         """
         r_e = np.zeros((self.mesh.get_number_of_cell_faces(cell_index),
-                           self.mesh.dim))
+                        self.mesh.dim))
 
         counter = 0
 
@@ -279,7 +374,7 @@ class MFD():
             current_k = self.mesh.get_cell_k(cell_index)
         is_ortho = True
         c_e = self.build_c_e(n_e)
-        
+
         m_0 =  r_e.dot(np.linalg.inv(np.dot(r_e.T, n_e)).dot(r_e.T))
 
         if self.m_e_construction_method == 0:
@@ -356,7 +451,7 @@ class MFD():
                                             self.mesh.get_cell_real_centroid(cell_index))
                     diagonal.append(entry)
 
-            diagonal=  np.diag(diagonal)
+            diagonal = np.diag(diagonal)
             m_e += diagonal.dot(c_e.dot(c_e.T))
 
         if self.check_m_e:
@@ -369,9 +464,11 @@ class MFD():
             
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
+                print m_e
+
         return m_e
 
-    def build_m(self, save_update_info = False, k_unity = False):
+    def build_m_full(self, save_update_info = False, k_unity = False):
         """ Construct the global matrix M_x. This is
         done by first constructing local matrices
         M_E and constructing a coo matrix for
@@ -398,6 +495,7 @@ class MFD():
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_e = self.build_m_e(cell_index, k_unity)
 
+            m_e_norm = np.linalg.norm(m_e)
             neumann_faces = self.get_cell_faces_neumann(cell_index)
 
             current_cell = self.mesh.get_cell(cell_index)
@@ -405,19 +503,19 @@ class MFD():
                 self.mesh.get_cell_normal_orientation(cell_index)
             for i in range(len(m_e)):
                 global_i = current_cell[i]
-
-                if global_i not in  neumann_faces:
+                
+                if global_i not in neumann_faces:
                     for j in range(len(m_e)):
                         global_j = current_cell[j]
 
-                        if abs(m_e[i][j]) > 1.e-40:
+                        if abs(m_e[i][j])/m_e_norm > 1.e-12:
                             current_length += 1
                             m_data.append(m_e[i, j]*
                                           current_orientation[i]*
                                           current_orientation[j])
                             m_row.append(global_i)
                             m_col.append(global_j)
-
+                                
             if save_update_info:
                 self.m_e_locations.append(current_length)
 
@@ -431,8 +529,72 @@ class MFD():
             self.m_data_for_update = np.array(m_data)
             self.m_e_locations = np.array(self.m_e_locations)
 
+        print "all ortho", self.all_ortho
+
         return [m_data, m_row, m_col]
 
+    def build_m(self, save_update_info = False, k_unity = False):
+        """ Construct the global matrix M_x. This is
+        done by first constructing local matrices
+        M_E and constructing a coo matrix for
+        the global matrix. This function avoids adding
+        the neumann boundaries to the matrix.
+        """
+        if self.compute_diagonality:
+            self.diagonality_index_list = \
+                np.zeros(self.mesh.get_number_of_cells())
+
+        m_data = array.array('f')
+        m_row = array.array('i')
+        m_col = array.array('i')
+
+        if save_update_info:
+            self.m_e_locations = [0]
+
+        current_length = 0
+        neumann_boundary_indices = \
+            map(lambda x: x[0], self.get_neumann_boundary_values())
+
+        if self.neumann_needs_updating:
+            self.renumber_for_neumann()
+
+        total_work = self.mesh.get_number_of_cells()
+        percentage_inc = 10.
+        last_percent = 10.
+        for cell_index in range(self.mesh.get_number_of_cells()):
+            m_e = self.build_m_e(cell_index, k_unity)
+
+            m_e_norm = np.linalg.norm(m_e)
+            neumann_faces = self.get_cell_faces_neumann(cell_index)
+
+            current_cell = self.mesh.get_cell(cell_index)
+            current_orientation = \
+                self.mesh.get_cell_normal_orientation(cell_index)
+            for i in range(len(m_e)):
+                global_i = current_cell[i]
+
+                if global_i not in  neumann_faces:
+                    for j in range(len(m_e)):
+                        global_j = current_cell[j]
+                        if global_j not in neumann_faces:
+                            if abs(m_e[i][j])/m_e_norm > 1.e-12:
+                                current_length += 1
+                                m_data.append(m_e[i, j]*
+                                              current_orientation[i]*
+                                              current_orientation[j])
+                                m_row.append(self.face_to_flux[global_i, 0])
+                                m_col.append(self.face_to_flux[global_j, 0])
+
+            if save_update_info:
+                self.m_e_locations.append(current_length)
+
+        if save_update_info:
+            self.m_data_for_update = np.array(m_data)
+            self.m_e_locations = np.array(self.m_e_locations)
+
+        print "all ortho", self.all_ortho
+
+        return [m_data, m_row, m_col]
 
     def build_m_parallel(self, save_update_info = False, k_unity = False):
         """ Construct the global matrix M_x. This is
@@ -488,7 +650,6 @@ class MFD():
 
         print "All Ortho = ", self.all_ortho
 
-
         if save_update_info:
             self.m_data_for_update = np.array(m_data)
 
@@ -511,7 +672,7 @@ class MFD():
                                  self.m_e_locations, 
                                  self.mesh.get_number_of_cells())
 
-    def build_bottom_right(self, alpha = 0.):
+    def build_bottom_right(self, alpha = 0., shift = 1):
         """ Build the matrix C in the global
         saddle point problem (bottom right
         side of the matrix). Returns
@@ -527,18 +688,18 @@ class MFD():
                          self.mesh.get_cell_volume(cell_index))
                 bottom_right_data.append(entry)
                 bottom_right_row.append(cell_index +
-                                        self.mesh.get_number_of_faces())
+                                        shift*self.mesh.get_number_of_faces())
                 bottom_right_col.append(cell_index +
-                                        self.mesh.get_number_of_faces())
+                                        shift*self.mesh.get_number_of_faces())
 
         else:
             for cell_index in range(self.mesh.get_number_of_cells()):
                 entry = alpha * self.mesh.get_cell_volume(cell_index)
                 bottom_right_data.append(entry)
                 bottom_right_row.append(cell_index +
-                                        self.mesh.get_number_of_faces())
+                                        shift*self.flux_dof)
                 bottom_right_col.append(cell_index +
-                                        self.mesh.get_number_of_faces())
+                                        shift*self.flux_dof)
 
         return [bottom_right_data, bottom_right_row, bottom_right_col]
 
@@ -673,52 +834,6 @@ class MFD():
 
         return self.lhs
 
-        m_info = self.build_m()
-
-        self.m = sparse.coo_matrix((m_info[0], (m_info[1], m_info[2]))).tocsr()
-
-        total_work = len(m_info[0])
-        percentage_inc = 10.
-        last_percent = 10.
-
-        for index in range(len(m_info[0])):
-            if float(index)/float(total_work)*100>last_percent:
-                print "percentage done", last_percent
-                last_percent+= percentage_inc
-
-            self.lhs[m_info[1][index], m_info[2][index]] = m_info[0][index]
-
-        del m_info
-
-        [div_info, div_t_info] = self.build_div()
-
-        for index in range(len(div_info[0])):
-            self.lhs[div_info[1][index], div_info[2][index]] = \
-                div_info[0][index]
-
-        for index in range(len(div_t_info[0])):
-            self.lhs[div_t_info[1][index], div_t_info[2][index]] = \
-                div_t_info[0][index]
-
-        del div_info
-        del div_t_info
-
-        c_info = self.build_bottom_right(alpha)
-
-        for index in range(len(c_info[0])):
-            self.lhs[c_info[1][index], c_info[2][index]] = c_info[0][index]
-
-        del c_info
-
-        coupling_info = self.build_coupling_terms()
-
-        for index in range(len(coupling_info[0])):
-            self.lhs[coupling_info[1][index], coupling_info[2][index]] = \
-                coupling_info[0][index]
-
-        del coupling_info
-
-
     def build_lhs_divided(self, alpha = 0):
         """ Builds the saddle point problem,
         |  M    DIV^T |
@@ -768,7 +883,7 @@ class MFD():
         of freedom for the saddle-point system.
         """
         return (self.mesh.get_number_of_cells()+
-                self.mesh.get_number_of_faces())
+                self.flux_dof)
 
     def build_rhs(self):
         """ Build RHS for the saddle-point problem.
@@ -811,7 +926,7 @@ class MFD():
         function in the RHS.
         """
         for cell_index in range(self.mesh.get_number_of_cells()):
-            self.rhs[cell_index + self.mesh.get_number_of_faces()] +=\
+            self.rhs[cell_index + self.flux_dof] +=\
                 self.cell_forcing_function[cell_index]
 
     def build_rhs_neumann(self):
@@ -820,7 +935,7 @@ class MFD():
         """
         for [boundary_index, boundary_value] in \
                 self.get_neumann_boundary_values():
-            self.rhs[boundary_index] =  boundary_value
+            self.rhs[self.face_to_flux[boundary_index, 0]] =  boundary_value
 
     def get_cell_faces_neumann(self, cell_index):
         """ Returns all the faces in cell_index that
@@ -830,6 +945,14 @@ class MFD():
             return self.cell_faces_neumann[cell_index]
         else:
             return []
+
+    def is_neumann_face(self, face_index):
+        """ Returns True if face is a Neumann
+        boundary. 
+        """
+        if self.neumann_boundary_values.has_key(face_index):
+            return True
+        return False
 
     def apply_neumann_from_function(self, boundary_marker, grad_u):
         """ Sets the Neumann boundary values for the
@@ -861,11 +984,12 @@ class MFD():
             else:
                 self.cell_faces_neumann[cell_index] = [boundary_index]
 
+            self.neumann_needs_updating = True
 
     def set_neumann_by_face(self,
-                              face_index,
-                              face_orientation,
-                              value):
+                            face_index,
+                            face_orientation,
+                            value):
         """ Directly sets Neumann value to face_index.
         The input *value* corresponding to the
         integral of the pressure over the face.
@@ -879,13 +1003,15 @@ class MFD():
         else:
             self.cell_faces_neumann[cell_index] = [face_index]
 
+        self.neumann_needs_updating = True
+
     def get_dirichlet_boundary_values(self):
         """ Returns a list of all faces designated as
         Dirichlet boundaries and their values.
         """
         return self.dirichlet_boundary_values.iteritems()
 
-    def get_dirichlet_boundary_value_by_face(self, face_index):
+    def get_dirichlet_value(self, face_index):
         """ Return pressure value at face_index.
         """
         return self.dirichlet_boundary_values[face_index]
@@ -983,7 +1109,7 @@ class MFD():
         """
         for [boundary_index, boundary_value] in \
                 self.get_dirichlet_boundary_values():
-            self.rhs[boundary_index] = -boundary_value
+            self.rhs[self.face_to_flux[boundary_index, 0]] = -boundary_value
 
     def get_analytical_pressure_solution(self,
                                          p_function,
@@ -1225,7 +1351,7 @@ class MFD():
         pressures are indexed in the same order as the
         corresponding cell indices.
         """
-        return self.solution[self.mesh.get_number_of_faces():]
+        return self.solution[self.flux_dof:]
 
     def get_velocity_solution_by_index(self, face_index):
         """

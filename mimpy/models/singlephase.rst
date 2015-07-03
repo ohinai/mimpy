@@ -1,6 +1,6 @@
 
-Single-Phase Model
-------------------
+Single-Phase Derivation
+----------------------
 
 Derivation of the single-phase solution using the Mimetic Finite Difference Method. 
 We start with the equation for single phase slightly compressible fluid:
