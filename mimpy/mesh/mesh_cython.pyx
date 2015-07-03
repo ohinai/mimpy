@@ -6,60 +6,60 @@ def all_cell_volumes_centroids(int[:,:] cell_pointer,
                                int ncells, 
                                int [:] cells, 
                                int [:] cell_normal_orientation,
-                               float [:, :] points,
-                               float[:] cell_volume, 
-                               float[:, :] cell_centroids, 
+                               double [:, :] points,
+                               double[:] cell_volume, 
+                               double[:, :] cell_centroids, 
                                int[:,:] face_pointer, 
                                int nfaces, 
                                int [:] faces, 
-                               float [:, :] normals, 
+                               double[:, :] normals, 
                                int [:, :] face_to_cell, 
                                ):
     """ Computes and sets all the cell volumes and real
     cell centroids for mesh.
     """
-    cdef float[:] current_normal
+    cdef double[:] current_normal
     cdef int[:] current_face
     cdef int face_index 
     cdef int A
     cdef int B
     cdef int C
        
-    cdef float P1 
-    cdef float Pa 
-    cdef float Pb 
-    cdef float Paa 
-    cdef float Pab 
-    cdef float Pbb 
+    cdef double P1 
+    cdef double Pa 
+    cdef double Pb 
+    cdef double Paa 
+    cdef double Pab 
+    cdef double Pbb 
 
-    cdef float a0
-    cdef float b0
+    cdef double a0
+    cdef double b0
     
-    cdef float a1
-    cdef float b1
+    cdef double a1
+    cdef double b1
     
-    cdef float da
-    cdef float db
-    cdef float a0_2
-    cdef float a0_3
-    cdef float b0_2
-    cdef float b0_3
-    cdef float a1_2
-    cdef float C1
-    cdef float Ca
-    cdef float Caa
-    cdef float Cb
-    cdef float Cbb
-    cdef float Cab
-    cdef float Kab
+    cdef double da
+    cdef double db
+    cdef double a0_2
+    cdef double a0_3
+    cdef double b0_2
+    cdef double b0_3
+    cdef double a1_2
+    cdef double C1
+    cdef double Ca
+    cdef double Caa
+    cdef double Cb
+    cdef double Cbb
+    cdef double Cab
+    cdef double Kab
             
 
     cdef int len_current_face
     cdef int local_index 
 
-    cdef float[:] first_point
+    cdef double[:] first_point
 
-    cdef float w
+    cdef double w
 
     for face_index in range(nfaces):
         current_normal = normals[face_index]

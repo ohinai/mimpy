@@ -2,23 +2,23 @@
 import numpy as np
 cimport cython 
 cdef extern from "math.h":
-    float sqrt(float n)
+    double sqrt(double n)
 
 
 
-cdef dist(float[:] v1, float[:] v2):
-    cdef float summation = (v1[0]-v2[0])*(v1[0]-v2[0])
+cdef dist(double[:] v1, double[:] v2):
+    cdef double summation = (v1[0]-v2[0])*(v1[0]-v2[0])
     summation += (v1[1]-v2[1])*(v1[1]-v2[1])
     summation += (v1[2]-v2[2])*(v1[2]-v2[2])
     return sqrt(summation)
 
 
-cdef cross(float[:] v1, float[:] v2, float[:] result):
+cdef cross(double[:] v1, double[:] v2, double[:] result):
     result[0] = v1[1]*v2[2] - v1[2]*v2[1]
     result[1] = v1[2]*v2[0] - v1[0]*v2[2]
     result[2] = v1[0]*v2[1] - v1[1]*v2[0]
 
-cdef normalize(float[:] v):
+cdef normalize(double[:] v):
     normal=v[0]*v[0]
     normal+=v[1]*v[1]
     normal+=v[2]*v[2]
@@ -30,21 +30,21 @@ cdef normalize(float[:] v):
 def all_face_areas(int[:,:] pointer, 
                    int nfaces, 
                    int [:] faces, 
-                   float [:, :] points,
-                   float[:] face_areas):
+                   double [:, :] points,
+                   double [:] face_areas):
 
     cdef int start_point 
-    cdef float[:] p1 
-    cdef float[:] p2 
-    cdef float[:] p3 
-    cdef float[:] p4 
-    cdef float[:] center_point = np.array([0., 0., 0.], dtype=np.dtype('f'))
+    cdef double[:] p1 
+    cdef double[:] p2 
+    cdef double[:] p3 
+    cdef double[:] p4 
+    cdef double[:] center_point = np.array([0., 0., 0.], dtype=np.dtype('d'))
 
-    cdef float a 
-    cdef float b
-    cdef float c
-    cdef float s
-    cdef float area
+    cdef double a 
+    cdef double b
+    cdef double c
+    cdef double s
+    cdef double area
 
     cdef int face_index 
     for face_index in range(nfaces):
@@ -91,15 +91,15 @@ def all_face_areas(int[:,:] pointer,
 def all_face_normals(int[:,:] pointer, 
                      int nfaces, 
                      int [:] faces, 
-                     float [:, :] points,
-                     float[:, :] face_normals):
+                     double[:, :] points,
+                     double[:, :] face_normals):
     
     
-    cdef float[3] v1
-    cdef float[3] v2
-    cdef float[:] p1
-    cdef float[:] p2
-    cdef float[:] p3
+    cdef double[3] v1
+    cdef double[3] v2
+    cdef double[:] p1
+    cdef double[:] p2
+    cdef double[:] p3
     
     for face_index in range(nfaces):
         p1 = points[faces[pointer[face_index, 0]]]

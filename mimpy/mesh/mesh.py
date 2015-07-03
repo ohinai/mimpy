@@ -24,7 +24,7 @@ class variable_array():
     The structure allows the user to modify the entries
     as well as extend the data as needed.
     """
-    def __init__(self, dtype=np.dtype('f'), size=(2, 2), dim = 1):
+    def __init__(self, dtype=np.dtype('d'), size=(2, 2), dim = 1):
         self.pointer_capacity = size[0]
         self.data_capacity  = size[1]
         self.dim = dim
@@ -184,7 +184,7 @@ class Mesh:
         # List of points used to construct mesh faces.
         # Each point coordinate is prepresented by
         # a Numpy array.
-        self.points = np.empty(shape=(0, 3), dtype=np.dtype('f'))
+        self.points = np.empty(shape=(0, 3), dtype=np.dtype('d'))
         self.number_of_points = 0
 
         # List of mesh faces, each face is represented by the
@@ -194,10 +194,10 @@ class Mesh:
         self.faces = variable_array(dtype=np.dtype('i'))
 
         # Face normals.
-        self.face_normals = np.empty(shape=(0, 3), dtype=np.dtype('f'))
+        self.face_normals = np.empty(shape=(0, 3), dtype=np.dtype('d'))
 
         # Area of mesh face.
-        self.face_areas = np.empty(shape=(0), dtype=np.dtype('f'))
+        self.face_areas = np.empty(shape=(0), dtype=np.dtype('d'))
 
         # The centroid of face.
         self.face_real_centroids = np.empty(shape=(0, 3))
@@ -232,14 +232,14 @@ class Mesh:
         self.cell_normal_orientation  = variable_array(dtype=np.dtype('i'))
 
         # Cell Volumes.
-        self.cell_volume = np.empty(shape=(0), dtype=np.dtype('f'))
+        self.cell_volume = np.empty(shape=(0), dtype=np.dtype('d'))
 
         # List of cell centroids.
-        self.cell_real_centroid = np.empty(shape=(0, 3), dtype=np.dtype('f'))
+        self.cell_real_centroid = np.empty(shape=(0, 3), dtype=np.dtype('d'))
 
         # Points used inside the cell used
         # to build the MFD matrix R.
-        self.cell_shifted_centroid = np.empty(shape=(0, 3), dtype=np.dtype('f'))
+        self.cell_shifted_centroid = np.empty(shape=(0, 3), dtype=np.dtype('d'))
 
         self.cell_k = np.empty(shape=(0, 9))
 
@@ -1088,6 +1088,11 @@ class Mesh:
         (Numpy matrix) for cell_index.
         """
         return self.cell_k[cell_index].reshape((3, 3))
+
+    def get_all_k_entry(self, i, j):
+        """ Returns a list of all K[i, j].
+        """
+        return self.cell_k[:self.get_number_of_cells(), i*3+j]
 
     def get_all_k(self):
         """ Returns a list of all cell

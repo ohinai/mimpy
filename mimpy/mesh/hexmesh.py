@@ -250,8 +250,8 @@ class HexMesh(mesh.Mesh):
 
         self.cell_to_ijk = {}
 
-    def build_mesh(self, ni, nj, nk, K,
-                   dim_x, dim_y, dim_z,
+    def build_mesh(self, ni, nj, nk,
+                   dim_x, dim_y, dim_z, K, 
                    modification_function = None):
         """ Constructs a structured hexahedral mesh.
 
@@ -273,9 +273,13 @@ class HexMesh(mesh.Mesh):
         self.dim_y = dim_y
         self.dim_z = dim_z
 
-        dx = dim_x/(ni-1.)
-        dy = dim_y/(nj-1.)
-        dz = dim_z/(nk-1.)
+        ni += 1
+        nj += 1
+        nk += 1
+
+        dx = self.dim_x/float(ni-1.)
+        dy = self.dim_y/float(nj-1.)
+        dz = self.dim_z/float(nk-1.)
 
         self.set_boundary_markers([0, 1, 2, 3, 4, 5],
                                   ['BottomX', 'TopX',
@@ -329,11 +333,5 @@ class HexMesh(mesh.Mesh):
             k_e = K(np.array([cx, cy, cz]), i, j, k)
 
             self.set_cell_k(cell_index, k_e)
-
-
-
-
-
-
 
 
