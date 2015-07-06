@@ -10,5 +10,7 @@ env:
 install: 
     - pip install --install-option="--no-cython-compile" Cython
     - pip install tox
+    - pip install numpy 
+
 script:
     - tox -e $TOX_ENV
