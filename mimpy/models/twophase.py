@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 
 import numpy as np
 from scipy import sparse, diag
@@ -6,6 +8,8 @@ import scipy.sparse.linalg.dsolve as dsolve
 import scipy.sparse.linalg as linalg
 
 import mimpy.mfd.mfd as mfd
+from six.moves import range
+from six.moves import zip
 
 try:
     import petsc4py, sys
@@ -476,13 +480,13 @@ class TwoPhase:
         self.mfd.set_mesh(self.mesh)
         [[div_data, div_row, div_col],
          [div_t_data, div_t_row, div_t_col]] = self.mfd.build_div()
-        print "building m"
+        print("building m")
         [self.m_x_coo_data,
          m_x_coo_row,
          m_x_coo_col] = self.mfd.build_m(save_update_info=True)
-        print "done building m"
+        print("done building m")
 
-        print len(self.m_x_coo_data)
+        print(len(self.m_x_coo_data))
 
         self.current_u_t = np.zeros(self.mfd.flux_dof)
         self.initial_u_t = np.zeros(self.mfd.flux_dof)
@@ -660,8 +664,8 @@ class TwoPhase:
             m_diag = m_csr.diagonal()
             m_diag = 1./m_diag
             m_diag = sparse.csr_matrix((m_diag,
-                                        (range(self.mfd.flux_dof),
-                                         range(self.mfd.flux_dof))))
+                                        (list(range(self.mfd.flux_dof)),
+                                         list(range(self.mfd.flux_dof)))))
 
             self.last_solution = np.zeros(self.mesh.get_number_of_cells())
 
@@ -705,7 +709,7 @@ class TwoPhase:
         self.mesh.output_vtk_mesh(self.model_name + "0",
                                   [self.current_p_o,
                                    self.mesh.get_cell_domain_all(),
-                                   range(self.mesh.get_number_of_cells())],
+                                   list(range(self.mesh.get_number_of_cells()))],
                                   ["pressure", "domain", "cell_number"])
 
         for time_step in range(1, self.number_of_time_steps + 1):
@@ -721,14 +725,14 @@ class TwoPhase:
             if time_step % self.prod_output_frequency == 0:
                 for (cell_index, output) in zip(self.rate_wells,
                                             self.pressure_files):
-                    print >> output, time_step, self.current_p_o[cell_index],
-                    print >> output, self.current_s_w[cell_index]
+                    print(time_step, self.current_p_o[cell_index], end=' ', file=output)
+                    print(self.current_s_w[cell_index], file=output)
 
             if time_step % self.output_frequency == 0:
                 self.mesh.output_vtk_mesh(self.model_name + str(time_step),
                                           [self.current_s_w, self.current_p_o],
                                           ["sw", "POIL"])
-                print "time step", time_step
+                print("time step", time_step)
 
                 self.time_step_output(self.current_time, time_step)
 
@@ -855,8 +859,8 @@ class TwoPhase:
                     m_diag = m_csr.diagonal()
                     m_diag = 1./m_diag
                     m_diag = sparse.csr_matrix((m_diag,
-                                                (range(self.mfd.flux_dof),
-                                                 range(self.mfd.flux_dof))))
+                                                (list(range(self.mfd.flux_dof)),
+                                                 list(range(self.mfd.flux_dof)))))
 
                     pc_matrix = -self.div_csr.dot(m_diag.dot(self.div_t_csr))
                     pc_matrix += c_csr
@@ -907,7 +911,7 @@ class TwoPhase:
                 po_k += delta_po_k
                 ut_k += delta_ut_k
 
-            print "\t\t", newton_step, newton_residual
+            print("\t\t", newton_step, newton_residual)
             newton_step += 1
             if newton_step > self.newton_step_max:
                 1/0
@@ -927,7 +931,7 @@ class TwoPhase:
             current_cell = self.mesh.get_cell(cell_index)
             current_orientation = \
                 self.mesh.get_cell_normal_orientation(cell_index)
-            face_orientation_list = zip(current_cell, current_orientation)
+            face_orientation_list = list(zip(current_cell, current_orientation))
             for [face_index, orientation] in face_orientation_list:
                 current_direction = orientation
                 flux_index = self.mfd.face_to_flux[face_index, 0]
@@ -963,7 +967,7 @@ class TwoPhase:
                                              oil_mob[cell_index])
 
         # Update saturation for faces on the boundary.
-        for boundary_marker in self.saturation_boundaries.keys():
+        for boundary_marker in list(self.saturation_boundaries.keys()):
             saturation_function = self.saturation_boundaries[boundary_marker]
             for (boundary_index, boundary_orientation) in\
                     self.mesh.get_boundary_faces_by_marker(boundary_marker):
@@ -1075,8 +1079,8 @@ class TwoPhase:
                 oil_production_modified = oil_production*(-1)
                 water_production_modified = water_production*(-1)
 
-                print >> output, time_step, oil_production_modified,
-                print >> output, water_production_modified
+                print(time_step, oil_production_modified, end=' ', file=output)
+                print(water_production_modified, file=output)
 
             next_s_w[cell_index] += water_production
 

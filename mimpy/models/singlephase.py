@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 
 
 import numpy as np
@@ -9,6 +11,7 @@ from multiprocessing import Pool
 import itertools
 
 import mimpy.mfd.mfd as mfd
+from six.moves import range
 
 class SinglePhase():
     """ The class relies on the Mesh and MFD libraries
@@ -252,7 +255,7 @@ class SinglePhase():
             rhs_current += self.rhs_mfd
             
             current_time = time_step*self.delta_t
-            print time_step
+            print(time_step)
             
             for cell_index in range(self.mesh.get_number_of_cells()):
                 density = -self.ref_pressure

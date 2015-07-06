@@ -1,7 +1,9 @@
+from __future__ import absolute_import
 
 import numpy as np
 import mimpy.mesh.mesh as mesh
 import mimpy.mesh.hexmesh_cython as hexmesh_cython
+from six.moves import range
 
 class HexMesh(mesh.Mesh):
     """ Class for constructing structured hexahedral meshes.

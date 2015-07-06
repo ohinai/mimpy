@@ -1,10 +1,15 @@
 """ Mesh module.
 """
+from __future__ import absolute_import
+from __future__ import print_function
 import numpy as np
 import array
 from itertools import islice
 import mimpy.mesh.mesh_cython as mesh_cython
 import mimpy as mimpy
+from six.moves import map
+from six.moves import range
+from six.moves import zip
 
 class variable_array():
     """ The class is an efficient reprenstation of variable
@@ -479,7 +484,7 @@ class Mesh:
         :rtype: list
         """
         f_to_c = list(self.face_to_cell[face_index])
-        f_to_c = filter(lambda x: x >=0, f_to_c)
+        f_to_c = [x for x in f_to_c if x >=0]
         return f_to_c
 
     def is_line_seg_intersect_face(self, face_index, p1, p2):
@@ -543,12 +548,12 @@ class Mesh:
         :param file intput_file: Mesh file (mms).
         :return: None
         """
-        version = input_file.next()
-        date = input_file.next()
-        name = input_file.next()
-        comments = input_file.next()
-        input_file.next()
-        input_file.next()
+        version = next(input_file)
+        date = next(input_file)
+        name = next(input_file)
+        comments = next(input_file)
+        next(input_file)
+        next(input_file)
 
         for line in input_file:
             line_split = line.split()
@@ -560,11 +565,11 @@ class Mesh:
             elif line_split[0] == "FACES":
                 number_of_faces = int(line_split[1])
                 self.faces.number_of_entries = number_of_faces
-                current_line = input_file.next()
+                current_line = next(input_file)
                 n_data_entries = int(current_line)
                 self.faces.data = np.loadtxt(islice(input_file, n_data_entries),
                                              dtype=np.dtype('i'))
-                current_line = input_file.next()
+                current_line = next(input_file)
                 n_pointers = int(current_line)
                 self.faces.pointers = np.loadtxt(islice(input_file, n_pointers),
                                                  dtype=np.dtype('i'))
@@ -593,12 +598,12 @@ class Mesh:
             elif line_split[0] == "CELLS":
                 number_of_cells = int(line_split[1])
                 self.cells.number_of_entries = number_of_cells
-                current_line = input_file.next()
+                current_line = next(input_file)
                 n_data_entries = int(current_line)
                 self.cells.data = np.loadtxt(islice(input_file, n_data_entries),
                                              dtype=np.dtype('i'))
 
-                current_line = input_file.next()
+                current_line = next(input_file)
                 n_pointers = int(current_line)
 
                 self.cells.pointers = np.loadtxt(islice(input_file, n_pointers),
@@ -608,13 +613,13 @@ class Mesh:
                 number_of_cells = int(line_split[1])
                 self.cell_normal_orientation.number_of_entries = \
                     number_of_cells
-                current_line = input_file.next()
+                current_line = next(input_file)
                 n_data_entries = int(current_line)
                 self.cell_normal_orientation.data = \
                     np.loadtxt(islice(input_file, n_data_entries),
                                dtype=np.dtype('i'))
 
-                current_line = input_file.next()
+                current_line = next(input_file)
                 n_pointers = int(current_line)
                 self.cell_normal_orientation.pointers = \
                     np.loadtxt(islice(input_file, n_pointers),
@@ -643,7 +648,7 @@ class Mesh:
                 number_of_boundary_markers = int(line_split[1])
 
                 for line_index in range(number_of_boundary_markers):
-                    current_line = input_file.next()
+                    current_line = next(input_file)
                     line_split = current_line.split()
                     entries = [int(x) for x in line_split]
                     boundary_marker = entries.pop(0)
@@ -656,7 +661,7 @@ class Mesh:
             elif line_split[0] == "DIRICHLET_BOUNDARY_POINTERS":
                 number_of_pointers = int(line_split[1])
                 for line_index in range(number_of_pointers):
-                    current_line = input_file.next()
+                    current_line = next(input_file)
                     line_split = current_line.split()
                     key = int(line_split[0])
                     cell_index = int(line_split[1])
@@ -673,10 +678,10 @@ class Mesh:
             elif line_split[0] == "FORCING_FUNCTION_POINTERS":
                 number_of_cells = int(line_split[1])
                 for line_index in range(number_of_cells):
-                    current_line = input_file.next()
+                    current_line = next(input_file)
                     line_split = current_line.split()
                     cell_index = int(line_split[0])
-                    entries = map(int, line_split[1:])
+                    entries = list(map(int, line_split[1:]))
                     face_list = []
                     orientation_list = []
                     while entries:
@@ -689,7 +694,7 @@ class Mesh:
             elif line_split[0] == "FACE_TO_LAGRANGE_POINTERS":
                 number_of_pointers = int(line_split[1])
                 for line_index in range(number_of_pointers):
-                    current_line = input_file.next()
+                    current_line = next(input_file)
                     line_split = current_line.split()
                     face_index = int(line_split[0])
                     lagrange_index = int(line_split[1])
@@ -701,7 +706,7 @@ class Mesh:
             elif line_split[0] == "LAGRANGE_TO_FACE_POINTERS":
                 number_of_pointers = int(line_split[1])
                 for line_index in range(number_of_pointers):
-                    current_line = input_file.next()
+                    current_line = next(input_file)
                     line_split = current_line.split()
                     lagrange_index = int(line_split[0])
                     face_index = int(line_split[1])
@@ -729,7 +734,7 @@ class Mesh:
                               self.get_cell_normal_orientation(cell_index)):
             current_face = []
             for point_index in self.get_face(face_index):
-                if glob_to_loc_points.has_key(point_index):
+                if point_index in glob_to_loc_points:
                     current_face.append(glob_to_loc_points[point_index])
                 else:
                     current_point = self.get_point(point_index)
@@ -760,113 +765,113 @@ class Mesh:
 
         :param file output_file: File to save mesh to.
         """
-        print >> output_file, mimpy.__version__
-        print >> output_file, "date"
-        print >> output_file, "name"
-        print >> output_file, "comments"
-        print >> output_file, "#"
-        print >> output_file, "#"
+        print(mimpy.__version__, file=output_file)
+        print("date", file=output_file)
+        print("name", file=output_file)
+        print("comments", file=output_file)
+        print("#", file=output_file)
+        print("#", file=output_file)
 
-        print >> output_file, "POINTS",
-        print >> output_file, len(self.points)
+        print("POINTS", end=' ', file=output_file)
+        print(len(self.points), file=output_file)
         np.savetxt(output_file, self.points)
 
-        print >> output_file, "FACES", self.get_number_of_faces()
-        print >> output_file, len(self.faces.data)
+        print("FACES", self.get_number_of_faces(), file=output_file)
+        print(len(self.faces.data), file=output_file)
         np.savetxt(output_file, self.faces.data,  fmt='%i')
-        print >> output_file, len(self.faces.pointers)
+        print(len(self.faces.pointers), file=output_file)
         np.savetxt(output_file, self.faces.pointers, fmt="%i %i")
 
-        print >> output_file, "FACE_NORMALS", len(self.face_normals)
+        print("FACE_NORMALS", len(self.face_normals), file=output_file)
         np.savetxt(output_file, self.face_normals)
 
-        print >> output_file, "FACE_AREAS", self.get_number_of_faces()
+        print("FACE_AREAS", self.get_number_of_faces(), file=output_file)
         for face_index in range(self.get_number_of_faces()):
-            print >> output_file, self.get_face_area(face_index)
+            print(self.get_face_area(face_index), file=output_file)
 
-        print >> output_file, "FACE_REAL_CENTROIDS", self.get_number_of_faces()
+        print("FACE_REAL_CENTROIDS", self.get_number_of_faces(), file=output_file)
         for face_index in range(self.get_number_of_faces()):
             current_centroid = self.get_face_real_centroid(face_index)
-            print >> output_file, current_centroid[0],
-            print >> output_file, current_centroid[1],
-            print >> output_file, current_centroid[2]
+            print(current_centroid[0], end=' ', file=output_file)
+            print(current_centroid[1], end=' ', file=output_file)
+            print(current_centroid[2], file=output_file)
 
         if self.has_face_shifted_centroid:
-            print >> output_file, "FACE_SHIFTED_CENTROIDS",
-            print >> output_file, self.get_number_of_faces()
+            print("FACE_SHIFTED_CENTROIDS", end=' ', file=output_file)
+            print(self.get_number_of_faces(), file=output_file)
             for face_index in range(self.get_number_of_faces()):
-                print >> output_file, self.get_face_real_centroid(face_index)
+                print(self.get_face_real_centroid(face_index), file=output_file)
 
-        print >> output_file, "FACE_TO_CELL", len(self.face_to_cell)
+        print("FACE_TO_CELL", len(self.face_to_cell), file=output_file)
         np.savetxt(output_file, self.face_to_cell, fmt="%i %i")
 
-        print >> output_file, "CELLS", self.get_number_of_cells()
-        print >> output_file, len(self.cells.data)
+        print("CELLS", self.get_number_of_cells(), file=output_file)
+        print(len(self.cells.data), file=output_file)
         np.savetxt(output_file, self.cells.data,  fmt='%i')
-        print >> output_file, len(self.cells.pointers)
+        print(len(self.cells.pointers), file=output_file)
         np.savetxt(output_file, self.cells.pointers, fmt="%i %i")
 
-        print >> output_file, "CELL_NORMAL_ORIENTATION",
-        print >> output_file, self.get_number_of_cells()
-        print >> output_file, len(self.cell_normal_orientation.data)
+        print("CELL_NORMAL_ORIENTATION", end=' ', file=output_file)
+        print(self.get_number_of_cells(), file=output_file)
+        print(len(self.cell_normal_orientation.data), file=output_file)
         np.savetxt(output_file, self.cell_normal_orientation.data, fmt='%i')
-        print >> output_file, len(self.cell_normal_orientation.pointers)
+        print(len(self.cell_normal_orientation.pointers), file=output_file)
         np.savetxt(output_file,
                    self.cell_normal_orientation.pointers,
                    fmt="%i %i")
 
-        print >> output_file, "CELL_VOLUMES", self.get_number_of_cells()
+        print("CELL_VOLUMES", self.get_number_of_cells(), file=output_file)
         np.savetxt(output_file, self.cell_volume)
 
-        print >> output_file, "CELL_REAL_CENTROIDS", self.get_number_of_cells()
+        print("CELL_REAL_CENTROIDS", self.get_number_of_cells(), file=output_file)
         np.savetxt(output_file, self.cell_real_centroid)
 
         if self.has_cell_shifted_centroid:
-            print >> output_file, "CELL_SHIFTED_CENTROIDS",
-            print >> output_file, self.get_number_of_cells()
+            print("CELL_SHIFTED_CENTROIDS", end=' ', file=output_file)
+            print(self.get_number_of_cells(), file=output_file)
             np.savetxt(ouptut_file, self.cell_shifted_centroid)
 
-        print >> output_file, "CELL_K", self.get_number_of_cells()
+        print("CELL_K", self.get_number_of_cells(), file=output_file)
         np.savetxt(output_file, self.cell_k)
 
-        print >> output_file, "BOUNDARY_MARKERS", len(self.boundary_markers)
+        print("BOUNDARY_MARKERS", len(self.boundary_markers), file=output_file)
         for marker_index in self.boundary_markers:
-            print >> output_file, marker_index,
+            print(marker_index, end=' ', file=output_file)
             for (face_index, face_orientation) in\
                     self.get_boundary_faces_by_marker(marker_index):
-                print >> output_file, face_index, face_orientation,
-            print >> output_file, "\n",
+                print(face_index, face_orientation, end=' ', file=output_file)
+            print("\n", end=' ', file=output_file)
 
-        print >> output_file, "DIRICHLET_BOUNDARY_POINTERS",
-        print >> output_file, len(self.dirichlet_boundary_pointers.keys())
+        print("DIRICHLET_BOUNDARY_POINTERS", end=' ', file=output_file)
+        print(len(list(self.dirichlet_boundary_pointers.keys())), file=output_file)
         for key in self.dirichlet_boundary_pointers:
             cell_index, orientation = self.dirichlet_boundary_pointers[key]
-            print >> output_file, key, cell_index, orientation
+            print(key, cell_index, orientation, file=output_file)
 
-        print >> output_file, "INTERNAL_NO_FLOW",
-        print >> output_file, len(self.internal_no_flow)
+        print("INTERNAL_NO_FLOW", end=' ', file=output_file)
+        print(len(self.internal_no_flow), file=output_file)
         np.savetxt(output_file, self.internal_no_flow)
 
-        print >> output_file, "FORCING_FUNCTION_POINTERS",
-        print >> output_file, len(self.forcing_function_pointers.keys())
+        print("FORCING_FUNCTION_POINTERS", end=' ', file=output_file)
+        print(len(list(self.forcing_function_pointers.keys())), file=output_file)
         for cell_index in self.forcing_function_pointers:
-            print >> output_file, cell_index,
+            print(cell_index, end=' ', file=output_file)
             for face_index, orientation in \
                     self.forcing_function_pointers[cell_index]:
-                print >> output_file, face_index, orientation,
-            print >> output_file, "\n",
+                print(face_index, orientation, end=' ', file=output_file)
+            print("\n", end=' ', file=output_file)
 
-        print >> output_file, "FACE_TO_LAGRANGE_POINTERS",
-        print >> output_file, len(self.face_to_lagrange_pointers.keys())
+        print("FACE_TO_LAGRANGE_POINTERS", end=' ', file=output_file)
+        print(len(list(self.face_to_lagrange_pointers.keys())), file=output_file)
         for key in self.face_to_lagrange_pointers:
             lagrange_index, orientation = self.face_to_lagrange_pointers[key]
-            print >> output_file, key, lagrange_index, orientation
+            print(key, lagrange_index, orientation, file=output_file)
 
-        print >> output_file, "LAGRANGE_TO_FACE_POINTERS",
-        print >> output_file, len(self.lagrange_to_face_pointers.keys())
+        print("LAGRANGE_TO_FACE_POINTERS", end=' ', file=output_file)
+        print(len(list(self.lagrange_to_face_pointers.keys())), file=output_file)
         for key in self.lagrange_to_face_pointers:
             face_index, orientation = self.lagrange_to_face_pointers[key]
-            print >> output_file, key, face_index, orientation
+            print(key, face_index, orientation, file=output_file)
 
         output_file.close()
 
@@ -1324,7 +1329,7 @@ class Mesh:
         """ Returns all the faces with Dirichlet
         values set by pointing to a cell.
         """
-        return self.dirichlet_boundary_pointers.keys()
+        return list(self.dirichlet_boundary_pointers.keys())
 
     def set_face_to_lagrange_pointer(self,
                                      face_index,
@@ -1345,7 +1350,7 @@ class Mesh:
         """ Returns all face indices that are
         pointing to a lagrange multiplier.
         """
-        return self.face_to_lagrange_pointers.keys()
+        return list(self.face_to_lagrange_pointers.keys())
 
     def get_face_to_lagrange_pointer(self, face_index):
         """ Returns the lagrange multiplier index
@@ -1367,7 +1372,7 @@ class Mesh:
         """ Returns all lagrange face indices that
         point to fluxes.
         """
-        return self.lagrange_to_face_pointers.keys()
+        return list(self.lagrange_to_face_pointers.keys())
 
     def get_lagrange_to_face_pointers(self, lagrange_index):
         """ Returns the faces the lagrange_index face
@@ -1401,13 +1406,13 @@ class Mesh:
         # becomes additive to the source term
         # for that cell.
         self.forcing_function_pointers[cell_index] = \
-            zip(face_indices, face_orientations)
+            list(zip(face_indices, face_orientations))
 
     def get_forcing_pointer_cells(self):
         """ Returns cell indices with forcing function
         poitners.
         """
-        return self.forcing_function_pointers.keys()
+        return list(self.forcing_function_pointers.keys())
 
     def get_forcing_pointers_for_cell(self, cell_index):
         """ Returns list of pointers (face_indices)
@@ -1530,8 +1535,7 @@ class Mesh:
         as the x, y, z coordinates of its center.
         """
         (v1, v2, origin_index) = self.find_basis_for_face(face_index)
-        polygon = map(lambda x: np.array(self.get_point(x)),
-                      self.get_face(face_index))
+        polygon = [np.array(self.get_point(x)) for x in self.get_face(face_index)]
 
         assert(np.linalg.norm(v2) >1.e-12)
         assert(np.linalg.norm(v1) >1.e-12)
@@ -1550,13 +1554,11 @@ class Mesh:
 
         origin = self.get_point(origin_index)
 
-        transposed_polygon = map(lambda x: x - origin, polygon)
-        polygon_projected_v1 = map(lambda x: np.dot(x, v1),
-                                   transposed_polygon)
-        polygon_projected_v2 = map(lambda x: np.dot(x, v2),
-                                   transposed_polygon)
-        polygon_projected =  zip(polygon_projected_v1,
-                                 polygon_projected_v2)
+        transposed_polygon = [x - origin for x in polygon]
+        polygon_projected_v1 = [np.dot(x, v1) for x in transposed_polygon]
+        polygon_projected_v2 = [np.dot(x, v2) for x in transposed_polygon]
+        polygon_projected =  list(zip(polygon_projected_v1,
+                                 polygon_projected_v2))
 
         area = self.compute_polygon_area(polygon_projected)
 
@@ -1781,45 +1783,45 @@ class Mesh:
         """
         output = open(file_name +".vtk",'w')
 
-        print >> output, "# vtk DataFile Version 1.0"
-        print >> output, "MFD output"
-        print >> output, "ASCII"
-        print >> output, "DATASET UNSTRUCTURED_GRID"
-        print >> output, "POINTS", self.get_number_of_faces() ,  "float"
+        print("# vtk DataFile Version 1.0", file=output)
+        print("MFD output", file=output)
+        print("ASCII", file=output)
+        print("DATASET UNSTRUCTURED_GRID", file=output)
+        print("POINTS", self.get_number_of_faces() ,  "float", file=output)
 
         for face_index in range(self.get_number_of_faces()):
             current_point = self.get_face_real_centroid(face_index)
-            print >> output, current_point[0],
-            print >> output, current_point[1],
-            print >> output, current_point[2]
+            print(current_point[0], end=' ', file=output)
+            print(current_point[1], end=' ', file=output)
+            print(current_point[2], file=output)
 
-        print >> output, " "
-        print >> output, "CELLS", self.get_number_of_faces(),
-        print >> output,  self.get_number_of_faces()*2
+        print(" ", file=output)
+        print("CELLS", self.get_number_of_faces(), end=' ', file=output)
+        print(self.get_number_of_faces()*2, file=output)
 
         for face_index in range(self.get_number_of_faces()):
-            print >> output, "1", face_index + 1
-        print >> output, " "
-        print >> output, "CELL_TYPES" , self.get_number_of_faces()
+            print("1", face_index + 1, file=output)
+        print(" ", file=output)
+        print("CELL_TYPES" , self.get_number_of_faces(), file=output)
 
         for index in range(self.get_number_of_faces()):
-            print >> output, "1"
-        print >> output, " "
-        print >> output, "POINT_DATA", self.get_number_of_faces()
-        print >> output, " "
+            print("1", file=output)
+        print(" ", file=output)
+        print("POINT_DATA", self.get_number_of_faces(), file=output)
+        print(" ", file=output)
 
         for data_index in range(len(vector_labels)):
-            print >> output, "VECTORS", vector_labels[data_index], "float"
+            print("VECTORS", vector_labels[data_index], "float", file=output)
 
             for face_index in range(len(vector_magnitudes[data_index])):
                 current_vector = vector_magnitudes[data_index][face_index]*\
                     self.get_face_normal(face_index)
 
-                print >> output, current_vector[0],
-                print >> output, current_vector[1],
-                print >> output, current_vector[2]
+                print(current_vector[0], end=' ', file=output)
+                print(current_vector[1], end=' ', file=output)
+                print(current_vector[2], file=output)
 
-            print >> output, " "
+            print(" ", file=output)
 
     def output_cell_normals(self, file_name, cell_index):
         """ Outputs the normals over the cell in the outward direction.
@@ -1829,38 +1831,38 @@ class Mesh:
 
         number_of_faces = len(self.get_cell(cell_index))
 
-        print >> output, "# vtk DataFile Version 1.0"
-        print >> output, "MFD output"
-        print >> output, "ASCII"
-        print >> output, "DATASET UNSTRUCTURED_GRID"
-        print >> output, "POINTS", number_of_faces ,  "float"
+        print("# vtk DataFile Version 1.0", file=output)
+        print("MFD output", file=output)
+        print("ASCII", file=output)
+        print("DATASET UNSTRUCTURED_GRID", file=output)
+        print("POINTS", number_of_faces ,  "float", file=output)
 
         for face_index in self.get_cell(cell_index):
             centroid = self.get_face_real_centroid(face_index)
-            print >> output, centroid[0],
-            print >> output, centroid[1],
-            print >> output, centroid[2]
+            print(centroid[0], end=' ', file=output)
+            print(centroid[1], end=' ', file=output)
+            print(centroid[2], file=output)
 
-        print >> output, " "
-        print >> output, "CELLS", number_of_faces,
-        print >> output, number_of_faces*2
+        print(" ", file=output)
+        print("CELLS", number_of_faces, end=' ', file=output)
+        print(number_of_faces*2, file=output)
 
         for index in range(number_of_faces):
-            print >> output, "1", index+1
-        print >> output, " "
-        print >> output, "POINT_DATA", number_of_faces
-        print >> output, " "
+            print("1", index+1, file=output)
+        print(" ", file=output)
+        print("POINT_DATA", number_of_faces, file=output)
+        print(" ", file=output)
 
-        print >> output, "VECTORS", "OUT_NORMAL", "float"
+        print("VECTORS", "OUT_NORMAL", "float", file=output)
         face_list = self.get_cell(cell_index)
         orientation_list = self.get_cell_normal_orientation(cell_index)
         for (face_index, orientation) in zip(face_list, orientation_list):
             normal = self.get_face_normal(face_index)
-            print >> output, normal[0]*orientation,
-            print >> output, normal[1]*orientation,
-            print >> output, normal[2]*orientation
+            print(normal[0]*orientation, end=' ', file=output)
+            print(normal[1]*orientation, end=' ', file=output)
+            print(normal[2]*orientation, file=output)
 
-        print >> output, " "
+        print(" ", file=output)
 
     def output_vtk_faces(self,
                          file_name,
@@ -1870,42 +1872,42 @@ class Mesh:
         """ Outputs in vtk format the faces in face_indices.
         """
         output = open(file_name +".vtk",'w')
-        print >> output, "# vtk DataFile Version 2.0"
-        print >> output, "# unstructured mesh"
-        print >> output, "ASCII"
-        print >> output, "DATASET UNSTRUCTURED_GRID"
-        print >> output, "POINTS", self.get_number_of_points(), "float"
+        print("# vtk DataFile Version 2.0", file=output)
+        print("# unstructured mesh", file=output)
+        print("ASCII", file=output)
+        print("DATASET UNSTRUCTURED_GRID", file=output)
+        print("POINTS", self.get_number_of_points(), "float", file=output)
 
         for point_index in range(self.get_number_of_points()):
             point = self.get_point(point_index)
-            print >> output, point[0], point[1], point[2]
+            print(point[0], point[1], point[2], file=output)
 
         total_polygon_points = 0
         for face_index in face_indices:
             total_polygon_points += \
                 self.get_number_of_face_points(face_index)+1
 
-        print >> output, "CELLS", len(face_indices)
-        print >> output, total_polygon_points
+        print("CELLS", len(face_indices), file=output)
+        print(total_polygon_points, file=output)
 
         for face_index in face_indices:
             current_face = self.get_face(face_index)
-            print >> output, len(current_face),
+            print(len(current_face), end=' ', file=output)
             for point in current_face:
-                print >> output, point,
-            print >> output, "\n",
+                print(point, end=' ', file=output)
+            print("\n", end=' ', file=output)
 
-        print >> output, "CELL_TYPES", len(face_indices)
+        print("CELL_TYPES", len(face_indices), file=output)
         for face_index in face_indices:
-            print >> output, 7
+            print(7, file=output)
 
         if face_values:
-            print >> output, "CELL_DATA", len(face_indices)
+            print("CELL_DATA", len(face_indices), file=output)
             for (entry, entryname) in zip(face_values, face_value_labels):
-                print >> output, "SCALARS", entryname, "double 1"
-                print >> output, "LOOKUP_TABLE default"
+                print("SCALARS", entryname, "double 1", file=output)
+                print("LOOKUP_TABLE default", file=output)
                 for value in entry:
-                    print >> output, value
+                    print(value, file=output)
 
         output.close()
 
@@ -1917,15 +1919,15 @@ class Mesh:
         vtk files for general polyhedral meshes.
         """
         output = open(file_name +".vtk",'w')
-        print >> output, "# vtk DataFile Version 2.0"
-        print >> output, "# unstructured mesh"
-        print >> output, "ASCII"
-        print >> output, "DATASET UNSTRUCTURED_GRID"
-        print >> output, "POINTS", self.get_number_of_points(), "float"
+        print("# vtk DataFile Version 2.0", file=output)
+        print("# unstructured mesh", file=output)
+        print("ASCII", file=output)
+        print("DATASET UNSTRUCTURED_GRID", file=output)
+        print("POINTS", self.get_number_of_points(), "float", file=output)
 
         for point_index in range(self.get_number_of_points()):
             point = self.get_point(point_index)
-            print >> output, point[0], point[1], point[2]
+            print(point[0], point[1], point[2], file=output)
 
         total_polygon_points = 0
         for cell_index in range(self.get_number_of_cells()):
@@ -1934,8 +1936,8 @@ class Mesh:
                     self.get_number_of_face_points(face_index)+1
             total_polygon_points += 2
 
-        print >> output, "CELLS", self.get_number_of_cells(),
-        print >> output, total_polygon_points
+        print("CELLS", self.get_number_of_cells(), end=' ', file=output)
+        print(total_polygon_points, file=output)
 
         for cell_index in range(self.get_number_of_cells()):
             number_of_entries = len(self.get_cell(cell_index))
@@ -1943,26 +1945,26 @@ class Mesh:
                 number_of_entries += self.get_number_of_face_points(face_index)
             number_of_entries += 1
 
-            print >> output, number_of_entries,
-            print >> output, len(self.get_cell(cell_index)),
+            print(number_of_entries, end=' ', file=output)
+            print(len(self.get_cell(cell_index)), end=' ', file=output)
             for face_index in self.get_cell(cell_index):
                 current_face = self.get_face(face_index)
-                print >> output, len(current_face),
+                print(len(current_face), end=' ', file=output)
                 for point in current_face:
-                    print >> output, point,
-            print >> output, "\n",
+                    print(point, end=' ', file=output)
+            print("\n", end=' ', file=output)
 
-        print >> output, "CELL_TYPES", self.get_number_of_cells()
+        print("CELL_TYPES", self.get_number_of_cells(), file=output)
         for cell_index in range(self.get_number_of_cells()):
-            print >> output, 42
+            print(42, file=output)
 
         if cell_values:
-            print >> output, "CELL_DATA", self.get_number_of_cells()
+            print("CELL_DATA", self.get_number_of_cells(), file=output)
             for (entry, entryname) in zip(cell_values, cell_value_labels):
-                print >> output, "SCALARS", entryname, "double 1"
-                print >> output, "LOOKUP_TABLE default"
+                print("SCALARS", entryname, "double 1", file=output)
+                print("LOOKUP_TABLE default", file=output)
                 for value in entry:
-                    print >> output, value
+                    print(value, file=output)
 
         output.close()
 
@@ -2065,7 +2067,7 @@ class Mesh:
                 assert(hits == 1)
             except:
                 for seg in current_segments:
-                    print self.get_point(seg[0]), self.get_point(seg[1])
+                    print(self.get_point(seg[0]), self.get_point(seg[1]))
                 raise Exception("Faild at constructing polygon from segments")
 
             current_segments.pop(to_be_removed)
@@ -2167,13 +2169,13 @@ class Mesh:
                     self.set_cell_faces(cell_next_door[0], next_door_faces)
                     self.set_cell_orientation(cell_next_door[0],
                                               next_door_orientations)
-                    if face_segments_to_be_added.has_key(cell_next_door[0]):
+                    if cell_next_door[0] in face_segments_to_be_added:
                         face_segments_to_be_added[cell_next_door[0]] += [interior_face_segments[-1]]
                     else:
                         face_segments_to_be_added[cell_next_door[0]] = [interior_face_segments[-1]]
 
 
-        if face_segments_to_be_added.has_key(cell_index):
+        if cell_index in face_segments_to_be_added:
             interior_face_segments += face_segments_to_be_added[cell_index]
 
         if len(interior_face_segments) > 0:
@@ -2330,7 +2332,7 @@ class Mesh:
                             multiple_connection_groups[-1].append(remote_connection_index)
                             multiple_connection_indices.append(remote_connection_index)
 
-        multiple_connection_groups = filter(lambda x:len(x)>0, multiple_connection_groups)
+        multiple_connection_groups = [x for x in multiple_connection_groups if len(x)>0]
 
         new_multiple_connection_groups = []
         ## Switch from connection index to actual connections

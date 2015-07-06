@@ -1,7 +1,12 @@
+from __future__ import absolute_import
+from __future__ import print_function
 
 import numpy as np
 import math
-import mesh
+from . import mesh
+from six.moves import map
+from six.moves import range
+from six.moves import zip
 
 
 class VoroMesh(mesh.Mesh):
@@ -133,7 +138,7 @@ class VoroMesh(mesh.Mesh):
                             pass
 
                     else:
-                        if neighbor_to_face_hash.has_key((global_cell_index, current_cell)):
+                        if (global_cell_index, current_cell) in neighbor_to_face_hash:
                             current_cell_faces.append(neighbor_to_face_hash[(global_cell_index, current_cell)])
                             current_cell_orientations.append(-1)
                             if use_shifted_points:
@@ -207,41 +212,41 @@ class VoroMesh(mesh.Mesh):
                 center = self.get_face_real_centroid(face)
                 normal = self.get_face_normal(face)
 
-                print >>output, center[0], center[1], 
-                print >>output, normal[0] * vectorMagnitude[face], 
-                print >>output, normal[1] * vectorMagnitude[face], 
-                print >>output, " "
+                print(center[0], center[1], end=' ', file=output) 
+                print(normal[0] * vectorMagnitude[face], end=' ', file=output) 
+                print(normal[1] * vectorMagnitude[face], end=' ', file=output) 
+                print(" ", file=output)
 
     def output_vtk_mesh_w_data(self, filename, CellValues = [], CellValueLabels = []):
         output = open(filename + ".vtk", 'w')
         
-        print >>output, "# vtk DataFile Version 2.0"
-        print >>output, "#unstructured mesh"
-        print >>output, "ASCII"
-        print >>output, "DATASET UNSTRUCTURED_GRID"
+        print("# vtk DataFile Version 2.0", file=output)
+        print("#unstructured mesh", file=output)
+        print("ASCII", file=output)
+        print("DATASET UNSTRUCTURED_GRID", file=output)
 
-        print >>output, "POINTS", self.get_number_of_points(), "float"
+        print("POINTS", self.get_number_of_points(), "float", file=output)
         
         for p in self.points:
-            print >>output, p[0], p[1], p[2]
+            print(p[0], p[1], p[2], file=output)
 
-        print >>output, "CELLS", self.get_number_of_cells(), 9 * self.get_number_of_cells()
+        print("CELLS", self.get_number_of_cells(), 9 * self.get_number_of_cells(), file=output)
         
         for cell in self.vtk_cells:
-            print >> output, 8, " ".join(map(str, cell))
+            print(8, " ".join(map(str, cell)), file=output)
 
-        print >>output, "CELL_TYPES", self.get_number_of_cells()
+        print("CELL_TYPES", self.get_number_of_cells(), file=output)
 
         for cell in self.vtk_cells:
-            print >>output, 12
+            print(12, file=output)
 
         if CellValues:
-            print >>output, "CELL_DATA", self.get_number_of_cells()
+            print("CELL_DATA", self.get_number_of_cells(), file=output)
             for (entry, entryname) in zip(CellValues, CellValueLabels):
-                print >>output, "SCALARS", entryname, "double 1"
-                print >>output, "LOOKUP_TABLE default" 
+                print("SCALARS", entryname, "double 1", file=output)
+                print("LOOKUP_TABLE default", file=output) 
                 for value in entry:
-                    print >>output, value
+                    print(value, file=output)
             
         
 

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 
 
 import numpy as np
@@ -7,6 +9,8 @@ import scipy.sparse.linalg.dsolve as dsolve
 import os
 from multiprocessing import Pool
 import itertools
+from six.moves import range
+from six.moves import zip
 
 class Transport():
     """ Solves single-phase single-component 
@@ -302,7 +306,7 @@ class Transport():
         for [face_index, cell_index] in self.upwinded_face_cell:
             self.current_c_uw[face_index] = self.current_concentration[cell_index]
             
-        for boundary_marker in self.concentration_boundaries.keys():
+        for boundary_marker in list(self.concentration_boundaries.keys()):
             concentration_function = self.concentration_boundaries[boundary_marker]
             for (boundary_index, boundary_orientation) in\
                     self.mesh.get_boundary_faces_by_marker(boundary_marker):
@@ -371,7 +375,7 @@ class Transport():
 
         for time_step in range(1,self.number_of_time_steps+1):
             current_time = time_step*self.delta_t
-            print time_step
+            print(time_step)
 
             self.update_pressure()
             self.find_upwinding_direction()

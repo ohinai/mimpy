@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 
 import numpy as np
 import sys
@@ -9,6 +11,9 @@ from scipy import sparse, diag
 import scipy.sparse.linalg.dsolve as dsolve
 import scipy.sparse.linalg as linalg
 from multiprocessing import Pool
+import six
+from six.moves import range
+from six.moves import zip
 
 try:
     import petsc4py 
@@ -167,8 +172,7 @@ class MFD():
         div_t_row = array.array('i')
         div_t_col = array.array('i')
 
-        neumaan_boundary_indices = map(lambda x: x[0],
-                                       self.get_neumann_boundary_values())
+        neumaan_boundary_indices = [x[0] for x in self.get_neumann_boundary_values()]
         for current_cell_index in range(self.mesh.get_number_of_cells()):
             current_cell = self.mesh.get_cell(current_cell_index)
             current_cell_orientations = \
@@ -215,8 +219,7 @@ class MFD():
         if self.neumann_needs_updating:
             self.renumber_for_neumann()
 
-        neumaan_boundary_indices = map(lambda x: x[0],
-                                       self.get_neumann_boundary_values())
+        neumaan_boundary_indices = [x[0] for x in self.get_neumann_boundary_values()]
         for current_cell_index in range(self.mesh.get_number_of_cells()):
             current_cell = self.mesh.get_cell(current_cell_index)
             current_cell_orientations = \
@@ -292,8 +295,8 @@ class MFD():
         counter = 0
 
         face_face_orientation = \
-            zip(self.mesh.get_cell(cell_index),
-                self.mesh.get_cell_normal_orientation(cell_index))
+            list(zip(self.mesh.get_cell(cell_index),
+                self.mesh.get_cell_normal_orientation(cell_index)))
 
         if k_unity:
             for [face_index, face_orientation] in face_face_orientation:
@@ -456,7 +459,7 @@ class MFD():
 
         if self.check_m_e:
             if np.linalg.norm(np.dot(m_e, n_e)-r_e) > 1.e-6:
-                print "M_E N ne R", np.linalg.norm(np.dot(m_e, n_e)-r_e)
+                print("M_E N ne R", np.linalg.norm(np.dot(m_e, n_e)-r_e))
 
         if self.compute_diagonality:
             self.diagonality_index_list[cell_index] = \
@@ -464,7 +467,7 @@ class MFD():
             
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
-                print m_e
+                print(m_e)
 
         return m_e
 
@@ -487,7 +490,7 @@ class MFD():
 
         current_length = 0
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.get_neumann_boundary_values())
+            [x[0] for x in self.get_neumann_boundary_values()]
 
         total_work = self.mesh.get_number_of_cells()
         percentage_inc = 10.
@@ -519,8 +522,7 @@ class MFD():
             if save_update_info:
                 self.m_e_locations.append(current_length)
 
-        for face_index in map(lambda x: x[0],
-                                self.get_neumann_boundary_values()):
+        for face_index in [x[0] for x in self.get_neumann_boundary_values()]:
             m_data.append(1.)
             m_row.append(face_index)
             m_col.append(face_index)
@@ -529,7 +531,7 @@ class MFD():
             self.m_data_for_update = np.array(m_data)
             self.m_e_locations = np.array(self.m_e_locations)
 
-        print "all ortho", self.all_ortho
+        print("all ortho", self.all_ortho)
 
         return [m_data, m_row, m_col]
 
@@ -553,7 +555,7 @@ class MFD():
 
         current_length = 0
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.get_neumann_boundary_values())
+            [x[0] for x in self.get_neumann_boundary_values()]
 
         if self.neumann_needs_updating:
             self.renumber_for_neumann()
@@ -592,7 +594,7 @@ class MFD():
             self.m_data_for_update = np.array(m_data)
             self.m_e_locations = np.array(self.m_e_locations)
 
-        print "all ortho", self.all_ortho
+        print("all ortho", self.all_ortho)
 
         return [m_data, m_row, m_col]
 
@@ -615,7 +617,7 @@ class MFD():
 
         current_length = 0
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.get_neumann_boundary_values())
+            [x[0] for x in self.get_neumann_boundary_values()]
 
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_e = self.build_m_e(cell_index, k_unity)
@@ -642,13 +644,12 @@ class MFD():
                 self.m_e_locations.append(current_length)
 
 
-        for face_index in map(lambda x: x[0],
-                                self.get_neumann_boundary_values()):
+        for face_index in [x[0] for x in self.get_neumann_boundary_values()]:
             m_data.append(1.)
             m_row.append(face_index)
             m_col.append(face_index)
 
-        print "All Ortho = ", self.all_ortho
+        print("All Ortho = ", self.all_ortho)
 
         if save_update_info:
             self.m_data_for_update = np.array(m_data)
@@ -915,7 +916,7 @@ class MFD():
 
         gravity_force = m_coo.dot(gravity_force)
         neumann_boundary_indices = \
-            map(lambda x: x[0], self.get_neumann_boundary_values())
+            [x[0] for x in self.get_neumann_boundary_values()]
 
         for face_index in range(self.mesh.get_number_of_faces()):
             if face_index not in neumann_boundary_indices:
@@ -941,7 +942,7 @@ class MFD():
         """ Returns all the faces in cell_index that
         are also neumann faces.
         """
-        if self.cell_faces_neumann.has_key(cell_index):
+        if cell_index in self.cell_faces_neumann:
             return self.cell_faces_neumann[cell_index]
         else:
             return []
@@ -950,7 +951,7 @@ class MFD():
         """ Returns True if face is a Neumann
         boundary. 
         """
-        if self.neumann_boundary_values.has_key(face_index):
+        if face_index in self.neumann_boundary_values:
             return True
         return False
 
@@ -979,7 +980,7 @@ class MFD():
             cell_list = list(self.mesh.get_cell(cell_index))
             local_face_index = cell_list.index(boundary_index)
 
-            if self.cell_faces_neumann.has_key(cell_index):
+            if cell_index in self.cell_faces_neumann:
                 self.cell_faces_neumann[cell_index].append(boundary_index)
             else:
                 self.cell_faces_neumann[cell_index] = [boundary_index]
@@ -998,7 +999,7 @@ class MFD():
 
         cell_index = self.mesh.face_to_cell[face_index][0]
 
-        if self.cell_faces_neumann.has_key(cell_index):
+        if cell_index in self.cell_faces_neumann:
             self.cell_faces_neumann[cell_index].append(face_index)
         else:
             self.cell_faces_neumann[cell_index] = [face_index]
@@ -1009,7 +1010,7 @@ class MFD():
         """ Returns a list of all faces designated as
         Dirichlet boundaries and their values.
         """
-        return self.dirichlet_boundary_values.iteritems()
+        return six.iteritems(self.dirichlet_boundary_values)
 
     def get_dirichlet_value(self, face_index):
         """ Return pressure value at face_index.
@@ -1025,7 +1026,7 @@ class MFD():
         """ Returns a list of all faces designated as
         Neumann boundaries and their values.
         """
-        return self.neumann_boundary_values.iteritems()
+        return six.iteritems(self.neumann_boundary_values)
 
     def reset_dirichlet_boundaries(self):
         """ Resets all Dirichlet bounday data.
@@ -1096,7 +1097,7 @@ class MFD():
             cell_index = self.mesh.face_to_cell[face_index][0]
             cell_list = list(self.mesh.get_cell(cell_index))
             local_face_index = cell_list.index(face_index)
-            if self.cell_faces_neumann.has_key(cell_index):
+            if cell_index in self.cell_faces_neumann:
                 self.cell_faces_neumann[cell_index].append(face_index)
             else:
                 self.cell_faces_neumann[cell_index] = [face_index]
@@ -1260,7 +1261,7 @@ class MFD():
                                                       self.rhs,
                                                       tol=1.e-8)
             if converged > 0:
-                print "did not converge after", converged
+                print("did not converge after", converged)
 
         return self.solution
 
@@ -1277,7 +1278,7 @@ class MFD():
             return current_x
 
         for i in range(1000):
-            print "\t\t inner iter", i
+            print("\t\t inner iter", i)
             Ap = apply_lhs(p)
             pAp = p.dot(Ap)
             if pAp<1.e-42:
@@ -1294,7 +1295,7 @@ class MFD():
             p=r+rsnew/rsold*p
             rsold = rsnew
 
-        print "\t\t went over max iterations", rsnew
+        print("\t\t went over max iterations", rsnew)
         return current_x
 
     def solve_divided(self):
@@ -1317,7 +1318,7 @@ class MFD():
         cg_rhs = f2-self.div.dot(f1_tilde)
 
         current_p = self.cg(apply_lhs, cg_rhs)
-        print "solver residual=>", np.linalg.norm(apply_lhs(current_p)-cg_rhs)
+        print("solver residual=>", np.linalg.norm(apply_lhs(current_p)-cg_rhs))
 
         current_v = -self.cg(self.m.dot,
                                self.div_t.dot(current_p),
@@ -1342,7 +1343,7 @@ class MFD():
 
         ksp.setOperators(self.lhs)
         ksp.setFromOptions()
-        print "solving..."
+        print("solving...")
         ksp.solve(b, x)
         self.solution = x.getArray()
 
@@ -1373,7 +1374,7 @@ class MFD():
         using the SVD.
         """
         lhs = self.lhs.todense()
-        return len(filter(lambda x:abs(x)>1.e-9,np.linalg.svd(lhs)[1]))
+        return len([x for x in np.linalg.svd(lhs)[1] if abs(x)>1.e-9])
 
     def print_lhs_to_file(self, filename):
         """
@@ -1386,8 +1387,8 @@ class MFD():
         (height, width) = lhs.get_shape()
         for i in range(height):
             for j in range(width):
-                print >> matout, lhs[i, j], ",",
-            print >> matout
+                print(lhs[i, j], ",", end=' ', file=matout)
+            print(file=matout)
 
         matout.close()
 
@@ -1399,15 +1400,15 @@ class MFD():
 
         (height, width) = self.lhs.get_shape()
 
-        print >> matout, "P1"
-        print >> matout, height, width
+        print("P1", file=matout)
+        print(height, width, file=matout)
 
         for i in range(height):
             for j in range(width):
                 if abs(self.lhs[i,j]) > 1.e-10:
-                    print >> matout, 1,
+                    print(1, end=' ', file=matout)
                 else:
-                    print >> matout, 0,
-            print >> matout
+                    print(0, end=' ', file=matout)
+            print(file=matout)
 
         matout.close()
