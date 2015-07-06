@@ -35,10 +35,9 @@ class TestCellDivide(unittest.TestCase):
 
     def test_write_single(self):
         two_cells = hexmesh.HexMesh()
-        two_cells.build_mesh(2, 2, 2, 
-                             lambda x, i, j,
+        two_cells.build_mesh(2, 2, 2,
                              1., 1., 1.,
-                             k: np.eye(3))
+                             lambda x, i, j, k: np.eye(3))
 
         two_cells.build_frac_from_faces([5])
         
