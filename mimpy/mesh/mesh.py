@@ -12,7 +12,7 @@ from six.moves import range
 from six.moves import zip
 
 def tb(s):
-    return bytes(s, encoding="UTF-8")
+    return s.encode('UTF-8')
 
 class variable_array():
     """ The class is an efficient reprenstation of variable
@@ -768,7 +768,7 @@ class Mesh:
 
         :param file output_file: File to save mesh to.
         """
-        print(mimpy.__version__, file=output_file)
+        print(tb(str(mimpy.__version__)), file=output_file)
         print("date", file=output_file)
         print("name", file=output_file)
         print("comments", file=output_file)
