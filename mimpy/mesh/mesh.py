@@ -770,7 +770,7 @@ class Mesh:
         """
         print(tb(mimpy.__version__), file=output_file)
         print(tb("date"), file=output_file)
-        print("name", file=output_file)
+        print(tb("name"), file=output_file)
         print("comments", file=output_file)
         print("#", file=output_file)
         print("#", file=output_file)
@@ -1875,7 +1875,7 @@ class Mesh:
         """ Outputs in vtk format the faces in face_indices.
         """
         output = open(file_name +".vtk",'wb')
-        print("# vtk DataFile Version 2.0", file=output)
+        print(tb("# vtk DataFile Version 2.0"), file=output)
         print("# unstructured mesh", file=output)
         print("ASCII", file=output)
         print("DATASET UNSTRUCTURED_GRID", file=output)
