@@ -768,7 +768,7 @@ class Mesh:
 
         :param file output_file: File to save mesh to.
         """
-        print(str(mimpy.__version__), file=output_file)
+        print(tb(str(mimpy.__version__)), file=output_file)
         print("date", file=output_file)
         print("name", file=output_file)
         print("comments", file=output_file)
