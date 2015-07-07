@@ -776,7 +776,7 @@ class Mesh:
         output_file.write(b"#\n")
         output_file.write(b"#\n")
 
-        output_file.write("POINTS")
+        output_file.write(b"POINTS")
         output_file.write(tb(str(len(self.points))+"\n"))
         np.savetxt(output_file, self.points)
 
