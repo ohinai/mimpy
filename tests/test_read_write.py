@@ -17,7 +17,7 @@ class TestCellDivide(unittest.TestCase):
 
         two_cells.build_frac_from_faces([5])
         
-        output_file = open("test_output", 'w')
+        output_file = open("test_output", 'wb')
         two_cells.save_mesh(output_file)
         output_file.close()
 
@@ -42,7 +42,7 @@ class TestCellDivide(unittest.TestCase):
 
         two_cells.build_frac_from_faces([5])
         
-        output_file = open("test_output", 'w')
+        output_file = open("test_output", 'wb')
         two_cells.save_mesh(output_file)
         output_file.close()
 
