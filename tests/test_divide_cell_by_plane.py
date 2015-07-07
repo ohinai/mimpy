@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-#import mimpy.mesh.hexmesh as hexmesh
+import mimpy.mesh.hexmesh as hexmesh
 import numpy as np
 
 
