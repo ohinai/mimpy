@@ -1781,7 +1781,7 @@ class Mesh:
         magnitudes that are associated with each face
         normal.
         """
-        output = open(file_name +".vtk",'w')
+        output = open(file_name +".vtk",'wb')
 
         print("# vtk DataFile Version 1.0", file=output)
         print("MFD output", file=output)
