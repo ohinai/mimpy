@@ -776,106 +776,117 @@ class Mesh:
         output_file.write(b"#\n")
         output_file.write(b"#\n")
 
-        output_file.write(b"POINTS")
+        output_file.write(b"POINTS ")
         output_file.write(tb(str(len(self.points))+"\n"))
         np.savetxt(output_file, self.points)
 
-        print("FACES", self.get_number_of_faces(), file=output_file)
-        print(len(self.faces.data), file=output_file)
+        output_file.write(b"FACES ")
+        output_file.write(tb(str(self.get_number_of_faces())+"\n"))
+        output_file.write(tb(str(len(self.faces.data))+"\n"))
         np.savetxt(output_file, self.faces.data,  fmt='%i')
-        print(len(self.faces.pointers), file=output_file)
+        output_file.write(tb(str(len(self.faces.pointers))+"\n"))
         np.savetxt(output_file, self.faces.pointers, fmt="%i %i")
 
-        print("FACE_NORMALS", len(self.face_normals), file=output_file)
+        output_file.write(b"FACE_NORMALS ")
+        output_file.write(tb(str(len(self.face_normals))+"\n"))
         np.savetxt(output_file, self.face_normals)
 
-        print("FACE_AREAS", self.get_number_of_faces(), file=output_file)
+        output_file.write(b"FACE_AREAS ")
+        output_file.write(tb(str(self.get_number_of_faces())+"\n"))
         for face_index in range(self.get_number_of_faces()):
-            print(self.get_face_area(face_index), file=output_file)
+            output_file.write(tb(str((self.get_face_area(face_index)))+"\n"))
 
-        print("FACE_REAL_CENTROIDS", self.get_number_of_faces(), file=output_file)
+        output_file.write(b"FACE_REAL_CENTROIDS ")
+        output_file.write(tb(str(self.get_number_of_faces())+"\n"))
         for face_index in range(self.get_number_of_faces()):
             current_centroid = self.get_face_real_centroid(face_index)
-            print(current_centroid[0], end=' ', file=output_file)
-            print(current_centroid[1], end=' ', file=output_file)
-            print(current_centroid[2], file=output_file)
+            output_file.write(tb(str(current_centroid[0])+" "))
+            output_file.write(tb(str(current_centroid[1])+" "))
+            output_file.write(tb(str(current_centroid[2])+"\n"))
 
         if self.has_face_shifted_centroid:
-            print("FACE_SHIFTED_CENTROIDS", end=' ', file=output_file)
-            print(self.get_number_of_faces(), file=output_file)
+            output_file.write(b"FACE_SHIFTED_CENTROIDS ")
+            output_file(tb(str(self.get_number_of_faces())+"\n"))
             for face_index in range(self.get_number_of_faces()):
-                print(self.get_face_real_centroid(face_index), file=output_file)
+                output_file.write(tb(str(self.get_face_real_centroid(face_index)+"\n")))
 
-        print("FACE_TO_CELL", len(self.face_to_cell), file=output_file)
+        output_file.write(b"FACE_TO_CELL ")
+        output_file.write(tb(str(len(self.face_to_cell))+"\n"))
         np.savetxt(output_file, self.face_to_cell, fmt="%i %i")
 
-        print("CELLS", self.get_number_of_cells(), file=output_file)
-        print(len(self.cells.data), file=output_file)
+        output_file.write(b"CELLS ")
+        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
+        output_file.write(tb(str(len(self.cells.data))+"\n"))
         np.savetxt(output_file, self.cells.data,  fmt='%i')
-        print(len(self.cells.pointers), file=output_file)
+        output_file.write(tb(str(len(self.cells.pointers))+"\n"))
         np.savetxt(output_file, self.cells.pointers, fmt="%i %i")
 
-        print("CELL_NORMAL_ORIENTATION", end=' ', file=output_file)
-        print(self.get_number_of_cells(), file=output_file)
-        print(len(self.cell_normal_orientation.data), file=output_file)
+        output_file.write(b"CELL_NORMAL_ORIENTATION ")
+        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
+        output_file.write(tb(str(len(self.cell_normal_orientation.data))+"\n"))
         np.savetxt(output_file, self.cell_normal_orientation.data, fmt='%i')
-        print(len(self.cell_normal_orientation.pointers), file=output_file)
+        output_file.write(tb(str((len(self.cell_normal_orientation.pointers)))+"\n"))
         np.savetxt(output_file,
                    self.cell_normal_orientation.pointers,
                    fmt="%i %i")
 
-        print("CELL_VOLUMES", self.get_number_of_cells(), file=output_file)
+        output_file.write(b"CELL_VOLUMES ")
+        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
         np.savetxt(output_file, self.cell_volume)
 
-        print("CELL_REAL_CENTROIDS", self.get_number_of_cells(), file=output_file)
+        output_file.write(b"CELL_REAL_CENTROIDS ")
+        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
         np.savetxt(output_file, self.cell_real_centroid)
 
         if self.has_cell_shifted_centroid:
-            print("CELL_SHIFTED_CENTROIDS", end=' ', file=output_file)
-            print(self.get_number_of_cells(), file=output_file)
+            output_file.write(b"CELL_SHIFTED_CENTROIDS ")
+            output_file.write(tb(str(self.get_number_of_cells())+"\n"))
             np.savetxt(ouptut_file, self.cell_shifted_centroid)
 
-        print("CELL_K", self.get_number_of_cells(), file=output_file)
+        output_file.write(b"CELL_K ")
+        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
         np.savetxt(output_file, self.cell_k)
 
-        print("BOUNDARY_MARKERS", len(self.boundary_markers), file=output_file)
+        output_file.write(b"BOUNDARY_MARKERS ")
+        output_file.write(tb(str(len(self.boundary_markers))+"\n"))
         for marker_index in self.boundary_markers:
-            print(marker_index, end=' ', file=output_file)
+            output_file.write(tb(str(marker_index)+" "))
             for (face_index, face_orientation) in\
                     self.get_boundary_faces_by_marker(marker_index):
-                print(face_index, face_orientation, end=' ', file=output_file)
-            print("\n", end=' ', file=output_file)
+                output_file.write(tb(str(face_index)+" "+str(face_orientation)))
+            output_file.write(b"\n")
 
-        print("DIRICHLET_BOUNDARY_POINTERS", end=' ', file=output_file)
-        print(len(list(self.dirichlet_boundary_pointers.keys())), file=output_file)
+        output_file.write(b"DIRICHLET_BOUNDARY_POINTERS ")
+        output_file.write(tb(str(len(list(
+                            self.dirichlet_boundary_pointers.keys())))+"\n"))
         for key in self.dirichlet_boundary_pointers:
             cell_index, orientation = self.dirichlet_boundary_pointers[key]
-            print(key, cell_index, orientation, file=output_file)
+            output_file.write(tb(str(key)+" "+str(cell_index)+" "+str(orientation)))
 
-        print("INTERNAL_NO_FLOW", end=' ', file=output_file)
-        print(len(self.internal_no_flow), file=output_file)
+        output_file.write(b"INTERNAL_NO_FLOW ")
+        output_file.write(tb(str(len(self.internal_no_flow))+"\n"))
         np.savetxt(output_file, self.internal_no_flow)
 
-        print("FORCING_FUNCTION_POINTERS", end=' ', file=output_file)
-        print(len(list(self.forcing_function_pointers.keys())), file=output_file)
+        output_file.write(b"FORCING_FUNCTION_POINTERS ")
+        output_file.write(tb(str(len(list(self.forcing_function_pointers.keys())))+"\n"))
         for cell_index in self.forcing_function_pointers:
-            print(cell_index, end=' ', file=output_file)
+            output_file.write(tb(str(cell_index)+" "))
             for face_index, orientation in \
                     self.forcing_function_pointers[cell_index]:
-                print(face_index, orientation, end=' ', file=output_file)
-            print("\n", end=' ', file=output_file)
+                output_file.write(tb(str(face_index)+" "+str(orientation)+" "))
+            output_file.write(b"\n")
 
-        print("FACE_TO_LAGRANGE_POINTERS", end=' ', file=output_file)
-        print(len(list(self.face_to_lagrange_pointers.keys())), file=output_file)
+        output_file.write(b"FACE_TO_LAGRANGE_POINTERS ")
+        output_file.write(tb(str(len(list(self.face_to_lagrange_pointers.keys())))+"\n"))
         for key in self.face_to_lagrange_pointers:
             lagrange_index, orientation = self.face_to_lagrange_pointers[key]
-            print(key, lagrange_index, orientation, file=output_file)
+            output_file.write(tb(str(key)+" "+str(lagrange_index)+" "+str(orientation)+"\n"))
 
-        print("LAGRANGE_TO_FACE_POINTERS", end=' ', file=output_file)
-        print(len(list(self.lagrange_to_face_pointers.keys())), file=output_file)
+        output_file.write(b"LAGRANGE_TO_FACE_POINTERS ")
+        output_file.write(tb(str(len(list(self.lagrange_to_face_pointers.keys())))+"\n"))
         for key in self.lagrange_to_face_pointers:
             face_index, orientation = self.lagrange_to_face_pointers[key]
-            print(key, face_index, orientation, file=output_file)
+            output_file.write(tb(str(key)+" "+str(face_index)+" "+str(orientation)+"\n"))
 
         output_file.close()
 
