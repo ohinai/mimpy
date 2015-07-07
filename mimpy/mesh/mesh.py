@@ -11,6 +11,9 @@ from six.moves import map
 from six.moves import range
 from six.moves import zip
 
+def tb(s):
+    return bytes(s, "UTF-8")
+
 class variable_array():
     """ The class is an efficient reprenstation of variable
     lenght two dimensional arrays. It can represent
@@ -766,7 +769,7 @@ class Mesh:
         :param file output_file: File to save mesh to.
         """
         print(mimpy.__version__, file=output_file)
-        print("date", file=output_file)
+        print(tb("date", 'UTF-8'), file=output_file)
         print("name", file=output_file)
         print("comments", file=output_file)
         print("#", file=output_file)
@@ -1827,7 +1830,7 @@ class Mesh:
         """ Outputs the normals over the cell in the outward direction.
         The function is intended for checking the correct orientation of cell.
         """
-        output = open(file_name +".vtk",'w')
+        output = open(file_name +".vtk",'wb')
 
         number_of_faces = len(self.get_cell(cell_index))
 
@@ -1871,7 +1874,7 @@ class Mesh:
                          face_value_labels = []):
         """ Outputs in vtk format the faces in face_indices.
         """
-        output = open(file_name +".vtk",'w')
+        output = open(file_name +".vtk",'wb')
         print("# vtk DataFile Version 2.0", file=output)
         print("# unstructured mesh", file=output)
         print("ASCII", file=output)
@@ -1918,7 +1921,7 @@ class Mesh:
         """ Base implementation for producing
         vtk files for general polyhedral meshes.
         """
-        output = open(file_name +".vtk",'w')
+        output = open(file_name +".vtk",'wb')
         print("# vtk DataFile Version 2.0", file=output)
         print("# unstructured mesh", file=output)
         print("ASCII", file=output)
