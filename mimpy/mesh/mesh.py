@@ -768,16 +768,16 @@ class Mesh:
 
         :param file output_file: File to save mesh to.
         """
-        output_file.write(b"this is just a test")
-        output_file.write(tb(str(mimpy.__version__)))
-        print("date", file=output_file)
-        print("name", file=output_file)
-        print("comments", file=output_file)
-        print("#", file=output_file)
-        print("#", file=output_file)
+        output_file.write(b"this is just a test\n")
+        output_file.write(tb(str(mimpy.__version__)+"\n"))
+        output_file.write(b"date\n")
+        output_file.write(b"name\n")
+        output_file.write(b"comments\n")
+        output_file.write(b"#\n")
+        output_file.write(b"#\n")
 
-        print("POINTS", end=' ', file=output_file)
-        print(str(len(self.points)), file=output_file)
+        output_file.write("POINTS")
+        output_file.write(tb(str(len(self.points))+"\n"))
         np.savetxt(output_file, self.points)
 
         print("FACES", self.get_number_of_faces(), file=output_file)
