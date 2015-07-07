@@ -853,7 +853,7 @@ class Mesh:
             output_file.write(tb(str(marker_index)+" "))
             for (face_index, face_orientation) in\
                     self.get_boundary_faces_by_marker(marker_index):
-                output_file.write(tb(str(face_index)+" "+str(face_orientation)))
+                output_file.write(tb(str(face_index)+" "+str(face_orientation)+" "))
             output_file.write(b"\n")
 
         output_file.write(b"DIRICHLET_BOUNDARY_POINTERS ")
@@ -861,7 +861,7 @@ class Mesh:
                             self.dirichlet_boundary_pointers.keys())))+"\n"))
         for key in self.dirichlet_boundary_pointers:
             cell_index, orientation = self.dirichlet_boundary_pointers[key]
-            output_file.write(tb(str(key)+" "+str(cell_index)+" "+str(orientation)))
+            output_file.write(tb(str(key)+" "+str(cell_index)+" "+str(orientation)+"\n"))
 
         output_file.write(b"INTERNAL_NO_FLOW ")
         output_file.write(tb(str(len(self.internal_no_flow))+"\n"))
