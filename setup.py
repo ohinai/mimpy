@@ -38,7 +38,7 @@ requirements = [
     # TODO: put package requirements here
 ]
 
-test_requirements = ['py.test'
+test_requirements = [###
 ]
 
 setup(
