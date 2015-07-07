@@ -1874,8 +1874,8 @@ class Mesh:
                          face_value_labels = []):
         """ Outputs in vtk format the faces in face_indices.
         """
-        output = open(file_name +".vtk",'wb')
-        print(tb("# vtk DataFile Version 2.0"), file=output)
+        output = open(file_name +".vtk",'wt')
+        print("# vtk DataFile Version 2.0", file=output)
         print("# unstructured mesh", file=output)
         print("ASCII", file=output)
         print("DATASET UNSTRUCTURED_GRID", file=output)
