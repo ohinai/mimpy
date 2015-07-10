@@ -91,6 +91,7 @@ class SinglePhase():
         self.mesh = mesh
         self.mfd = mfd.MFD()
         self.mfd.set_mesh(mesh)
+        self.mfd.set_m_e_construction_method(6)
         
     def set_compressibility(self, compressibility):
         """ Sets fluid compressilibity. 
@@ -119,7 +120,7 @@ class SinglePhase():
         self.initial_pressure = pressures
         self.current_pressure = pressures
         # Assuming zero initial velocity for now. 
-        self.current_velocity = np.zeros(self.mesh.get_number_of_faces())
+        self.current_velocity = np.zeros(self.mfd.flux_dof)
         
     def set_porosities(self, porosities):
         """ Sets cell porosities.
@@ -272,20 +273,20 @@ class SinglePhase():
                 c_entry /= self.delta_t
                 c_entry *= self.mesh.get_cell_volume(cell_index)
 
-                rhs_current[self.mesh.get_number_of_faces()+
+                rhs_current[self.mfd.flux_dof+
                             cell_index] += c_entry*self.current_pressure[cell_index]
                 
                 self.lhs_coo.data[self.c_start+cell_index] = c_entry
 
             for [index, cell_index] in enumerate(self.rate_wells):
-                rhs_current[self.mesh.get_number_of_faces()+cell_index] += \
+                rhs_current[self.mfd.flux_dof+cell_index] += \
                     self.rate_wells_rate[index]
                     
             self.mfd.update_m(self.lhs_coo.data[:self.m_x_coo_length], m_multipliers)
             
             solution = dsolve.spsolve(self.lhs_coo.tocsr(), rhs_current)
-            self.current_pressure = solution[self.mesh.get_number_of_faces():]
-            self.current_velocity = solution[:self.mesh.get_number_of_faces()]
+            self.current_pressure = solution[self.mfd.flux_dof:]
+            self.current_velocity = solution[:self.mfd.flux_dof]
 
             if time_step%self.output_frequency == 0:
                 self.mesh.output_vtk_mesh(self.model_name+str(time_step), 

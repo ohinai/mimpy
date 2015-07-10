@@ -575,7 +575,7 @@ class MFD():
             for i in range(len(m_e)):
                 global_i = current_cell[i]
 
-                if global_i not in  neumann_faces:
+                if global_i not in neumann_faces:
                     for j in range(len(m_e)):
                         global_j = current_cell[j]
                         if global_j not in neumann_faces:
@@ -689,9 +689,9 @@ class MFD():
                          self.mesh.get_cell_volume(cell_index))
                 bottom_right_data.append(entry)
                 bottom_right_row.append(cell_index +
-                                        shift*self.mesh.get_number_of_faces())
+                                        shift*self.flux_dof)
                 bottom_right_col.append(cell_index +
-                                        shift*self.mesh.get_number_of_faces())
+                                        shift*self.flux_dof)
 
         else:
             for cell_index in range(self.mesh.get_number_of_cells()):
@@ -723,23 +723,23 @@ class MFD():
                 coupling_data.append(-self.mesh.get_face_area(face_index) *
                                       orientation)
                 coupling_row.append(cell_index +
-                                    self.mesh.get_number_of_faces())
-                coupling_col.append(face_index)
+                                    self.flux_dof)
+                coupling_col.append(self.face_to_flux[face_index])
 
         for face_index in self.mesh.get_dirichlet_pointer_faces():
             (cell_index, orientation) = \
                 self.mesh.get_dirichlet_pointer(face_index)
             coupling_data.append(self.mesh.get_face_area(face_index) *
                                  orientation)
-            coupling_row.append(face_index)
-            coupling_col.append(cell_index+self.mesh.get_number_of_faces())
+            coupling_row.append(self.face_to_flux[face_index])
+            coupling_col.append(cell_index+self.flux_dof)
 
         for face_index in self.mesh.get_all_face_to_lagrange_pointers():
             (lagrange_index, orientation) = \
                 self.mesh.get_face_to_lagrange_pointer(face_index)
             coupling_data.append(self.mesh.get_face_area(face_index) *
                                  orientation)
-            coupling_row.append(face_index)
+            coupling_row.append(self.face_to_flux[face_index])
             coupling_col.append(lagrange_index)
 
         for lagrange_index in self.mesh.get_all_lagrange_to_face_pointers():
@@ -748,7 +748,7 @@ class MFD():
                 coupling_data.append(-self.mesh.get_face_area(face_index) *
                                       orientation)
                 coupling_row.append(lagrange_index)
-                coupling_col.append(face_index)
+                coupling_col.append(self.face_to_flux[face_index])
 
         return [coupling_data, coupling_row, coupling_col]
 
@@ -1101,7 +1101,7 @@ class MFD():
                 self.cell_faces_neumann[cell_index].append(face_index)
             else:
                 self.cell_faces_neumann[cell_index] = [face_index]
-            
+
             self.neumann_boundary_values[face_index] = 0.
             
     def build_rhs_dirichlet(self):
