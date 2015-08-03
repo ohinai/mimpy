@@ -3,8 +3,6 @@
 Code Overview
 ==============
 
-Mimpy is designed to be a simple library, with a transparent set of data structures and 
-methods.
 The code provides three main functions:
 
 - Basic polyehdral mesh representation and processing. 
@@ -38,5 +36,8 @@ solve more complex systems such as single-phase and two-phase flow equations.
 
 .. image:: models.svg
    :align: center
+
+The **MFD** class serves as a critical separate between the mesh and model. It allows a model developer 
+to solve the diffusion equation without having to directly deal with geometry. 
 
  

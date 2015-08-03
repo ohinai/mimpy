@@ -3,7 +3,6 @@ import mimpy.mesh.hexmesh as hexmesh
 import mimpy.mesh.mesh as mesh
 import numpy as np
 
-
 import unittest
 
 class TestCellDivide(unittest.TestCase):
@@ -11,9 +10,8 @@ class TestCellDivide(unittest.TestCase):
     def test_write(self):
         two_cells = hexmesh.HexMesh()
         two_cells.build_mesh(2, 3, 2, 
-                             lambda x, i, j,
-                             1., 1., 1.
-                             k: np.eye(3))
+                             1., 1., 1., 
+                             lambda x, i, j, k: np.eye(3))
 
         two_cells.build_frac_from_faces([5])
         
@@ -31,15 +29,13 @@ class TestCellDivide(unittest.TestCase):
                loaded_mesh.get_number_of_faces())
 
         assert(two_cells.get_number_of_cells() ==
-               loaded_mesh.get_number_of_cells())
-        
+               loaded_mesh.get_number_of_cells())        
 
     def test_write_single(self):
         two_cells = hexmesh.HexMesh()
         two_cells.build_mesh(2, 2, 2, 
-                             lambda x, i, j,
                              1., 1., 1.,
-                             k: np.eye(3))
+                             lambda x, i, j, k: np.eye(3))
 
         two_cells.build_frac_from_faces([5])
         

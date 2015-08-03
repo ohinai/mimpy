@@ -11,7 +11,7 @@ import scipy.sparse.linalg as linalg
 from multiprocessing import Pool
 
 try:
-    import petsc4py 
+    import petsc4py
     petsc4py.init(sys.argv)
     from petsc4py import PETSc
 except:
@@ -90,7 +90,7 @@ class MFD():
         self.process_internal_boundaries()
 
     def get_flux_dof(self):
-        """ Returns number of flux 
+        """ Returns number of flux
         degrees of freedom.
         """
         return self.flux_dof
@@ -137,7 +137,7 @@ class MFD():
         of freedom in final matrix.
         """
         index_offset = 0
-        self.face_to_flux = np.zeros(shape=(self.mesh.get_number_of_faces(), 1), 
+        self.face_to_flux = np.zeros(shape=(self.mesh.get_number_of_faces(), 1),
                                      dtype=np.dtype("i"))
 
         for face_index in range(self.mesh.get_number_of_faces()):
@@ -148,9 +148,9 @@ class MFD():
                 self.face_to_flux[face_index, 0] = face_index-index_offset
 
         self.flux_dof = self.mesh.get_number_of_faces()-index_offset
-        
+
         self.neumann_needs_updating = False
-                
+
     def build_div_full(self, shift=1):
         """ Build the div and -div^T matrices and returns
         arrays for constructing a coo sparse matrix
@@ -440,16 +440,18 @@ class MFD():
 
         elif self.m_e_construction_method == 6:
             m_e =  r_e.dot(np.linalg.inv(np.dot(r_e.T, n_e)).dot(r_e.T))
-            diagonal = []        
-            for (face_index, orientation) in \
-                    zip(self.mesh.get_cell(cell_index), 
-                        self.mesh.get_cell_normal_orientation(cell_index)):
-                    normal = orientation*self.mesh.get_face_normal(face_index)
-                    entry = normal.dot(np.linalg.inv(current_k).dot(normal))
-                    entry *= self.mesh.get_face_area(face_index)
-                    entry *= np.linalg.norm(self.mesh.get_face_real_centroid(face_index)-
-                                            self.mesh.get_cell_real_centroid(cell_index))
-                    diagonal.append(entry)
+            diagonal = []
+            face_orientation_list = \
+                zip(self.mesh.get_cell(cell_index),
+                    self.mesh.get_cell_normal_orientation(cell_index))
+            for (face_index, orientation) in face_orientation_list:
+                normal = orientation*self.mesh.get_face_normal(face_index)
+                entry = normal.dot(np.linalg.inv(current_k).dot(normal))
+                entry *= self.mesh.get_face_area(face_index)
+                entry *= np.linalg.norm(
+                    self.mesh.get_face_real_centroid(face_index)-
+                    self.mesh.get_cell_real_centroid(cell_index))
+                diagonal.append(entry)
 
             diagonal = np.diag(diagonal)
             m_e += diagonal.dot(c_e.dot(c_e.T))
@@ -461,7 +463,7 @@ class MFD():
         if self.compute_diagonality:
             self.diagonality_index_list[cell_index] = \
                 np.linalg.norm(m_e-np.diag(np.diag(m_e)))/np.linalg.norm(m_e)
-            
+
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
                 print m_e
@@ -503,7 +505,7 @@ class MFD():
                 self.mesh.get_cell_normal_orientation(cell_index)
             for i in range(len(m_e)):
                 global_i = current_cell[i]
-                
+
                 if global_i not in neumann_faces:
                     for j in range(len(m_e)):
                         global_j = current_cell[j]
@@ -515,7 +517,7 @@ class MFD():
                                           current_orientation[j])
                             m_row.append(global_i)
                             m_col.append(global_j)
-                                
+
             if save_update_info:
                 self.m_e_locations.append(current_length)
 
@@ -666,10 +668,10 @@ class MFD():
         matrices used to construct the full Mx
         matrix in coo format.
         """
-        mfd_cython.update_m_fast(m_coo, 
-                                 multipliers, 
+        mfd_cython.update_m_fast(m_coo,
+                                 multipliers,
                                  self.m_data_for_update,
-                                 self.m_e_locations, 
+                                 self.m_e_locations,
                                  self.mesh.get_number_of_cells())
 
     def build_bottom_right(self, alpha = 0., shift = 1):
@@ -948,7 +950,7 @@ class MFD():
 
     def is_neumann_face(self, face_index):
         """ Returns True if face is a Neumann
-        boundary. 
+        boundary.
         """
         if self.neumann_boundary_values.has_key(face_index):
             return True
@@ -1100,9 +1102,9 @@ class MFD():
                 self.cell_faces_neumann[cell_index].append(face_index)
             else:
                 self.cell_faces_neumann[cell_index] = [face_index]
-            
+
             self.neumann_boundary_values[face_index] = 0.
-            
+
     def build_rhs_dirichlet(self):
         """ Construct the entries for the Dirichlet boundaries
         in the RHS.
@@ -1281,7 +1283,6 @@ class MFD():
             Ap = apply_lhs(p)
             pAp = p.dot(Ap)
             if pAp<1.e-42:
-                #print "return from pAp"
                 return current_x
 
             alpha = rsold/p.dot(Ap)

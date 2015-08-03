@@ -115,7 +115,7 @@ This problem can be rewritten as a linear system of equations:
    \end{array}\right) = 
    \left(\begin{array}{c}
    0 \\
-   b
+   f
    \end{array}\right)  
    
 .. note::

@@ -27,16 +27,9 @@ and many more. This feature is uselful since:
 - Polyhedral elements make for a natural way to resolve local grid refinements. 
 
 The diffusion equation is often referred to a "kernel" problem for many more complex sets of 
-equations. An prime example of such equations are the ones related to porous media flows.
-
-Mimpy follows a very simple organization, just remember the three "m"s:
-
-- **mesh**: A representation of general polyhedral meshes and some basic operations on them. 
-- **matrix** : The linear systems of equations produced from the MFD discretization. 
-- **model**: Physical problems such as single-phase flow, the transport equation and two-phase flow.
+equations. An example of such equations are the ones related to porous media flows.
 
 For more information on the software, check out the :ref:`codeoverview`. 
-
 
 .. _discretization: http://en.wikipedia.org/wiki/Numerical_partial_differential_equations
 
