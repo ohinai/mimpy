@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 import mimpy.mesh.hexmesh as hexmesh
 import mimpy.mesh.mesh as mesh
@@ -10,12 +11,12 @@ class TestCellDivide(unittest.TestCase):
     def test_write(self):
         two_cells = hexmesh.HexMesh()
         two_cells.build_mesh(2, 3, 2, 
-                             1., 1., 1., 
+                             1., 1., 1.,
                              lambda x, i, j, k: np.eye(3))
 
         two_cells.build_frac_from_faces([5])
         
-        output_file = open("test_output", 'w')
+        output_file = open("test_output", 'wb')
         two_cells.save_mesh(output_file)
         output_file.close()
 
@@ -33,13 +34,13 @@ class TestCellDivide(unittest.TestCase):
 
     def test_write_single(self):
         two_cells = hexmesh.HexMesh()
-        two_cells.build_mesh(2, 2, 2, 
+        two_cells.build_mesh(2, 2, 2,
                              1., 1., 1.,
                              lambda x, i, j, k: np.eye(3))
 
         two_cells.build_frac_from_faces([5])
         
-        output_file = open("test_output", 'w')
+        output_file = open("test_output", 'wb')
         two_cells.save_mesh(output_file)
         output_file.close()
 
