@@ -2264,7 +2264,6 @@ class Mesh:
 
         return new_cell_index
 
-
     def build_frac_from_faces(self, faces):
         """ Takes a list of face indices, and
         extrudes them into cells.
@@ -2545,7 +2544,7 @@ class Mesh:
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
 
-            width = .0005
+            width = .001
             full_face = self.get_face(faces[connection[0]])
             point1 = -width*norm1+self.get_point(full_face[connection[2]])
             point2 = -width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
@@ -2624,7 +2623,7 @@ class Mesh:
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
 
-            width = .0007
+            width = .0014
 
             if connection[7] == 'TOP':
                 full_face = self.get_face(faces[connection[0]])
@@ -2733,7 +2732,7 @@ class Mesh:
 
                 new_face_points = []
                 norm = self.get_face_normal(global_face_index)
-                width = .0005
+                width = .001
                 if bot_points[local_face_index][point1] == -1:
                     new_point = -width*norm+self.get_point(self.get_face(global_face_index)[point1])
                     point_1_index = self.add_point(new_point)

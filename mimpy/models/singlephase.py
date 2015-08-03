@@ -91,7 +91,8 @@ class SinglePhase():
         self.mesh = mesh
         self.mfd = mfd.MFD()
         self.mfd.set_mesh(mesh)
-        self.mfd.set_m_e_construction_method(6)
+        self.mfd.set_m_e_construction_method(1)
+        self.mfd.check_m_e = True
         
     def set_compressibility(self, compressibility):
         """ Sets fluid compressilibity. 
@@ -249,10 +250,10 @@ class SinglePhase():
 
         self.time_step_output(0., 0)
 
-        m_multipliers = np.ones(self.mesh.get_number_of_cells())
+        m_multipliers = np.ones(self.mesh.get_number_of_cells(), dtype=np.dtype('d'))
 
         for time_step in range(1,self.number_of_time_steps+1):
-            rhs_current = np.zeros(self.mfd.get_number_of_dof())        
+            rhs_current = np.zeros(self.mfd.get_number_of_dof(), dtype=np.dtype('d'))
             rhs_current += self.rhs_mfd
             
             current_time = time_step*self.delta_t
@@ -283,10 +284,68 @@ class SinglePhase():
                     self.rate_wells_rate[index]
                     
             self.mfd.update_m(self.lhs_coo.data[:self.m_x_coo_length], m_multipliers)
-            
+
             solution = dsolve.spsolve(self.lhs_coo.tocsr(), rhs_current)
             self.current_pressure = solution[self.mfd.flux_dof:]
             self.current_velocity = solution[:self.mfd.flux_dof]
+
+            if time_step%self.output_frequency == 0:
+                self.mesh.output_vtk_mesh(self.model_name+str(time_step), 
+                                          [self.current_pressure, 
+                                           self.mesh.get_cell_domain_all()],
+                                          ["pressure", "domain"])
+
+                self.time_step_output(current_time, time_step)
+
+    def start_solving_newton(self):
+        """ Starts solving the problem. 
+        """
+        self.mesh.output_vtk_mesh(self.model_name + "0", 
+                                  [self.current_pressure, 
+                                   self.mesh.get_cell_domain_all()], 
+                                  ["pressure", "domain"])
+
+        self.time_step_output(0., 0)
+
+        m_multipliers = np.ones(self.mesh.get_number_of_cells(), dtype=np.dtype('d'))
+
+        for time_step in range(1,self.number_of_time_steps+1):
+            current_time = time_step*self.delta_t
+            print(time_step)
+            print("\n")
+            for i in range(100):
+                rhs_current = np.zeros(self.mfd.get_number_of_dof(), dtype=np.dtype('d'))
+                rhs_current += self.rhs_mfd
+                for cell_index in range(self.mesh.get_number_of_cells()):
+                    density = -self.ref_pressure
+                    density += self.current_pressure[cell_index]
+                    density *= self.compressibility
+                    density += 1.
+                    density *= self.ref_density
+
+                    # We multiply by the inverse of \frac{\rho}{\mu}
+                    m_multipliers[cell_index] = self.viscosity/density
+
+                    c_entry = self.compressibility
+                    c_entry *= self.porosities[cell_index]
+                    c_entry /= self.delta_t
+                    c_entry *= self.mesh.get_cell_volume(cell_index)
+
+                    rhs_current[self.mfd.flux_dof+
+                                cell_index] += c_entry*self.current_pressure[cell_index]
+
+                    self.lhs_coo.data[self.c_start+cell_index] = c_entry
+
+                for [index, cell_index] in enumerate(self.rate_wells):
+                    rhs_current[self.mfd.flux_dof+cell_index] += \
+                        self.rate_wells_rate[index]
+
+                self.mfd.update_m(self.lhs_coo.data[:self.m_x_coo_length], m_multipliers)
+
+                solution = dsolve.spsolve(self.lhs_coo.tocsr(), rhs_current)
+                print(np.linalg.norm(self.current_pressure-solution[self.mfd.flux_dof:]))
+                self.current_pressure = solution[self.mfd.flux_dof:]
+                self.current_velocity = solution[:self.mfd.flux_dof]
 
             if time_step%self.output_frequency == 0:
                 self.mesh.output_vtk_mesh(self.model_name+str(time_step), 
