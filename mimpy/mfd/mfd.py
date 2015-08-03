@@ -208,11 +208,11 @@ class MFD():
         [[div_data, div_row, div_col],
         [div_t_data, div_t_row, div_t_col]]
         """
-        div_data = array.array('f')
+        div_data = array.array('d')
         div_row = array.array('i')
         div_col = array.array('i')
 
-        div_t_data = array.array('f')
+        div_t_data = array.array('d')
         div_t_row = array.array('i')
         div_t_col = array.array('i')
 
@@ -256,7 +256,7 @@ class MFD():
         is_using_cell_shifted_centroid.
         """
         r_e = np.zeros((self.mesh.get_number_of_cell_faces(cell_index),
-                        self.mesh.dim))
+                        self.mesh.dim), dtype=np.dtype('d'))
 
         counter = 0
 
@@ -290,7 +290,7 @@ class MFD():
         definition for the mimetic method.
         """
         number_of_faces = len(self.mesh.get_cell(cell_index))
-        n_e = np.zeros((number_of_faces, self.mesh.dim))
+        n_e = np.zeros((number_of_faces, self.mesh.dim), dtype=np.dtype('d'))
 
         counter = 0
 
@@ -470,7 +470,7 @@ class MFD():
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
                 print(m_e)
-
+                
         return m_e
 
     def build_m_full(self, save_update_info = False, k_unity = False):
@@ -548,7 +548,7 @@ class MFD():
             self.diagonality_index_list = \
                 np.zeros(self.mesh.get_number_of_cells())
 
-        m_data = array.array('f')
+        m_data = array.array('d')
         m_row = array.array('i')
         m_col = array.array('i')
 
@@ -581,7 +581,7 @@ class MFD():
                     for j in range(len(m_e)):
                         global_j = current_cell[j]
                         if global_j not in neumann_faces:
-                            if abs(m_e[i][j])/m_e_norm > 1.e-12:
+                            if abs(m_e[i][j])/m_e_norm > 1.e-20:
                                 current_length += 1
                                 m_data.append(m_e[i, j]*
                                               current_orientation[i]*
@@ -681,7 +681,7 @@ class MFD():
         side of the matrix). Returns
         data, row and col data for coo matrix.
         """
-        bottom_right_data = array.array('f')
+        bottom_right_data = array.array('d')
         bottom_right_row = array.array('i')
         bottom_right_col = array.array('i')
 
@@ -715,7 +715,7 @@ class MFD():
         boundary and forcing function
         pointers.
         """
-        coupling_data = array.array('f')
+        coupling_data = array.array('d')
         coupling_row = array.array('i')
         coupling_col = array.array('i')
 
@@ -761,7 +761,7 @@ class MFD():
         | DIV     C   |
         Returns the system in coo matrix format.
         """
-        lhs_data = array.array('f')
+        lhs_data = array.array('d')
         lhs_row = array.array('i')
         lhs_col = array.array('i')
 

@@ -228,6 +228,7 @@ class TwoPhase:
         self.mesh = mesh
         self.mfd = mfd.MFD()
         self.mfd.set_mesh(mesh)
+        self.mfd.set_m_e_construction_method(6)
 
     def set_compressibility_water(self, compressibility_water):
         """ Sets water compressilibity.
@@ -730,8 +731,10 @@ class TwoPhase:
 
             if time_step % self.output_frequency == 0:
                 self.mesh.output_vtk_mesh(self.model_name + str(time_step),
-                                          [self.current_s_w, self.current_p_o],
-                                          ["sw", "POIL"])
+                                          [self.current_s_w, 
+                                           self.current_p_o,
+                                           self.mesh.get_cell_domain_all()],
+                                          ["sw", "POIL", "domain"])
                 print("time step", time_step)
 
                 self.time_step_output(self.current_time, time_step)
@@ -947,8 +950,9 @@ class TwoPhase:
         for face_index in self.mesh.get_dirichlet_pointer_faces():
             (cell_index, orientation) = \
                 self.mesh.get_dirichlet_pointer(face_index)
-            if self.current_u_t[face_index]*orientation<0.:
-                self.upwinded_face_cell.append([face_index, cell_index])
+            flux_index = self.mfd.face_to_flux[face_index]
+            if self.current_u_t[flux_index]*orientation<0.:
+                self.upwinded_face_cell.append([flux_index, cell_index])
 
         self.current_f_w = np.zeros(self.mfd.flux_dof)
         self.current_u_w = np.zeros(self.mfd.flux_dof)
@@ -1035,7 +1039,8 @@ class TwoPhase:
         for cell_index in self.mesh.get_forcing_pointer_cells():
             for (face_index, orientation) in \
                     self.mesh.get_forcing_pointers_for_cell(cell_index):
-                new_s_w = self.current_u_w[face_index]
+                flux_index = self.mfd.face_to_flux[face_index]
+                new_s_w = self.current_u_w[flux_index]
                 new_s_w *= orientation
                 new_s_w *= self.mesh.get_face_area(face_index)*sat_delta_t
                 new_s_w /= self.porosities[cell_index]
