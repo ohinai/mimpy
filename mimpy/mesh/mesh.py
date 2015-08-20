@@ -256,12 +256,16 @@ class Mesh:
         # multi-domain problems)
         self.cell_domain = np.empty(shape=(0), dtype=int)
 
+        self.cell_domain_tags = set([0])
+
         self.dim = 3
 
         # dict: {face_index: (cell_index, face_orientation), ...}
         # Allows Dirichlet boundaries to be set implicitly
         # based on pressure of cells.
         self.dirichlet_boundary_pointers = {}
+
+        self.periodic_boundaries = []
 
         # Faces designated as no flow, meant for
         # interior boundary conditions not to be
@@ -1381,7 +1385,7 @@ class Mesh:
         in order to impose zero flux across the boundary.
         """
         self.lagrange_to_face_pointers[lagrange_index] = \
-            [face_index, orientation]
+            zip(face_index, orientation)
 
     def get_all_lagrange_to_face_pointers(self):
         """ Returns all lagrange face indices that
@@ -1401,6 +1405,24 @@ class Mesh:
         implicitly.
         """
         return self.dirichlet_boundary_pointers[face_index]
+
+    def set_periodic_boundary(self,
+                              face_index_1,
+                              face_orientation_1,
+                              face_index_2,
+                              face_orientation_2):
+        """ Sets a periodic boundary condition, connecting 
+        face 1 with face 2. This ammounts to creating a single
+        lagrange multiplier shared by the faces. The MFD class would 
+        impose continuity of both the pressure and the flux 
+        for the periodic conditions. 
+        """
+        lagrange_index_1 = self.duplicate_face(face_index_1)
+        self.periodic_boundaries.append((face_index_1,
+                                         face_orientation_1,
+                                         face_index_2,
+                                         face_orientation_2,
+                                         lagrange_index_1,))
 
     def set_forcing_pointer(self,
                             cell_index,
@@ -1425,7 +1447,7 @@ class Mesh:
 
     def get_forcing_pointer_cells(self):
         """ Returns cell indices with forcing function
-        poitners.
+        pointers.
         """
         return list(self.forcing_function_pointers.keys())
 
@@ -1440,6 +1462,12 @@ class Mesh:
         for cell_index.
         """
         self.cell_domain[cell_index] = domain
+        self.cell_domain_tags.add(domain)
+        
+    def get_domain_tags(self):
+        """ Returns list of all domain tags.
+        """
+        return list(self.cell_domain_tags)
 
     def get_cell_domain(self, cell_index):
         """ Returns cell domain identifier
@@ -1684,14 +1712,13 @@ class Mesh:
             self.face_normals,
             self.face_to_cell)
 
-    def find_volume_centroid(self, cell_index):
-        """ Returns the volume and centroid for a 3D cell_index.
-        Based on code and paper by Brian Mirtich.
+    def find_volume_from_faces(self, face_list, orientation_list):
+        """ Calculates volume and centroid of cell
+        based on list of faces and face orientations relative 
+        to the cell. 
         """
         volume = 0.
         centroid = np.zeros(3)
-        face_list = self.get_cell(cell_index)
-        orientation_list = self.get_cell_normal_orientation(cell_index)
         for (face_index, face_orientation) in zip(face_list, orientation_list):
             current_normal = self.get_face_normal(face_index)*face_orientation
 
@@ -1785,6 +1812,14 @@ class Mesh:
         centroid /= volume*2.
 
         return (volume, centroid)
+
+    def find_volume_centroid(self, cell_index):
+        """ Returns the volume and centroid for a 3D cell_index.
+        Based on code and paper by Brian Mirtich.
+        """
+        face_list = self.get_cell(cell_index)
+        orientation_list = self.get_cell_normal_orientation(cell_index)
+        return self.find_volume_from_faces(face_list, orientation_list)
 
     def output_vector_field(self,
                             file_name,
@@ -2050,6 +2085,29 @@ class Mesh:
 
             new_cell_faces = self.get_cell(other_cell)
             new_cell_faces[local_face_index_in_other] = new_face_index
+
+    def find_domain_faces(self, domain):
+        """ Identifies the faces on the boundary
+        of the domain.
+        """
+        boundary_faces = []
+        boundary_orientation = []
+        for cell_index in self.get_cells_in_domain(domain):
+            for (face_index, orientation) in zip(self.get_cell(cell_index), 
+                                                 self.get_cell_normal_orientation(cell_index)):
+                neighboring_cells = self.face_to_cell[face_index]
+                if len(neighboring_cells)> 1:
+                    cell1, cell2 = neighboring_cells
+                    if cell1 == cell_index:
+                        if cell2 not in self.get_cells_in_domain(domain):
+                            boundary_faces.append(face_index)
+                            boundary_orientation.append(orientation)
+                    if cell2 == cell_index:
+                        if cell1 not in self.get_cells_in_domain(domain):
+                            boundary_faces.append(face_index)
+                            boundary_orientation.append(orientation)
+
+        return (boundary_faces, boundary_orientation)
 
     def construct_polygon_from_segments(self, segments):
         """ Takes point pairs and constructs a single polygon

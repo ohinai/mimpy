@@ -742,15 +742,42 @@ class MFD():
             coupling_data.append(self.mesh.get_face_area(face_index) *
                                  orientation)
             coupling_row.append(self.face_to_flux[face_index])
-            coupling_col.append(lagrange_index)
+            coupling_col.append(self.face_to_flux[lagrange_index])
 
         for lagrange_index in self.mesh.get_all_lagrange_to_face_pointers():
             for (face_index, orientation) in \
                     self.mesh.get_lagrange_to_face_pointers(lagrange_index):
                 coupling_data.append(-self.mesh.get_face_area(face_index) *
                                       orientation)
-                coupling_row.append(lagrange_index)
+                coupling_row.append(self.face_to_flux[lagrange_index])
                 coupling_col.append(self.face_to_flux[face_index])
+
+        for periodic in self.mesh.periodic_boundaries:
+            face_index_1 = periodic[0]
+            face_orientation_1 = periodic[1]
+            face_index_2 = periodic[2]
+            face_orientation_2 = periodic[3]
+            lagrange_index_1 = periodic[4]
+
+            ## L^T
+            coupling_data.append(self.mesh.get_face_area(face_index_1)*
+                                 face_orientation_1)
+            coupling_row.append(self.face_to_flux[face_index_1])
+            coupling_col.append(self.face_to_flux[lagrange_index_1])
+
+            coupling_data.append(self.mesh.get_face_area(face_index_2)*
+                                 face_orientation_2)
+            coupling_row.append(self.face_to_flux[face_index_2])
+            coupling_col.append(self.face_to_flux[lagrange_index_1])
+
+            # L
+            coupling_data.append(-face_orientation_1)
+            coupling_row.append(self.face_to_flux[lagrange_index_1])
+            coupling_col.append(self.face_to_flux[face_index_1])
+
+            coupling_data.append(-face_orientation_2)
+            coupling_row.append(self.face_to_flux[lagrange_index_1])
+            coupling_col.append(self.face_to_flux[face_index_2])
 
         return [coupling_data, coupling_row, coupling_col]
 
@@ -1362,24 +1389,21 @@ class MFD():
         return self.solution[face_index]
 
     def get_velocity_solution(self):
-        """
-        Returns the velocity solution for the problem. The
+        """ Returns the velocity solution for the problem. The
         fluxes are indexed in the same order as the
         corresponding face indices.
         """
         return self.solution[:self.mesh.get_number_of_faces()]
 
     def lhs_rank(self):
-        """
-        Return the rank of the saddle-point problem
+        """ Return the rank of the saddle-point problem
         using the SVD.
         """
         lhs = self.lhs.todense()
         return len([x for x in np.linalg.svd(lhs)[1] if abs(x)>1.e-9])
 
     def print_lhs_to_file(self, filename):
-        """
-        Output entire LHS to file (dense format).
+        """ Output entire LHS to file (dense format).
         """
         matout = open( filename + ".dat", 'w')
 
@@ -1393,9 +1417,16 @@ class MFD():
 
         matout.close()
 
-    def print_lhs_to_ppm(self, filename):
+    def lhs_svd(self):
+        """ Returns the singular values 
+        of the lhs matrix. 
         """
-        Output LHS to ppm image file type.
+        lhs = self.lhs.todense()
+        return np.linalg.svd(lhs)[1]
+
+
+    def print_lhs_to_ppm(self, filename):
+        """ Output LHS to ppm image file type.
         """
         matout = open( filename + ".ppm", 'w')
 
