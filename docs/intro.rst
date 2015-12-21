@@ -3,33 +3,45 @@ Introduction
 ============
 
 
-Mimpy solves equations like the diffusion problem:
+Mimpy solves the diffusion problem:
 
 .. math::
      \begin{align}
      - \nabla \cdot K \nabla p = f
      \end{align}
 
-using the Mimetic Finite Difference (MFD) method [BLS2005]_.
-MFD, like many other discretization_ methods, 
-requires the construction of a mesh. However, unlike most methods that require a specific 
-kind of mesh (like tetrahedra or hexahedra), the MFD method accepts general polyhedral elements. This means 
-that it can naturally solve using traditional meshes like tetrahedra, hexahedra and Voronoi:
+using the Mimetic Finite Difference (MFD) method [BLS2005]_. 
+The diffusion equation is often referred to a "kernel" problem for many more complex sets of 
+equations. An example of such equations are the ones related to porous media flows.
+
+The MFD method, like many other discretization_ methods, 
+requires the construction of a mesh. However, unlike most conventional methods that are restricted to a specific 
+kind of element, the MFD method accepts a wide range of general polyhedral elements. This means 
+that it can naturally solve for all kinds of conventional meshes such as tetrahedra, hexahedra and Voronoi:
 
 .. image:: three_solutions.png
 
 and many more. This feature is uselful since:
 
 - Users don't always have control over the mesh they use.
-- The element flexibility allows for  modeling complex features such as fractures. 
 - It allows model developers to debug their models on simple rectangular meshes 
   first, and then move on to more complex geometries.
-- Polyhedral elements make for a natural way to resolve local grid refinements. 
+- You can mix and match meshes. For example, solving one part of the domain with 
+  rectangles and the other with triangles. 
+- Polyhedral elements naturally allow for local grid refinement (adaptivity). 
 
-The diffusion equation is often referred to a "kernel" problem for many more complex sets of 
-equations. An example of such equations are the ones related to porous media flows.
 
-For more information on the software, check out the :ref:`codeoverview`. 
+Mimpy is designed for simple and intuitive use. 
+Meshes can be constructed using built-in routines or 
+loaded from popular mesh files. Boundary faces can be identified and solved for using a simple boundary marker construct. 
+
+
+For more information on the software, check out the :ref:`code overview <codeoverview>`. 
+
+
+For porous media model examples, see  :ref:`gallery of examples <examplegallery>` and 
+:ref:`model classes <modelmodule>`. 
+
 
 .. _discretization: http://en.wikipedia.org/wiki/Numerical_partial_differential_equations
 

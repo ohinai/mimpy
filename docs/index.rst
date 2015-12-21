@@ -6,7 +6,8 @@
 Welcome to mimpy's documentation!
 ======================================
 
-Mimpy is a Python based library for solving certain Partial Differential Equations using 
+Mimpy is a Python based library for solving the diffusion equation and related 
+problems using 
 the Mimetic Finite Difference method. 
 
 .. toctree::
@@ -19,13 +20,12 @@ the Mimetic Finite Difference method.
    examplegallery
    contributing
    authors
-
+   modules
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
