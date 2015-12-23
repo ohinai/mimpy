@@ -965,8 +965,9 @@ class Mesh:
             elif self.face_to_cell[face_index][1] == -1:
                 self.face_to_cell[face_index][1] = new_cell_index
             else:
-                raise Exception("setting face to cell already set"+
-                                " to two cells")
+                raise Exception("setting face " + str(face_index) +" to cell " +
+                                str(new_cell_index) + " already set"+
+                                " to two cells "+ str(self.face_to_cell[face_index]))
 
         if len(self.cell_domain)-1<new_cell_index:
             new_size = self._memory_extension(len(self.cell_domain))
@@ -2166,8 +2167,8 @@ class Mesh:
 
     def divide_cell_by_plane(self, cell_index, point_on_plane, plane_normal):
         """ Divides given cell into two cells
-        based on a plane specified by a point and normal
-        on the plane.
+        based on a plane specified by a point on the plane
+        and the plane normal.
         """
         current_cell = self.get_cell(cell_index)
         interior_face_segments = []
@@ -2175,6 +2176,7 @@ class Mesh:
         face_segments_to_be_added = {}
         for face_index in current_cell:
             face = self.get_face(face_index)
+
             new_face_1 = []
             new_face_2 = []
             face_offset = list(face[1:]) + [face[0]]
@@ -2212,6 +2214,7 @@ class Mesh:
 
             if len(new_face_2) > 0:
                 self.set_face(face_index, new_face_1)
+
                 assert(len(new_face_1)>2)
                 (face_1_area, face_1_centroid)  = self.find_face_centroid(face_index)
                 self.set_face_real_centroid(face_index, face_1_centroid)
@@ -2254,7 +2257,6 @@ class Mesh:
                     next_door_orientations = list(next_door_orientations) + \
                         [next_door_orientations[next_door_local_face_index]]
                     next_door_orientations = np.array(next_door_orientations)
-
                     self.set_cell_faces(cell_next_door[0], next_door_faces)
                     self.set_cell_orientation(cell_next_door[0],
                                               next_door_orientations)
@@ -2325,6 +2327,10 @@ class Mesh:
         (cell_volume, cell_centroid) = self.find_volume_centroid(cell_index)
         self.set_cell_real_centroid(cell_index, cell_centroid)
         self.set_cell_volume(cell_index, cell_volume)
+
+        for face_index in faces_for_cell_2:
+            if cell_index in self.face_to_cell[face_index]:
+                self.remove_from_face_to_cell(face_index, cell_index)
 
         new_cell_index = self.add_cell(faces_for_cell_2,
                                        normals_for_cell_2)
