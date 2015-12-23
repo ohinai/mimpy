@@ -417,10 +417,10 @@ class Mesh:
         """ Adds cell_index to face_to_cell map
         at face_index.
         """
-        if self.face_to_cell[face_index, 0] ==  -1:
-            self.face_to_cell[face_index, 0] =  cell_index
-        elif self.face_to_cell[face_index, 1] ==  -1:
-            self.face_to_cell[face_index, 1] =  cell_index
+        if self.face_to_cell[face_index, 0] == -1:
+            self.face_to_cell[face_index, 0] = cell_index
+        elif self.face_to_cell[face_index, 1] == -1:
+            self.face_to_cell[face_index, 1] = cell_index
         else:
             raise Exception("cell_index " + str(cell_index)+
                             " could not be added to "+
@@ -602,6 +602,11 @@ class Mesh:
                 self.face_shifted_centroids = np.loadtxt(
                     islice(input_file, number_of_faces))
 
+            elif line_split[0] == "FACE_TO_CELL":
+                number_of_faces = int(line_split[1])
+                self.face_to_cell = np.loadtxt(
+                    islice(input_file, number_of_faces))
+
             elif line_split[0] == "CELLS":
                 number_of_cells = int(line_split[1])
                 self.cells.number_of_entries = number_of_cells
@@ -633,19 +638,19 @@ class Mesh:
                                dtype=np.dtype('i'))
 
             elif line_split[0] == "CELL_VOLUMES":
-                number_of_cells = int(line_split[1])
+                number_of_entries = int(line_split[1])
                 self.cell_volume = np.loadtxt(islice(input_file,
-                                                     number_of_cells))
+                                                     number_of_entries))
 
             elif line_split[0] == "CELL_REAL_CENTROIDS":
-                number_of_cells = int(line_split[1])
+                number_of_entries = int(line_split[1])
                 self.cell_real_centroid = np.loadtxt(islice(input_file,
-                                                            number_of_cells))
+                                                            number_of_entries))
 
             elif line_split[0] == "CELL_SHIFTED_CENTROIDS":
-                number_of_cells = int(line_split[1])
+                number_of_entries = int(line_split[1])
                 self.cell_shifted_centroid = np.loadtxt(
-                    islice(input_file, number_of_cells))
+                    islice(input_file, number_of_entries))
 
             elif line_split[0] == "CELL_K":
                 number_of_cells = int(line_split[1])
@@ -679,8 +684,12 @@ class Mesh:
 
             elif line_split[0] == "INTERNAL_NO_FLOW":
                 number_of_faces = int(line_split[1])
-                self.internal_no_flow = list(np.loadtxt(
-                        islice(input_file, number_of_faces)))
+                for line_index in range(number_of_faces):
+                    current_line = next(input_file)
+                    line_split = current_line.split()
+                    face_index = int(line_split[0])
+                    orientation = int(line_split[1])
+                    self.internal_no_flow.append([face_index, orientation])
 
             elif line_split[0] == "FORCING_FUNCTION_POINTERS":
                 number_of_cells = int(line_split[1])
@@ -780,10 +789,12 @@ class Mesh:
         output_file.write(b"#\n")
         output_file.write(b"#\n")
 
+        ## Points
         output_file.write(b"POINTS ")
         output_file.write(tb(str(len(self.points))+"\n"))
         np.savetxt(output_file, self.points)
 
+        ## Faces
         output_file.write(b"FACES ")
         output_file.write(tb(str(self.get_number_of_faces())+"\n"))
         output_file.write(tb(str(len(self.faces.data))+"\n"))
@@ -835,20 +846,20 @@ class Mesh:
                    fmt="%i %i")
 
         output_file.write(b"CELL_VOLUMES ")
-        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
+        output_file.write(tb(str(len(self.cell_volume))+"\n"))
         np.savetxt(output_file, self.cell_volume)
 
         output_file.write(b"CELL_REAL_CENTROIDS ")
-        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
+        output_file.write(tb(str(len(self.cell_real_centroid))+"\n"))
         np.savetxt(output_file, self.cell_real_centroid)
 
         if self.has_cell_shifted_centroid:
             output_file.write(b"CELL_SHIFTED_CENTROIDS ")
-            output_file.write(tb(str(self.get_number_of_cells())+"\n"))
+            output_file.write(tb(str(len(self.cell_shifted_centroid))+"\n"))
             np.savetxt(ouptut_file, self.cell_shifted_centroid)
 
         output_file.write(b"CELL_K ")
-        output_file.write(tb(str(self.get_number_of_cells())+"\n"))
+        output_file.write(tb(str(len(self.cell_k))+"\n"))
         np.savetxt(output_file, self.cell_k)
 
         output_file.write(b"BOUNDARY_MARKERS ")
@@ -869,7 +880,9 @@ class Mesh:
 
         output_file.write(b"INTERNAL_NO_FLOW ")
         output_file.write(tb(str(len(self.internal_no_flow))+"\n"))
-        np.savetxt(output_file, self.internal_no_flow)
+        for [face_index, orientation] in self.internal_no_flow:
+            output_file.write(tb(str(face_index)+" "+str(orientation)+"\n"))
+        #np.savetxt(output_file, self.internal_no_flow)
 
         output_file.write(b"FORCING_FUNCTION_POINTERS ")
         output_file.write(tb(str(len(list(self.forcing_function_pointers.keys())))+"\n"))
@@ -949,8 +962,11 @@ class Mesh:
         for face_index in list_of_faces:
             if self.face_to_cell[face_index][0] == -1:
                 self.face_to_cell[face_index][0] = new_cell_index
-            else:
+            elif self.face_to_cell[face_index][1] == -1:
                 self.face_to_cell[face_index][1] = new_cell_index
+            else:
+                raise Exception("setting face to cell already set"+
+                                " to two cells")
 
         if len(self.cell_domain)-1<new_cell_index:
             new_size = self._memory_extension(len(self.cell_domain))
