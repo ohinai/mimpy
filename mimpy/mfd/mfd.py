@@ -57,6 +57,8 @@ class MFD():
 
         self.print_progress = False
 
+        self.verbose = False
+
         self.compute_diagonality = False
 
         # List indicating orthogonality of cells.
@@ -199,7 +201,6 @@ class MFD():
         return [[div_data, div_row, div_col],
                 [div_t_data, div_t_row, div_t_col]]
 
-
     def build_div(self, shift=1):
         """ Build the div and -div^T matrices and returns
         arrays for constructing a coo sparse matrix
@@ -318,12 +319,8 @@ class MFD():
         """
         [u, s, v] = np.linalg.svd(np.transpose(n_e))
 
-        if self.mesh.dim == 3:
-            c_e = np.transpose(v)[:, 3:]
-
-        if self.mesh.dim == 2:
-            c_e = np.transpose(v)[:, 2:]
-
+        c_e = np.transpose(v)[:, 3:]
+        
         return c_e
 
     def build_d_e(self, n_e):
@@ -375,6 +372,7 @@ class MFD():
         else:
             n_e = self.build_n_e(cell_index)
             current_k = self.mesh.get_cell_k(cell_index)
+
         is_ortho = True
         c_e = self.build_c_e(n_e)
 
@@ -469,8 +467,7 @@ class MFD():
 
             if self.diagonality_index_list[cell_index] > 1.e-8:
                 self.all_ortho = False
-                print(m_e)
-                
+
         return m_e
 
     def build_m_full(self, save_update_info = False, k_unity = False):
@@ -532,8 +529,9 @@ class MFD():
         if save_update_info:
             self.m_data_for_update = np.array(m_data)
             self.m_e_locations = np.array(self.m_e_locations)
-
-        print("all ortho", self.all_ortho)
+            
+        if self.verbose:
+            print("all ortho", self.all_ortho)
 
         return [m_data, m_row, m_col]
 
@@ -599,6 +597,77 @@ class MFD():
         print("all ortho", self.all_ortho)
 
         return [m_data, m_row, m_col]
+
+    def proj_vector(self, vector_f):
+        """ Projects vector onto face degrees of freedom
+        that can be indexed locally from the cells.
+        """
+        vector_p = []
+        for cell_index in range(self.mesh.get_number_of_cells()):
+            vector_p.append([])
+            for (face_index, orient) in zip(self.mesh.get_cell(cell_index), 
+                                           self.mesh.get_cell_normal_orientation(cell_index)):
+                current_centroid = self.mesh.get_face_real_centroid(face_index)
+                current_normal = self.mesh.get_face_normal(face_index)*orient
+                proj_value = vector_f(current_centroid).dot(current_normal)
+                vector_p[-1].append(proj_value)
+
+        return vector_p
+
+    def build_advection(self, beta, k_unity = False):
+        """ Constructs the advection matrix based on building
+        the local matrices m_e and a provided local advection
+        vector beta.
+        """
+        a_data = array.array('d')
+        a_row = array.array('i')
+        a_col = array.array('i')
+
+        neumann_boundary_indices = \
+            [x[0] for x in self.get_neumann_boundary_values()]
+
+        if self.neumann_needs_updating:
+            self.renumber_for_neumann()
+
+        for cell_index in range(self.mesh.get_number_of_cells()):
+            current_beta = beta[cell_index]
+            neumann_faces = self.get_cell_faces_neumann(cell_index)
+
+            current_cell = self.mesh.get_cell(cell_index)
+            current_orientation = \
+                self.mesh.get_cell_normal_orientation(cell_index)
+            current_beta = beta[cell_index]
+            for i in range(len(current_beta)):
+                if current_beta[i]*current_orientation[i]>0:
+#                if current_beta[i]:
+                    global_i = current_cell[i]
+                    if global_i not in neumann_faces:
+                        a_data.append(current_beta[i])
+                        a_row.append(cell_index+self.flux_dof)
+                        a_col.append(self.face_to_flux[global_i, 0])
+
+        if False:
+            for cell_index in range(self.mesh.get_number_of_cells()):
+                m_e = self.build_m_e(cell_index, k_unity)
+
+                m_e_norm = np.linalg.norm(m_e)
+                neumann_faces = self.get_cell_faces_neumann(cell_index)
+
+                current_cell = self.mesh.get_cell(cell_index)
+                current_orientation = \
+                    self.mesh.get_cell_normal_orientation(cell_index)
+
+                current_beta = beta[cell_index]
+
+                m_e_beta = m_e.dot(current_beta)
+                for i in range(len(m_e_beta)):
+                    global_i = current_cell[i]
+                    if global_i not in neumann_faces:
+                        a_data.append(m_e_beta[i])
+                        a_row.append(cell_index+self.flux_dof)
+                        a_col.append(self.face_to_flux[global_i, 0])
+
+        return [a_data, a_row, a_col]
 
     def build_m_parallel(self, save_update_info = False, k_unity = False):
         """ Construct the global matrix M_x. This is
@@ -766,22 +835,22 @@ class MFD():
             coupling_col.append(self.face_to_flux[lagrange_index_1])
 
             coupling_data.append(self.mesh.get_face_area(face_index_2)*
-                                 face_orientation_2)
+                                  face_orientation_2)
             coupling_row.append(self.face_to_flux[face_index_2])
             coupling_col.append(self.face_to_flux[lagrange_index_1])
 
             # L
-            coupling_data.append(-face_orientation_1)
+            coupling_data.append(face_orientation_1)
             coupling_row.append(self.face_to_flux[lagrange_index_1])
             coupling_col.append(self.face_to_flux[face_index_1])
 
-            coupling_data.append(-face_orientation_2)
+            coupling_data.append(face_orientation_2)
             coupling_row.append(self.face_to_flux[lagrange_index_1])
             coupling_col.append(self.face_to_flux[face_index_2])
 
         return [coupling_data, coupling_row, coupling_col]
 
-    def build_lhs(self, alpha = 0):
+    def build_lhs(self, alpha = 0, beta = None):
         """ Builds the entire saddle point problem,
         |  M    DIV^T |
         |             |
@@ -829,6 +898,12 @@ class MFD():
         lhs_col += coupling_info[2]
 
         del coupling_info
+
+        if beta is not None:
+            beta_info = self.build_advection(beta)
+            lhs_data += beta_info[0]
+            lhs_row += beta_info[1]
+            lhs_col += beta_info[2]
 
         self.lhs = sparse.coo_matrix((lhs_data,
                                       (lhs_row,
@@ -1386,14 +1461,20 @@ class MFD():
         """
         Returns the flux for face index by face_index.
         """
-        return self.solution[face_index]
+        return self.solution[self.face_to_flux[face_index]]
 
     def get_velocity_solution(self):
         """ Returns the velocity solution for the problem. The
         fluxes are indexed in the same order as the
         corresponding face indices.
         """
-        return self.solution[:self.mesh.get_number_of_faces()]
+        full_flux = np.zeros(self.mesh.get_number_of_faces())
+        for face_index in range(self.mesh.get_number_of_faces()):
+            index = self.face_to_flux[face_index, 0]
+            print( index, face_index)
+            if index >= 0:
+                full_flux[face_index] = self.solution[self.mesh.get_number_of_cells()]
+        return full_flux
 
     def lhs_rank(self):
         """ Return the rank of the saddle-point problem
