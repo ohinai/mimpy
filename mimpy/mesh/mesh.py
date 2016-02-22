@@ -95,7 +95,7 @@ class variable_array():
     def add_entry(self, data):
         """ Adds new data to end of the list.
 
-        :param  dtype data: Generic data to be added. Usually
+        :param  dtype data: Generic data to be added. Usually\
         either scalar type (float, int ...) or ndarray type.
 
         :return: Index of the new entry.
@@ -352,7 +352,7 @@ class Mesh:
         face is represnted by two points.
         Returns the index of the new face.
 
-        :param list list_of_points: List of point indices
+        :param list list_of_points: List of point indices\
              making up the new face.
 
         :return: Index of new face.
@@ -381,7 +381,8 @@ class Mesh:
             if len(self.face_shifted_centroids)-1 < new_face_index:
                 new_size = self._memory_extension(
                     len(self.face_shifted_centroids))
-                self.face_shifted_centroids.resize((new_size, 3))
+                self.face_shifted_centroids.resize((new_size, 3), 
+                                                   refcheck=False)
 
         return new_face_index
 
@@ -416,6 +417,10 @@ class Mesh:
     def add_to_face_to_cell(self, face_index, cell_index):
         """ Adds cell_index to face_to_cell map
         at face_index.
+
+        :param int face_index: The face index. 
+        :param int cell_index: The cell index that will be associated\
+        with the face. 
         """
         if self.face_to_cell[face_index, 0] == -1:
             self.face_to_cell[face_index, 0] = cell_index
@@ -937,12 +942,12 @@ class Mesh:
         by a list of face indices. The function also
         takes in a list of orientations of the same length
         as the list_of_faces. These represent the direction
-        of the face normal relative to the cell: 1 means it
-        points out, -1 means it points in to the cell.
+        of the face normals relative to the cell: (1) points in, 
+        (-1) points out. 
         Returns the index of the new cell.
 
         :param list list_of_faces: List of face indices making up new cell.
-        :param list list_of_orientations: List consisting of 1s and -1s
+        :param list list_of_orientations: List consisting of 1s and -1s\
             indicating whether normals are pointing out (1) or in (-1) of cell.
 
         :return: New cell index.
@@ -1004,9 +1009,9 @@ class Mesh:
         orientations for that cell.
 
         :param int cell_index: Index of cell.
-        :return: List of faces orientations in cell. The
-        list is made up of 1s and -1s, 1 if the corresponding
-        face normal is pointing out of the cell, and -1 if the
+        :return: List of faces orientations in cell. The\
+        list is made up of 1s and -1s, 1 if the corresponding\
+        face normal is pointing out of the cell, and -1 if the\
         corresponding face normal is pointing into the cell.
 
         :rtype: list
@@ -1214,6 +1219,10 @@ class Mesh:
 
     def add_boundary_marker(self, boundary_marker, boundary_description):
         """ Add a new boundary marker.
+
+        :param int boundary_marker: New boundary marker index.
+        :param str boundary_description: Text describing
+             the boundary marker.
         """
         self.boundary_markers.append(boundary_marker)
         self.boundary_descriptions.append(boundary_description)
@@ -1240,8 +1249,8 @@ class Mesh:
         """
         return self.boundary_markers
 
-    def get_boundary_discription(self, boundary_marker):
-        """ Returns the boundary discription for
+    def get_boundary_description(self, boundary_marker):
+        """ Returns the boundary description for
         boundary_marker.
         """
         return self.boundary_descriptions[boundary_marker]
@@ -1257,10 +1266,10 @@ class Mesh:
 
         A face should never be associated with more than one marker.
 
-        :param int boundary_marker: Boundary marker index face.
+        :param int boundary_marker: Boundary marker index.
         :param int face_index: Index of face.
-        :param  int face_orientation: Orientation of face normal
-             relative to the domain. (1) if pointing out, (-1) if
+        :param  int face_orientation: Orientation of face normal\
+             relative to the domain. (1) if pointing out, (-1) if\
              if pointing in.
 
         :return: None
@@ -1275,8 +1284,8 @@ class Mesh:
         of tuples for that boundary marker.
 
         :param int boundary_marker: Boundary marker to be set.
-        :param list face_orienation_list: A list of tuples of the form
-             [face_index, orientation] to be associated with the
+        :param list face_orienation_list: A list of tuples of the form\
+             [face_index, orientation] to be associated with the\
              indicated boundary marker.
 
         :return: None
@@ -1288,7 +1297,7 @@ class Mesh:
 
         :param int boundary_marker: Boundary marker index. 
         
-        :return: List of tupes [face_index, orientation] associated with
+        :return: List of tupes [face_index, orientation] associated with\
              boundary_marker. 
         :rtype: list
         """
@@ -1335,6 +1344,10 @@ class Mesh:
 
     def add_internal_no_flow(self, face_index, face_orientation):
         """ Sets face as interior no flow boundary condition.
+
+        :param int face_index: Face index to be set as internal no-flow. 
+        :param int face_orientation: Orientation of face relative to the domain, (1)\
+        for pointing out, (-1) for pointing in. 
         """
         self.internal_no_flow.append([face_index, face_orientation])
 
@@ -2344,7 +2357,7 @@ class Mesh:
 
         return new_cell_index
 
-    def build_frac_from_faces(self, faces):
+    def build_frac_from_faces(self, faces, width = .0001):
         """ Takes a list of face indices, and
         extrudes them into cells.
         """
@@ -2624,12 +2637,12 @@ class Mesh:
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
 
-            width = .001
+            width1 = width
             full_face = self.get_face(faces[connection[0]])
-            point1 = -width*norm1+self.get_point(full_face[connection[2]])
-            point2 = -width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
-            point3 = width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
-            point4 = width*norm1+self.get_point(full_face[connection[2]])
+            point1 = -width1*norm1+self.get_point(full_face[connection[2]])
+            point2 = -width1*norm2+self.get_point(full_face[connection[3]%len(full_face)])
+            point3 = width1*norm2+self.get_point(full_face[connection[3]%len(full_face)])
+            point4 = width1*norm1+self.get_point(full_face[connection[2]])
 
             point_1_index = self.add_point(point1)
             point_2_index = self.add_point(point2)
@@ -2703,19 +2716,19 @@ class Mesh:
             norm1 /= np.linalg.norm(norm1)
             norm2 /= np.linalg.norm(norm2)
 
-            width = .0014
+            width2 = width + .4*width
 
             if connection[7] == 'TOP':
                 full_face = self.get_face(faces[connection[0]])
                 point1 = self.get_point(full_face[connection[2]])
                 point2 = self.get_point(full_face[connection[3]%len(full_face)])
-                point3 = width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
-                point4 = width*norm1+self.get_point(full_face[connection[2]])
+                point3 = width2*norm2+self.get_point(full_face[connection[3]%len(full_face)])
+                point4 = width2*norm1+self.get_point(full_face[connection[2]])
 
             elif connection[7] == 'BOT':
                 full_face = self.get_face(faces[connection[0]])
-                point1 = -width*norm1+self.get_point(self.get_face(faces[connection[0]])[connection[2]])
-                point2 = -width*norm2+self.get_point(full_face[connection[3]%len(full_face)])
+                point1 = -width2*norm1+self.get_point(self.get_face(faces[connection[0]])[connection[2]])
+                point2 = -width2*norm2+self.get_point(full_face[connection[3]%len(full_face)])
                 point3 = self.get_point(full_face[connection[3]%len(full_face)])
                 point4 = self.get_point(full_face[connection[2]])
 
@@ -2812,9 +2825,9 @@ class Mesh:
 
                 new_face_points = []
                 norm = self.get_face_normal(global_face_index)
-                width = .001
+                width1 = width
                 if bot_points[local_face_index][point1] == -1:
-                    new_point = -width*norm+self.get_point(self.get_face(global_face_index)[point1])
+                    new_point = -width1*norm+self.get_point(self.get_face(global_face_index)[point1])
                     point_1_index = self.add_point(new_point)
                     bot_points[local_face_index][point1] = point_1_index
                 else:
@@ -2823,7 +2836,7 @@ class Mesh:
                 new_face_points.append(point_1_index)
 
                 if bot_points[local_face_index][point2] == -1:
-                    new_point = -width*norm+self.get_point(self.get_face(global_face_index)[point2])
+                    new_point = -width1*norm+self.get_point(self.get_face(global_face_index)[point2])
                     point_2_index = self.add_point(new_point)
                     bot_points[local_face_index][point2] = point_2_index
                 else:
@@ -2835,7 +2848,7 @@ class Mesh:
                     new_face_points.append(mid_points[local_face_index][point2])
 
                 if top_points[local_face_index][point2] == -1:
-                    new_point = width*norm+self.get_point(self.get_face(global_face_index)[point2])
+                    new_point = width1*norm+self.get_point(self.get_face(global_face_index)[point2])
                     point_3_index = self.add_point(new_point)
                     top_points[local_face_index][point2] = point_3_index
                 else:
@@ -2844,7 +2857,7 @@ class Mesh:
                 new_face_points.append(point_3_index)
 
                 if top_points[local_face_index][point1] == -1:
-                    new_point = width*norm+self.get_point(self.get_face(global_face_index)[point1])
+                    new_point = width1*norm+self.get_point(self.get_face(global_face_index)[point1])
                     point_4_index = self.add_point(new_point)
                     top_points[local_face_index][point1] = point_4_index
                 else:

@@ -1471,7 +1471,6 @@ class MFD():
         full_flux = np.zeros(self.mesh.get_number_of_faces())
         for face_index in range(self.mesh.get_number_of_faces()):
             index = self.face_to_flux[face_index, 0]
-            print( index, face_index)
             if index >= 0:
                 full_flux[face_index] = self.solution[self.mesh.get_number_of_cells()]
         return full_flux
