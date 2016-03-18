@@ -2357,7 +2357,7 @@ class Mesh:
                 local_face_index = \
                     list(self.get_cell(cell_index)).index(face_index)
                 face_normal = self.get_cell_normal_orientation(cell_index)
-                face_normal = [local_face_index]
+                face_normal = face_normal[local_face_index]
                 normals_for_cell_2.append(face_normal)
 
         faces_for_cell_1.append(new_face_index)
