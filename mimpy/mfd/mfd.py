@@ -149,7 +149,7 @@ class MFD():
 
         for face_index in range(self.mesh.get_number_of_faces()):
             if self.is_neumann_face(face_index):
-                index_offset+=1
+                index_offset += 1
                 self.face_to_flux[face_index, 0] = -1
             else:
                 self.face_to_flux[face_index, 0] = face_index-index_offset
@@ -174,7 +174,6 @@ class MFD():
         div_t_row = array.array('i')
         div_t_col = array.array('i')
 
-        neumaan_boundary_indices = [x[0] for x in self.get_neumann_boundary_values()]
         for current_cell_index in range(self.mesh.get_number_of_cells()):
             current_cell = self.mesh.get_cell(current_cell_index)
             current_cell_orientations = \
@@ -220,7 +219,6 @@ class MFD():
         if self.neumann_needs_updating:
             self.renumber_for_neumann()
 
-        neumaan_boundary_indices = [x[0] for x in self.get_neumann_boundary_values()]
         for current_cell_index in range(self.mesh.get_number_of_cells()):
             current_cell = self.mesh.get_cell(current_cell_index)
             current_cell_orientations = \
@@ -268,7 +266,7 @@ class MFD():
         if self.mesh.dim == 3:
             for face_index in self.mesh.get_cell(cell_index):
                 if self.mesh.is_using_face_shifted_centroid():
-                    face_centroid =\
+                    face_centroid = \
                         self.mesh.get_face_shifted_centroid(face_index)
                 else:
                     face_centroid = self.mesh.get_face_real_centroid(face_index)
@@ -320,7 +318,7 @@ class MFD():
         [u, s, v] = np.linalg.svd(np.transpose(n_e))
 
         c_e = np.transpose(v)[:, 3:]
-        
+
         return c_e
 
     def build_d_e(self, n_e):
@@ -488,12 +486,7 @@ class MFD():
             self.m_e_locations = [0]
 
         current_length = 0
-        neumann_boundary_indices = \
-            [x[0] for x in self.get_neumann_boundary_values()]
 
-        total_work = self.mesh.get_number_of_cells()
-        percentage_inc = 10.
-        last_percent = 10.
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_e = self.build_m_e(cell_index, k_unity)
 
@@ -529,7 +522,7 @@ class MFD():
         if save_update_info:
             self.m_data_for_update = np.array(m_data)
             self.m_e_locations = np.array(self.m_e_locations)
-            
+
         if self.verbose:
             print("all ortho", self.all_ortho)
 
@@ -554,18 +547,11 @@ class MFD():
             self.m_e_locations = [0]
 
         current_length = 0
-        neumann_boundary_indices = \
-            [x[0] for x in self.get_neumann_boundary_values()]
-
         if self.neumann_needs_updating:
             self.renumber_for_neumann()
 
-        total_work = self.mesh.get_number_of_cells()
-        percentage_inc = 10.
-        last_percent = 10.
         for cell_index in range(self.mesh.get_number_of_cells()):
             m_e = self.build_m_e(cell_index, k_unity)
-
             m_e_norm = np.linalg.norm(m_e)
             neumann_faces = self.get_cell_faces_neumann(cell_index)
 
@@ -605,8 +591,9 @@ class MFD():
         vector_p = []
         for cell_index in range(self.mesh.get_number_of_cells()):
             vector_p.append([])
-            for (face_index, orient) in zip(self.mesh.get_cell(cell_index), 
-                                           self.mesh.get_cell_normal_orientation(cell_index)):
+            face_orient = zip(self.mesh.get_cell(cell_index),
+                              self.mesh.get_cell_normal_orientation(cell_index))
+            for (face_index, orient) in face_orient:
                 current_centroid = self.mesh.get_face_real_centroid(face_index)
                 current_normal = self.mesh.get_face_normal(face_index)*orient
                 proj_value = vector_f(current_centroid).dot(current_normal)
@@ -623,9 +610,6 @@ class MFD():
         a_row = array.array('i')
         a_col = array.array('i')
 
-        neumann_boundary_indices = \
-            [x[0] for x in self.get_neumann_boundary_values()]
-
         if self.neumann_needs_updating:
             self.renumber_for_neumann()
 
@@ -638,7 +622,7 @@ class MFD():
                 self.mesh.get_cell_normal_orientation(cell_index)
             current_beta = beta[cell_index]
             for i in range(len(current_beta)):
-                if current_beta[i]*current_orientation[i]>0:
+                if current_beta[i]*current_orientation[i] > 0:
 #                if current_beta[i]:
                     global_i = current_cell[i]
                     if global_i not in neumann_faces:
@@ -1461,7 +1445,11 @@ class MFD():
         """
         Returns the flux for face index by face_index.
         """
-        return self.solution[self.face_to_flux[face_index]]
+        index = self.face_to_flux[face_index, 0]
+        if index >= 0 :
+            return self.solution[index]
+        else:
+            return 0.
 
     def get_velocity_solution(self):
         """ Returns the velocity solution for the problem. The
@@ -1472,7 +1460,8 @@ class MFD():
         for face_index in range(self.mesh.get_number_of_faces()):
             index = self.face_to_flux[face_index, 0]
             if index >= 0:
-                full_flux[face_index] = self.solution[self.mesh.get_number_of_cells()]
+                full_flux[face_index] = \
+                    self.solution[self.mesh.get_number_of_cells()]
         return full_flux
 
     def lhs_rank(self):
@@ -1498,8 +1487,8 @@ class MFD():
         matout.close()
 
     def lhs_svd(self):
-        """ Returns the singular values 
-        of the lhs matrix. 
+        """ Returns the singular values
+        of the lhs matrix.
         """
         lhs = self.lhs.todense()
         return np.linalg.svd(lhs)[1]
