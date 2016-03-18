@@ -183,8 +183,8 @@ class Mesh:
     """ The **Mesh** class is a common representation of polygonal
     meshes in Mimpy. In addition to the mesh data structure,
     it provides commonly used mesh functions as such
-    calculating volumes and centroids as well as basic visualization. 
-    The **Mesh** class serves as base implementation, 
+    calculating volumes and centroids as well as basic visualization.
+    The **Mesh** class serves as base implementation,
     with the specific mesh types (such as hexahedra,
     tetrahedra and Voronoi) inherting from it.
     """
@@ -381,7 +381,7 @@ class Mesh:
             if len(self.face_shifted_centroids)-1 < new_face_index:
                 new_size = self._memory_extension(
                     len(self.face_shifted_centroids))
-                self.face_shifted_centroids.resize((new_size, 3), 
+                self.face_shifted_centroids.resize((new_size, 3),
                                                    refcheck=False)
 
         return new_face_index
@@ -418,9 +418,9 @@ class Mesh:
         """ Adds cell_index to face_to_cell map
         at face_index.
 
-        :param int face_index: The face index. 
+        :param int face_index: The face index.
         :param int cell_index: The cell index that will be associated\
-        with the face. 
+        with the face.
         """
         if self.face_to_cell[face_index, 0] == -1:
             self.face_to_cell[face_index, 0] = cell_index
@@ -828,7 +828,8 @@ class Mesh:
             output_file.write(b"FACE_SHIFTED_CENTROIDS ")
             output_file(tb(str(self.get_number_of_faces())+"\n"))
             for face_index in range(self.get_number_of_faces()):
-                output_file.write(tb(str(self.get_face_real_centroid(face_index)+"\n")))
+                output_file.write(
+                    tb(str(self.get_face_real_centroid(face_index)+"\n")))
 
         output_file.write(b"FACE_TO_CELL ")
         output_file.write(tb(str(len(self.face_to_cell))+"\n"))
@@ -844,8 +845,10 @@ class Mesh:
         output_file.write(b"CELL_NORMAL_ORIENTATION ")
         output_file.write(tb(str(self.get_number_of_cells())+"\n"))
         output_file.write(tb(str(len(self.cell_normal_orientation.data))+"\n"))
-        np.savetxt(output_file, self.cell_normal_orientation.data, fmt='%i')
-        output_file.write(tb(str((len(self.cell_normal_orientation.pointers)))+"\n"))
+        np.savetxt(output_file,
+                   self.cell_normal_orientation.data, fmt='%i')
+        output_file.write(
+            tb(str((len(self.cell_normal_orientation.pointers)))+"\n"))
         np.savetxt(output_file,
                    self.cell_normal_orientation.pointers,
                    fmt="%i %i")
@@ -873,7 +876,8 @@ class Mesh:
             output_file.write(tb(str(marker_index)+" "))
             for (face_index, face_orientation) in\
                     self.get_boundary_faces_by_marker(marker_index):
-                output_file.write(tb(str(face_index)+" "+str(face_orientation)+" "))
+                output_file.write(
+                    tb(str(face_index)+" "+str(face_orientation)+" "))
             output_file.write(b"\n")
 
         output_file.write(b"DIRICHLET_BOUNDARY_POINTERS ")
@@ -881,16 +885,17 @@ class Mesh:
                             self.dirichlet_boundary_pointers.keys())))+"\n"))
         for key in self.dirichlet_boundary_pointers:
             cell_index, orientation = self.dirichlet_boundary_pointers[key]
-            output_file.write(tb(str(key)+" "+str(cell_index)+" "+str(orientation)+"\n"))
+            output_file.write(
+                tb(str(key)+" "+str(cell_index)+" "+str(orientation)+"\n"))
 
         output_file.write(b"INTERNAL_NO_FLOW ")
         output_file.write(tb(str(len(self.internal_no_flow))+"\n"))
         for [face_index, orientation] in self.internal_no_flow:
             output_file.write(tb(str(face_index)+" "+str(orientation)+"\n"))
-        #np.savetxt(output_file, self.internal_no_flow)
 
         output_file.write(b"FORCING_FUNCTION_POINTERS ")
-        output_file.write(tb(str(len(list(self.forcing_function_pointers.keys())))+"\n"))
+        output_file.write(
+            tb(str(len(list(self.forcing_function_pointers.keys())))+"\n"))
         for cell_index in self.forcing_function_pointers:
             output_file.write(tb(str(cell_index)+" "))
             for face_index, orientation in \
@@ -899,16 +904,20 @@ class Mesh:
             output_file.write(b"\n")
 
         output_file.write(b"FACE_TO_LAGRANGE_POINTERS ")
-        output_file.write(tb(str(len(list(self.face_to_lagrange_pointers.keys())))+"\n"))
+        output_file.write(
+            tb(str(len(list(self.face_to_lagrange_pointers.keys())))+"\n"))
         for key in self.face_to_lagrange_pointers:
             lagrange_index, orientation = self.face_to_lagrange_pointers[key]
-            output_file.write(tb(str(key)+" "+str(lagrange_index)+" "+str(orientation)+"\n"))
+            output_file.write(
+                tb(str(key)+" "+str(lagrange_index)+" "+str(orientation)+"\n"))
 
         output_file.write(b"LAGRANGE_TO_FACE_POINTERS ")
-        output_file.write(tb(str(len(list(self.lagrange_to_face_pointers.keys())))+"\n"))
+        output_file.write(
+            tb(str(len(list(self.lagrange_to_face_pointers.keys())))+"\n"))
         for key in self.lagrange_to_face_pointers:
             face_index, orientation = self.lagrange_to_face_pointers[key]
-            output_file.write(tb(str(key)+" "+str(face_index)+" "+str(orientation)+"\n"))
+            output_file.write(
+                tb(str(key)+" "+str(face_index)+" "+str(orientation)+"\n"))
 
         output_file.close()
 
@@ -942,8 +951,8 @@ class Mesh:
         by a list of face indices. The function also
         takes in a list of orientations of the same length
         as the list_of_faces. These represent the direction
-        of the face normals relative to the cell: (1) points in, 
-        (-1) points out. 
+        of the face normals relative to the cell: (1) points in,
+        (-1) points out.
         Returns the index of the new cell.
 
         :param list list_of_faces: List of face indices making up new cell.
@@ -970,9 +979,10 @@ class Mesh:
             elif self.face_to_cell[face_index][1] == -1:
                 self.face_to_cell[face_index][1] = new_cell_index
             else:
-                raise Exception("setting face " + str(face_index) +" to cell " +
-                                str(new_cell_index) + " already set"+
-                                " to two cells "+ str(self.face_to_cell[face_index]))
+                raise Exception("setting face "+str(face_index)+" to cell "+
+                                str(new_cell_index)+" already set"+
+                                " to two cells "+
+                                str(self.face_to_cell[face_index]))
 
         if len(self.cell_domain)-1<new_cell_index:
             new_size = self._memory_extension(len(self.cell_domain))
@@ -1031,7 +1041,7 @@ class Mesh:
 
         :param int cell_index: Index of cell.
         :param ndarray centroid: New cell centroid.
-        
+
         :return: None
         """
         self.cell_real_centroid[cell_index] = centroid
@@ -1043,7 +1053,7 @@ class Mesh:
 
     def get_all_cell_real_centroids(self):
         """ Returns list of all cell centroids.
-        
+
         :return: List of all the cell centroids.
         :rtype: ndarray
         """
@@ -1277,7 +1287,7 @@ class Mesh:
         self.boundary_faces[boundary_marker].append([face_index,
                                                      face_orientation])
 
-    def set_boundary_faces(self, 
+    def set_boundary_faces(self,
                            boundary_marker,
                            face_orientation_list):
         """ Takes a boundary_marker index, and sets the entire list
@@ -1295,10 +1305,10 @@ class Mesh:
     def get_boundary_faces_by_marker(self, boundary_marker):
         """ Returns a list of all the faces associated with a boundary_marker.
 
-        :param int boundary_marker: Boundary marker index. 
-        
+        :param int boundary_marker: Boundary marker index.
+
         :return: List of tupes [face_index, orientation] associated with\
-             boundary_marker. 
+             boundary_marker.
         :rtype: list
         """
         return self.boundary_faces[boundary_marker]
@@ -1345,9 +1355,9 @@ class Mesh:
     def add_internal_no_flow(self, face_index, face_orientation):
         """ Sets face as interior no flow boundary condition.
 
-        :param int face_index: Face index to be set as internal no-flow. 
-        :param int face_orientation: Orientation of face relative to the domain, (1)\
-        for pointing out, (-1) for pointing in. 
+        :param int face_index: Face index to be set as internal no-flow.
+        :param int face_orientation: Orientation of face relative to the\
+        domain, (1) for pointing out, (-1) for pointing in.
         """
         self.internal_no_flow.append([face_index, face_orientation])
 
@@ -1441,11 +1451,11 @@ class Mesh:
                               face_orientation_1,
                               face_index_2,
                               face_orientation_2):
-        """ Sets a periodic boundary condition, connecting 
+        """ Sets a periodic boundary condition, connecting
         face 1 with face 2. This ammounts to creating a single
-        lagrange multiplier shared by the faces. The MFD class would 
-        impose continuity of both the pressure and the flux 
-        for the periodic conditions. 
+        lagrange multiplier shared by the faces. The MFD class would
+        impose continuity of both the pressure and the flux
+        for the periodic conditions.
         """
         lagrange_index_1 = self.duplicate_face(face_index_1)
         self.periodic_boundaries.append((face_index_1,
@@ -1493,7 +1503,7 @@ class Mesh:
         """
         self.cell_domain[cell_index] = domain
         self.cell_domain_tags.add(domain)
-        
+
     def get_domain_tags(self):
         """ Returns list of all domain tags.
         """
@@ -1565,8 +1575,8 @@ class Mesh:
         raise Exception("Couldn't compute normal for face " + str(face_index))
 
     def find_centroid_for_coordinates(self, face_index, coordinates):
-        """ Computes centroid calculation for a 3D polygon based on 
-        two coordinates of the polygon. 
+        """ Computes centroid calculation for a 3D polygon based on
+        two coordinates of the polygon.
         """
         C_1 = 0.
         C_2 = 0.
@@ -1603,12 +1613,13 @@ class Mesh:
         """ Returns centroid coordinates for face_index.
         This function assumes planarity of the face.
         and is currently intended for use with three dimensional
-        meshes. 
+        meshes.
         The function returns the area of the face, as well
         as the x, y, z coordinates of its center.
         """
         (v1, v2, origin_index) = self.find_basis_for_face(face_index)
-        polygon = [np.array(self.get_point(x)) for x in self.get_face(face_index)]
+        polygon = [np.array(self.get_point(x))
+                   for x in self.get_face(face_index)]
 
         assert(np.linalg.norm(v2) >1.e-12)
         assert(np.linalg.norm(v1) >1.e-12)
@@ -1690,8 +1701,8 @@ class Mesh:
 
         centroid = np.array([centroid_3d_x, centroid_3d_y, centroid_3d_z])
 
-        return (abs(area), centroid)        
-                           
+        return (abs(area), centroid)
+
     def compute_polygon_area(self, polygon, dims = [0, 1]):
         """ Computes the area of a polygon. A polygon is
         represented by a list of Numpy array coordinates
@@ -1744,8 +1755,8 @@ class Mesh:
 
     def find_volume_from_faces(self, face_list, orientation_list):
         """ Calculates volume and centroid of cell
-        based on list of faces and face orientations relative 
-        to the cell. 
+        based on list of faces and face orientations relative
+        to the cell.
         """
         volume = 0.
         centroid = np.zeros(3)
@@ -2048,18 +2059,21 @@ class Mesh:
 
         output.close()
 
-    def find_cell_near_point(self, point):
+    def find_cell_near_point(self, point, condition = lambda x: True):
         """ Returns cell whose centroid is closest
-        to a given point.
+        to a given point. Condition is an optional function
+        to avoid cells with certain conditions (e.g. too small).
+        Condition takes in cell_index.
         """
         closest_cell = 0
         min_distance = np.linalg.norm(self.get_cell_real_centroid(0)-point)
         for cell_index in range(1, self.get_number_of_cells()):
-            cell_centroid = self.get_cell_real_centroid(cell_index)
-            new_distance = np.linalg.norm(cell_centroid-point)
-            if new_distance < min_distance:
-                closest_cell = cell_index
-                min_distance = new_distance
+            if condition(cell_index):
+                cell_centroid = self.get_cell_real_centroid(cell_index)
+                new_distance = np.linalg.norm(cell_centroid-point)
+                if new_distance < min_distance:
+                    closest_cell = cell_index
+                    min_distance = new_distance
 
         return closest_cell
 
@@ -2123,8 +2137,11 @@ class Mesh:
         boundary_faces = []
         boundary_orientation = []
         for cell_index in self.get_cells_in_domain(domain):
-            for (face_index, orientation) in zip(self.get_cell(cell_index), 
-                                                 self.get_cell_normal_orientation(cell_index)):
+            cell_cell_normal = \
+                zip(self.get_cell(cell_index),
+                self.get_cell_normal_orientation(cell_index))
+
+            for (face_index, orientation) in cell_cell_normal:
                 neighboring_cells = self.face_to_cell[face_index]
                 if len(neighboring_cells)> 1:
                     cell1, cell2 = neighboring_cells
@@ -2156,12 +2173,14 @@ class Mesh:
             to_be_removed = None
             hits = 0
             for (index, segment) in enumerate(current_segments):
-                if np.linalg.norm(self.get_point(point_to_match)-self.get_point(segment[0])) < 1.e-7:
+                if np.linalg.norm(self.get_point(point_to_match)-
+                                  self.get_point(segment[0])) < 1.e-7:
                     new_face.append(segment[0])
                     to_be_removed = index
                     next_point_to_match = segment[1]
                     hits += 1
-                elif np.linalg.norm(self.get_point(point_to_match)-self.get_point(segment[1])) < 1.e-7:
+                elif np.linalg.norm(self.get_point(point_to_match)-
+                                    self.get_point(segment[1])) < 1.e-7:
                     new_face.append(segment[1])
                     to_be_removed = index
                     next_point_to_match = segment[0]
@@ -2229,13 +2248,15 @@ class Mesh:
                 self.set_face(face_index, new_face_1)
 
                 assert(len(new_face_1)>2)
-                (face_1_area, face_1_centroid)  = self.find_face_centroid(face_index)
+                (face_1_area,
+                 face_1_centroid) = self.find_face_centroid(face_index)
                 self.set_face_real_centroid(face_index, face_1_centroid)
                 self.set_face_area(face_index, face_1_area)
 
                 new_face_index = self.add_face(new_face_2)
 
-                (face_area, face_centroid) = self.find_face_centroid(new_face_index)
+                (face_area,
+                 face_centroid) = self.find_face_centroid(new_face_index)
                 self.set_face_real_centroid(new_face_index, face_centroid)
                 self.set_face_area(new_face_index, face_area)
 
@@ -2247,7 +2268,8 @@ class Mesh:
                 self.set_cell_faces(cell_index, list(faces)+[new_face_index])
 
                 cell_orientations = self.get_cell_normal_orientation(cell_index)
-                local_face_index  = list(self.get_cell(cell_index)).index(face_index)
+                local_face_index = \
+                    list(self.get_cell(cell_index)).index(face_index)
 
                 if self.is_boundary_face(face_index, self.get_boundary_markers()):
                     boundary_marker = self.find_boundary_marker(face_index,
@@ -2989,4 +3011,3 @@ class Mesh:
         """ Base class function for constructing the mesh.
         """
         raise NotImplementedError
-
