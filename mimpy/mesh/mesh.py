@@ -2156,7 +2156,7 @@ class Mesh:
 
         return (boundary_faces, boundary_orientation)
 
-    def construct_polygon_from_segments(self, segments):
+    def construct_polygon_from_segs(self, segments):
         """ Takes point pairs and constructs a single polygon
         from joining all the ends. The pairs are identified
         by directly comparing the point locations.
@@ -2271,24 +2271,30 @@ class Mesh:
                 local_face_index = \
                     list(self.get_cell(cell_index)).index(face_index)
 
-                if self.is_boundary_face(face_index, self.get_boundary_markers()):
-                    boundary_marker = self.find_boundary_marker(face_index,
-                                                                self.get_boundary_markers())
+                if self.is_boundary_face(face_index,
+                                         self.get_boundary_markers()):
+                    boundary_marker =\
+                        self.find_boundary_marker(face_index,
+                                                  self.get_boundary_markers())
                     self.add_boundary_face(boundary_marker,
-                                           new_face_index, cell_orientations[local_face_index])
+                                           new_face_index,
+                                           cell_orientations[local_face_index])
 
-                self.set_cell_orientation(cell_index,
-                                          np.array(list(cell_orientations) +
-                                                   [cell_orientations[local_face_index]]))
+                self.set_cell_orientation(
+                    cell_index,
+                    np.array(list(cell_orientations)+
+                             [cell_orientations[local_face_index]]))
 
                 cell_next_door = list(self.get_face_to_cell(face_index))
                 cell_next_door.remove(cell_index)
 
                 if len(cell_next_door) == 1:
                     next_door_faces = self.get_cell(cell_next_door[0])
-                    next_door_local_face_index = list(next_door_faces).index(face_index)
-                    next_door_faces = list(next_door_faces) + [new_face_index]
-                    next_door_orientations = self.get_cell_normal_orientation(cell_next_door[0])
+                    next_door_local_face_index =\
+                        list(next_door_faces).index(face_index)
+                    next_door_faces = list(next_door_faces)+[new_face_index]
+                    next_door_orientations =\
+                        self.get_cell_normal_orientation(cell_next_door[0])
                     next_door_orientations = list(next_door_orientations) + \
                         [next_door_orientations[next_door_local_face_index]]
                     next_door_orientations = np.array(next_door_orientations)
@@ -2296,16 +2302,18 @@ class Mesh:
                     self.set_cell_orientation(cell_next_door[0],
                                               next_door_orientations)
                     if cell_next_door[0] in face_segments_to_be_added:
-                        face_segments_to_be_added[cell_next_door[0]] += [interior_face_segments[-1]]
+                        face_segments_to_be_added[cell_next_door[0]]+=\
+                                                [interior_face_segments[-1]]
                     else:
-                        face_segments_to_be_added[cell_next_door[0]] = [interior_face_segments[-1]]
+                        face_segments_to_be_added[cell_next_door[0]]=\
+                                                [interior_face_segments[-1]]
 
 
         if cell_index in face_segments_to_be_added:
             interior_face_segments += face_segments_to_be_added[cell_index]
 
         if len(interior_face_segments) > 0:
-            new_face = self.construct_polygon_from_segments(interior_face_segments)
+            new_face = self.construct_polygon_from_segs(interior_face_segments)
 
         for i in range(1):
             v1 = self.get_point(new_face[i+1]) - self.get_point(new_face[i])
@@ -2335,8 +2343,10 @@ class Mesh:
 
             if np.dot(plane_to_center, plane_normal) > 0.:
                 faces_for_cell_1.append(face_index)
-                local_face_index = list(self.get_cell(cell_index)).index(face_index)
-                face_normal = self.get_cell_normal_orientation(cell_index)[local_face_index]
+                local_face_index =\
+                    list(self.get_cell(cell_index)).index(face_index)
+                face_normal = self.get_cell_normal_orientation(cell_index)
+                face_normal = face_normal[local_face_index]
                 normals_for_cell_1.append(face_normal)
 
             else:
