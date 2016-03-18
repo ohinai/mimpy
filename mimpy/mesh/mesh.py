@@ -12,6 +12,9 @@ from six.moves import range
 from six.moves import zip
 
 def tb(s):
+    """ Encodes strings for compatibility
+    with Python 3.
+    """
     return s.encode()
 
 class variable_array():
@@ -496,7 +499,7 @@ class Mesh:
         :rtype: list
         """
         f_to_c = list(self.face_to_cell[face_index])
-        f_to_c = [x for x in f_to_c if x >=0]
+        f_to_c = [x for x in f_to_c if x >= 0]
         return f_to_c
 
     def is_line_seg_intersect_face(self, face_index, p1, p2):
@@ -732,9 +735,9 @@ class Mesh:
                     lagrange_index = int(line_split[0])
                     face_index = int(line_split[1])
                     orientation = int(line_split[2])
-                    self.set_lagrange_to_face_pointer(lagrange_index,
-                                                      face_index,
-                                                      orientation)
+                    self.set_lagrange_to_face_pointers(lagrange_index,
+                                                       face_index,
+                                                       orientation)
 
     def save_cell(self, cell_index, output_file):
         """ Saves individual cell in mms format.
@@ -2273,7 +2276,7 @@ class Mesh:
 
                 if self.is_boundary_face(face_index,
                                          self.get_boundary_markers()):
-                    boundary_marker =\
+                    boundary_marker = \
                         self.find_boundary_marker(face_index,
                                                   self.get_boundary_markers())
                     self.add_boundary_face(boundary_marker,
@@ -2290,10 +2293,10 @@ class Mesh:
 
                 if len(cell_next_door) == 1:
                     next_door_faces = self.get_cell(cell_next_door[0])
-                    next_door_local_face_index =\
+                    next_door_local_face_index = \
                         list(next_door_faces).index(face_index)
                     next_door_faces = list(next_door_faces)+[new_face_index]
-                    next_door_orientations =\
+                    next_door_orientations = \
                         self.get_cell_normal_orientation(cell_next_door[0])
                     next_door_orientations = list(next_door_orientations) + \
                         [next_door_orientations[next_door_local_face_index]]
@@ -2302,10 +2305,10 @@ class Mesh:
                     self.set_cell_orientation(cell_next_door[0],
                                               next_door_orientations)
                     if cell_next_door[0] in face_segments_to_be_added:
-                        face_segments_to_be_added[cell_next_door[0]]+=\
+                        face_segments_to_be_added[cell_next_door[0]]+= \
                                                 [interior_face_segments[-1]]
                     else:
-                        face_segments_to_be_added[cell_next_door[0]]=\
+                        face_segments_to_be_added[cell_next_door[0]]= \
                                                 [interior_face_segments[-1]]
 
 
@@ -2343,7 +2346,7 @@ class Mesh:
 
             if np.dot(plane_to_center, plane_normal) > 0.:
                 faces_for_cell_1.append(face_index)
-                local_face_index =\
+                local_face_index = \
                     list(self.get_cell(cell_index)).index(face_index)
                 face_normal = self.get_cell_normal_orientation(cell_index)
                 face_normal = face_normal[local_face_index]
@@ -2351,8 +2354,10 @@ class Mesh:
 
             else:
                 faces_for_cell_2.append(face_index)
-                local_face_index = list(self.get_cell(cell_index)).index(face_index)
-                face_normal = self.get_cell_normal_orientation(cell_index)[local_face_index]
+                local_face_index = \
+                    list(self.get_cell(cell_index)).index(face_index)
+                face_normal = self.get_cell_normal_orientation(cell_index)
+                face_normal = [local_face_index]
                 normals_for_cell_2.append(face_normal)
 
         faces_for_cell_1.append(new_face_index)
@@ -2404,10 +2409,14 @@ class Mesh:
             current_face_points = list(self.get_face(faces[local_face_index]))
             current_face_points.append(current_face_points[0])
             for local_point_index in range(len(current_face_points)-1):
-                point_1 = self.get_point(current_face_points[local_point_index])
-                point_2 = self.get_point(current_face_points[local_point_index+1])
-                for local_face_index_2 in range(local_face_index+1, len(faces)):
-                    current_face_points_2 = list(self.get_face(faces[local_face_index_2]))
+                point_1 = \
+                    self.get_point(current_face_points[local_point_index])
+                point_2 = \
+                    self.get_point(current_face_points[local_point_index+1])
+                for local_face_index_2 in range(local_face_index+1,
+                                                len(faces)):
+                    current_face_points_2 = \
+                            list(self.get_face(faces[local_face_index_2]))
                     current_face_points_2.append(current_face_points_2[0])
 
                     for local_point_index_2 in range(len(current_face_points_2)-1):
@@ -2984,7 +2993,7 @@ class Mesh:
 
                 top_cell_index = self.face_to_cell[top_res_face_index, 0]
                 local_top_face_index_in_cell = list(self.get_cell(top_cell_index)).index(top_res_face_index)
-                top_res_face_orientation =\
+                top_res_face_orientation = \
                     self.get_cell_normal_orientation(top_cell_index)[local_top_face_index_in_cell]
 
                 self.remove_from_face_to_cell(top_res_face_index, bottom_cell)
