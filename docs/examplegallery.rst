@@ -1,7 +1,7 @@
 .. _examplegallery:
 
-Gallery
-=======
+Model Examples
+================
 
 
 

@@ -1,3 +1,5 @@
+.. _mfdclass:
+
 MFD (Base)
 ---------
 

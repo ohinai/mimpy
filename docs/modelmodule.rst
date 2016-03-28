@@ -1,6 +1,6 @@
 .. _modelmodule:
 
-model
+models
 ------
 
 

@@ -1,3 +1,5 @@
+.. _meshclass:
+
 Mesh (Base)
 -----------------
 

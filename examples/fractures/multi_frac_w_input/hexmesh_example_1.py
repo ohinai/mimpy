@@ -23,7 +23,7 @@ res_mesh = mesh.HexMeshWMSFracs()
 def mod_function(p, i, j, k):
     return p
 
-frac_file = open("fracs2.dat")
+frac_file = open("fracs.dat")
 frac_file.readline()
 frac_list = []
 
@@ -57,13 +57,10 @@ for line in frac_file:
 
 res_mesh.build_mesh(22, 22, 22, 300., 300., 300., K, mod_function)
 
-print "cells" , res_mesh.get_number_of_cells()
-print "faces", res_mesh.get_number_of_faces()
 
 count = 1
 fracture_faces_list = []
 for frac in frac_list:
-    print "adding frac", count
     frac.output_vtk("frac" + str(count))
     count += 1
     fracture_faces_list.append(res_mesh.add_fractures(frac))
@@ -74,9 +71,6 @@ for key in res_mesh.fracture_faces_multi:
     count += 1
     res_mesh.output_vtk_faces("faces_"+str(count), list(fracture_faces))
     res_mesh.build_frac_from_faces(list(fracture_faces))
-
-print "cells" , res_mesh.get_number_of_cells()
-print "faces", res_mesh.get_number_of_faces()
 
 res_mfd.set_mesh(res_mesh)
 

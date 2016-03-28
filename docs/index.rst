@@ -18,6 +18,7 @@ the Mimetic Finite Difference method.
    singlephasesection
    codeoverview
    examplegallery
+   meshgallery
    contributing
    authors
    modules

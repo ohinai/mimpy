@@ -2,12 +2,11 @@
 Credits
 =======
 
-Development Lead
-----------------
 
 * Omar Al-Hinai <ohinai@gmail.com>
+* Tameem Al-Mani 
+* Deandra White
+* Rencheng Dong 
+* Jing Ping
+ 
 
-Contributors
-------------
-
-None yet. Why not be the first?
