@@ -233,14 +233,24 @@ class HexMesh(mesh.Mesh):
 
         return polygon_ijka_to_index
 
-    def ijk_to_index(i, j, k):
+    def ijk_to_index(self, i, j, k):
+        """ Returns point index number for an i, j, k numbering.
+
+        :param int i: index in x-direction.
+        :param int j: index in y-direction.
+        :param int k: index in z-direction.
+        """
+        return i+self.ni*j+self.ni*self.nj*k
+
+    def ijk_to_cell_index(self, i, j, k):
         """ Returns cell index number for an i, j, k numbering.
 
         :param int i: index in x-direction.
         :param int j: index in y-direction.
         :param int k: index in z-direction.
         """
-        pass
+        return i+(self.ni-1)*j+(self.ni-1)*(self.nj-1)*k
+
 
     def __init__(self):
         """ Initialize hexmesh.
@@ -249,6 +259,10 @@ class HexMesh(mesh.Mesh):
         self.dim_x = 0.0
         self.dim_y = 0.0
         self.dim_z = 0.0
+
+        self.ni = 0
+        self.nj = 0
+        self.nk = 0
 
         self.cell_to_ijk = {}
 
@@ -279,6 +293,10 @@ class HexMesh(mesh.Mesh):
         nj += 1
         nk += 1
 
+        self.ni = ni
+        self.nj = nj
+        self.nk = nk
+
         dx = self.dim_x/float(ni-1.)
         dy = self.dim_y/float(nj-1.)
         dz = self.dim_z/float(nk-1.)
@@ -287,11 +305,6 @@ class HexMesh(mesh.Mesh):
                                   ['BottomX', 'TopX',
                                    'BottomY', 'TopY',
                                    "BottomZ,", "TopZ",])
-
-        def ijk_to_index(i, j, k):
-            return i+ni*j+k*ni*nj
-
-        self.ijk_to_index = ijk_to_index
 
         ## adding points:
         if modification_function == None:

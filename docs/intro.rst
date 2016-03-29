@@ -14,7 +14,7 @@ using the Mimetic Finite Difference (MFD) method [BLS2005]_.
 The diffusion equation is often referred to a "kernel" problem for many more complex sets of 
 equations. An example of such equations are the ones related to porous media flows.
 
-The MFD method, like many other discretization_ methods, 
+The MFD method, like many other discretization methods, 
 requires the construction of a mesh. However, unlike most conventional methods that are restricted to a specific 
 kind of element, the MFD method accepts a wide range of general polyhedral elements. This means 
 that it can naturally solve for all kinds of conventional meshes such as tetrahedra, hexahedra and Voronoi:

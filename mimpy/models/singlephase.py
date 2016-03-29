@@ -17,9 +17,10 @@ class SinglePhase():
     """ The class relies on the Mesh and MFD libraries
     to solve time dependent slighly-compressible
     flow problems (heat equation).
+
     .. math::
-        \phi \frac{\partial \rho}{\partial t}  =
-        -\nabla \cdot \lef( \frac{\rho}{\mu} K (\nabla p)\right) + q
+        \\phi \\frac{\\partial \\rho}{\\partial t}  =
+        -\\nabla \\cdot \\left( \\frac{\\rho}{\\mu} K (\\nabla p)\\right) + q
 
     """
     def __init__(self):

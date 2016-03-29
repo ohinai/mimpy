@@ -43,7 +43,7 @@ class TestCellDivide(unittest.TestCase):
             assert(single_cell.get_number_of_cells()==2)
 
 
-    def test_single_hex_cell_2(self):
+    def test_single_hex_cell_3(self):
         normals = [np.array([1.2, .8, 0.]), 
                    np.array([1.2, .2, 1.3]), 
                    -np.array([1.2, .8, 0.]), 
