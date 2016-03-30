@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Single-Phase Derivation &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="index.html"/>
+        <link rel="up" title="Single-Phase" href="singlephasesection.html"/>
+        <link rel="next" title="Single-Phase Example Walk Through" href="singlephaseexample.html"/>
+        <link rel="prev" title="Single-Phase" href="singlephasesection.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="singlephasesection.html">Single-Phase</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Single-Phase Derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="singlephaseexample.html">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Mimpy Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshmodule.html">mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfdmodule.html">mfd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="singlephasesection.html">Single-Phase</a> &raquo;</li>
+      
+    <li>Single-Phase Derivation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/singlephase.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="single-phase-derivation">
+<h1>Single-Phase Derivation<a class="headerlink" href="#single-phase-derivation" title="Permalink to this headline">¶</a></h1>
+<p>Derivation of the single-phase solution using the Mimetic Finite Difference Method.
+We start with the equation for single phase slightly compressible fluid:</p>
+<div class="math">
+\[\phi \frac{\partial \rho}{\partial t} = \nabla \cdot \frac{\rho}{\mu}K \nabla p + f\]</div>
+<p>Assuming slight compressibilty of the fluid, we have:</p>
+<div class="math">
+\[\rho(p) \approx \rho^0(1+c_f(p-p^0))\]</div>
+<p>Resulting in,</p>
+<div class="math">
+\[\phi \rho^0 c_f \frac{\partial p}{\partial t} = \nabla \cdot \frac{\rho}{\mu}K \nabla p + f\]</div>
+<p>We rewrite this equation in flux form as,</p>
+<div class="math">
+\[\begin{split}\begin{align}
+\phi \rho^0 c_f \frac{\partial p}{\partial t} &amp;= -\nabla \cdot v + f\\
+v &amp;= -\frac{\rho}{\mu}K \nabla p
+\end{align}\end{split}\]</div>
+<p>Recall the Mimetic method constructs operators <span class="math">\(\mathcal{G} \text{ and } \mathcal{DIV}\)</span> that approximate
+the continuous forms:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+\mathcal{DIV} &amp;\approx \nabla \cdot\\
+\mathcal{G} &amp;\approx \frac{\rho}{\mu}K \nabla
+\end{align}\end{split}\]</div>
+<p>that satify the adjoint relationship:</p>
+<div class="math">
+\[[p_h, \mathcal{DIV} v_h]_{Q} = -[\mathcal{G} p_h, v_h]_{X} \,\, \forall v_h \in X \text{ and } \forall p_h \in Q\]</div>
+<p>Substituting <span class="math">\(\mathcal{G} \text{ and } \mathcal{DIV}\)</span> into our equation, we get:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+\phi \rho^0 c_f \frac{\partial p_h}{\partial t} &amp;=  -\mathcal{DIV }v_h + f^I\\
+v_h &amp;= -\mathcal{G} p_h
+\end{align}\end{split}\]</div>
+<p>At this point, we have a spatial discretization of the problem.
+However, recall that computing operator <span class="math">\(\mathcal{G}\)</span> explicitly can be difficult as it may
+be a dense matrix. To avoid this problem, we use the adjoint relationship to rewrite the problem
+without explicity computing <span class="math">\(\mathcal{G}\)</span>:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+ v_h &amp;= -\mathcal{G} p_h \\
+ [v_h, u_h]_X &amp;= -[\mathcal{G} p_h, u_h]_X \,\,\, \forall u_h \in X \\
+ [v_h, u_h]_X &amp;= [p_h, \mathcal{DIV} u_h]_{Q} \,\,\, \forall u_h \in X
+\end{align}\end{split}\]</div>
+<p>We call this the &#8220;weak&#8221; representation of the problem. We can directly write
+the conservation law equation in this form, giving us:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+\phi \rho^0 c_f \frac{\partial p_h}{\partial t} &amp;=  -\mathcal{DIV }v_h + f^I\\
+[\phi \rho^0 c_f \frac{\partial p_h}{\partial t}, q_h]_Q &amp;=  -[\mathcal{DIV }v_h + f^I, q_h]_Q \forall q_h \in Q
+\end{align}\end{split}\]</div>
+<p>All togther, we write the problem out in weak form: Find <span class="math">\(v_h \in X\)</span> and <span class="math">\(p_h \in Q\)</span> such that:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+[v_h, u_h]_X &amp;= [p_h, \mathcal{DIV} u_h]_{Q} \,\,\, \forall u_h \in X\\
+[\phi \rho^0 c_f \frac{\partial p_h}{\partial t}, q_h]_Q &amp;=  -[\mathcal{DIV }v_h + f^I, q_h]_Q \,\,\,\forall q_h \in Q
+\end{align}\end{split}\]</div>
+<p>We are now left with an ODE, so our next step is to solve for the derivative in time. There are plenty of options here,
+one of the simplest thing we can do is to use the Backward-Euler method:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+[v^{n+1}_h, u_h]_X &amp;= [p^{n+1}_h, \mathcal{DIV} u_h]_{Q} \,\,\, \forall u_h \in X\\
+[\phi \rho^0 c_f \frac{p^{n+1}_h-p_h^n}{ \Delta t}, q_h]_Q &amp;=  -[\mathcal{DIV }v^{n+1}_h + f^I, q_h]_Q \,\,\,\forall q_h \in Q
+\end{align}\end{split}\]</div>
+<p>If we group all the unknowns on the left, we are left with:</p>
+<p>Find <span class="math">\(v_h \in X\)</span> and <span class="math">\(p_h \in Q\)</span> such that:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+[v^{n+1}_h, u_h]_X - [p^{n+1}_h, \mathcal{DIV} u_h]_{Q}&amp;= 0 \,\,\, \forall u_h \in X\\
+[\mathcal{DIV }v^{n+1}_h, q_h]_Q + [\frac{\phi \rho^0 c_f}{ \Delta t}p^{n+1}_h, q_h]_Q &amp;=
+[\frac{\phi \rho^0 c_f}{\Delta t}p_h^n + f^I, q_h]_Q \,\,\,\forall q_h \in Q
+\end{align}\end{split}\]</div>
+<p>This problem can be rewritten as a linear system of equations:</p>
+<div class="math">
+\[\begin{split}\left(\begin{array}{cc}
+M&amp; D^*\\
+D&amp; C
+\end{array}\right)
+\left(\begin{array}{c}
+v^{n+1}_h\\
+p^{n+1}_h
+\end{array}\right) =
+\left(\begin{array}{c}
+0 \\
+f
+\end{array}\right)\end{split}\]</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Notice that matrix <span class="math">\(M\)</span> is dependent on <span class="math">\(\frac{\rho}{\mu}K\)</span>. Since the density
+term <span class="math">\(\rho\)</span> is a function of pressure, we technically have a nonlinear system of equations.
+However, since the compressibility is so small, its effects on the velocity term can be
+negligable. For this reason, the calculation of density used for building <span class="math">\(M\)</span> is lagged
+from the previous time step: <span class="math">\(M(\frac{\rho(p^n)}{\mu}K)\)</span>.</p>
+</div>
+<p>Nomenclature:</p>
+<div class="math">
+\[\begin{split}\begin{align}
+p &amp;= \text{pressure [Pa]}\\
+t &amp;= \text{time [s]}\\
+\phi &amp;= \text{porosity [dimensionless]}\\
+\rho &amp;= \text{density [kg/m$^3$]}\\
+\mu &amp;= \text{viscosity [Pa$\cdot$s]}\\
+f &amp;= \text{source [kg/s]}\\
+p^0 &amp;= \text{reference pressure [Pa]}\\
+\rho^0 &amp;= \text{reference density [kg/m$^3$]} \\
+c_f &amp;= \text{compressibility [Pa$^-1$]}
+\end{align}\end{split}\]</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="singlephaseexample.html" class="btn btn-neutral float-right" title="Single-Phase Example Walk Through">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="singlephasesection.html" class="btn btn-neutral" title="Single-Phase"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
