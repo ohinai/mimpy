@@ -6,20 +6,12 @@ mimpy
     :target: https://travis-ci.org/ohinai/mimpy
 
 Mimpy is a Python based library for solving
-the diffusion equation. 
-
-.. image:: diff_eq.gif
+the diffusion equation. Mimpy uses the Mimetic Finite Difference 
+method, which as the advantage of solving using general polyhedral elements. 
 
 Because diffusion is a "kernel" for many physical phenomena, 
 mimpy can also solve problems like the heat equation and multi-phase flow
 through porous media. 
-
-The best way to get the code right now is to clone the git repo and run the setup utility:
-
-    .. code-block:: bash
-    
-        $ git clone https://github.com/ohinai/mimpy.git
-        $ python setup.py install 
 
 A simple example can be found in hexmesh_example_1.py_.
 Run:
@@ -28,12 +20,10 @@ Run:
     
         $ python hexmesh_example_1.py 
 
-If all goes well, you should get a file named (hexmesh_example_1.vtk). Open the file using 
-Paraview and plot "MFDPressure." You should see something like this:
+Code requirements: 
 
-.. image:: hexmesh_solution.png
-
-
-.. _hexmesh_example_1.py: https://github.com/ohinai/mimpy/blob/master/examples/hexmesh/example1/hexmesh_example_1.py
+* NumPy 
+* SciPy
+* Cython (if you want to update the c code). 
 
 

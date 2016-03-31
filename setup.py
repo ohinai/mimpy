@@ -43,7 +43,7 @@ test_requirements = [###
 
 setup(
     name='mimpy',
-    version='0.1.0',
+    version='0.1.1',
     description="Python implementation of the Mimetic Finite Difference method.",
     long_description=readme + '\n\n' + history,
     author="Omar Al-Hinai",
