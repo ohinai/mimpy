@@ -1,0 +1,538 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mimpy.mesh.hexmesh &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="../../../index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../singlephasesection.html">Single-Phase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../singlephase.html">Single-Phase Derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../singlephaseexample.html">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Mimpy Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../meshmodule.html">mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mfdmodule.html">mfd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>mimpy.mesh.hexmesh</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>Source code for mimpy.mesh.hexmesh</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">mimpy.mesh.mesh</span> <span class="kn">as</span> <span class="nn">mesh</span>
+<span class="kn">import</span> <span class="nn">mimpy.mesh.hexmesh_cython</span> <span class="kn">as</span> <span class="nn">hexmesh_cython</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+
+<div class="viewcode-block" id="HexMesh"><a class="viewcode-back" href="../../../hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh">[docs]</a><span class="k">class</span> <span class="nc">HexMesh</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">Mesh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Class for constructing structured hexahedral meshes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_nonplanar_face_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates an approximate normal for a</span>
+<span class="sd">        face that might not planar.</span>
+
+<span class="sd">        :param int face_index: index of face.</span>
+<span class="sd">        :return: The face normal.</span>
+<span class="sd">        :rtype: ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_face</span><span class="p">(</span><span class="n">face_index</span><span class="p">)</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">v1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">normal</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_nonplanar_face_centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates an approximate centroid for a</span>
+<span class="sd">        face that might not planar.</span>
+
+<span class="sd">        :param int face_index: index of face.</span>
+<span class="sd">        :return: Face centroid.</span>
+<span class="sd">        :rtype: ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_face</span><span class="p">(</span><span class="n">face_index</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+
+        <span class="n">center_point</span> <span class="o">=</span> <span class="o">.</span><span class="mi">25</span> <span class="o">*</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span> <span class="o">+</span> <span class="n">p3</span> <span class="o">+</span> <span class="n">p4</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">center_point</span>
+
+    <span class="k">def</span> <span class="nf">_nonplanar_cell_centroid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates an approximate centroid for a</span>
+<span class="sd">        cell that may have nonplanar faces.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">centroid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell</span><span class="p">(</span><span class="n">cell_index</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_face</span><span class="p">(</span><span class="n">face</span><span class="p">):</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mf">1.</span>
+                <span class="n">centroid</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+
+        <span class="n">centroid</span> <span class="o">=</span> <span class="n">centroid</span><span class="o">/</span><span class="n">count</span>
+        <span class="k">return</span> <span class="n">centroid</span>
+
+    <span class="k">def</span> <span class="nf">_populate_face_areas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Finds all the faces areas and</span>
+<span class="sd">        stores them the area array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hexmesh_cython</span><span class="o">.</span><span class="n">all_face_areas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="o">.</span><span class="n">pointers</span><span class="p">,</span>
+                                      <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="p">),</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">face_areas</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_populate_face_centroids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Finds all the faces centroids and</span>
+<span class="sd">        stores them the area array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">face_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_number_of_faces</span><span class="p">()):</span>
+            <span class="n">current_centroid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nonplanar_face_centroid</span><span class="p">(</span><span class="n">face_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_face_real_centroid</span><span class="p">(</span><span class="n">face_index</span><span class="p">,</span> <span class="n">current_centroid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_populate_face_normals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Finds all the faces normals and</span>
+<span class="sd">        stores them the normals array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">hexmesh_cython</span><span class="o">.</span><span class="n">all_face_normals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="o">.</span><span class="n">pointers</span><span class="p">,</span>
+                                        <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="p">),</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">face_normals</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_nonplanar_face_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates an approximate area for a</span>
+<span class="sd">        face that might not planar.</span>
+
+<span class="sd">        :param int face_index: index of face.</span>
+
+<span class="sd">        :return: Face area.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_face</span><span class="p">(</span><span class="n">face_index</span><span class="p">)</span>
+        <span class="n">area</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+        <span class="n">p4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">face</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+
+        <span class="n">center_point</span> <span class="o">=</span> <span class="o">.</span><span class="mi">25</span> <span class="o">*</span> <span class="p">(</span><span class="n">p1</span> <span class="o">+</span> <span class="n">p2</span> <span class="o">+</span> <span class="n">p3</span> <span class="o">+</span> <span class="n">p4</span><span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p1</span><span class="o">-</span><span class="n">p2</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p2</span><span class="o">-</span><span class="n">center_point</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">center_point</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+
+        <span class="n">area</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p2</span><span class="o">-</span><span class="n">p3</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p3</span><span class="o">-</span><span class="n">center_point</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">center_point</span><span class="o">-</span><span class="n">p2</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+
+        <span class="n">area</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p3</span><span class="o">-</span><span class="n">p4</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p4</span><span class="o">-</span><span class="n">center_point</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">center_point</span> <span class="o">-</span> <span class="n">p3</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+
+        <span class="n">area</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p4</span><span class="o">-</span><span class="n">p1</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p1</span><span class="o">-</span><span class="n">center_point</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">center_point</span> <span class="o">-</span> <span class="n">p4</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+
+        <span class="n">area</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="n">c</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">area</span>
+
+<div class="viewcode-block" id="HexMesh.get_dim_x"><a class="viewcode-back" href="../../../hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.get_dim_x">[docs]</a>    <span class="k">def</span> <span class="nf">get_dim_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the dimension of the domain</span>
+<span class="sd">        in the X direction.</span>
+
+<span class="sd">        :return: Domain x dimension.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_x</span>
+</div>
+<div class="viewcode-block" id="HexMesh.get_dim_y"><a class="viewcode-back" href="../../../hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.get_dim_y">[docs]</a>    <span class="k">def</span> <span class="nf">get_dim_y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the dimension of the domain</span>
+<span class="sd">        in the Y direction.</span>
+
+<span class="sd">        :return: Domain y dimension.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_y</span>
+</div>
+<div class="viewcode-block" id="HexMesh.get_dim_z"><a class="viewcode-back" href="../../../hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.get_dim_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_dim_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the dimension of the domain</span>
+<span class="sd">        in the Z direction.</span>
+
+<span class="sd">        :return: Domain z dimension.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span>
+</div>
+    <span class="k">def</span> <span class="nf">_build_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ni</span><span class="p">,</span> <span class="n">nj</span><span class="p">,</span> <span class="n">nk</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Function to build the mesh faces.</span>
+
+<span class="sd">        :param int ni: Number of faces in the x-direction.</span>
+<span class="sd">        :param int nj: Number of faces in the y-direction.</span>
+<span class="sd">        :param int nk: Number of faces in the z-direction.</span>
+
+<span class="sd">        :return: Dictionary mapping ijka to index.</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">polygon_ijka_to_index</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nj</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ni</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ni</span><span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">nj</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">new_face</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">)]</span>
+
+                        <span class="n">face_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_face</span><span class="p">(</span><span class="n">new_face</span><span class="p">)</span>
+
+                        <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">face_index</span>
+                        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">add_boundary_face</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">face_index</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">nk</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">add_boundary_face</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">face_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">if</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">nk</span><span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ni</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">new_face</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)]</span>
+
+                        <span class="n">face_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_face</span><span class="p">(</span><span class="n">new_face</span><span class="p">)</span>
+
+                        <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">face_index</span>
+
+                        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">add_boundary_face</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">face_index</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">nj</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">add_boundary_face</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">face_index</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">nj</span><span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">nk</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">new_face</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ijk_to_index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+
+                        <span class="n">face_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_face</span><span class="p">(</span><span class="n">new_face</span><span class="p">)</span>
+
+                        <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">count</span>
+
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">add_boundary_face</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">ni</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">add_boundary_face</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_face_areas</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_face_centroids</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populate_face_normals</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">polygon_ijka_to_index</span>
+
+<div class="viewcode-block" id="HexMesh.ijk_to_index"><a class="viewcode-back" href="../../../hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.ijk_to_index">[docs]</a>    <span class="k">def</span> <span class="nf">ijk_to_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns point index number for an i, j, k numbering.</span>
+
+<span class="sd">        :param int i: index in x-direction.</span>
+<span class="sd">        :param int j: index in y-direction.</span>
+<span class="sd">        :param int k: index in z-direction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">i</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ni</span><span class="o">*</span><span class="n">j</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ni</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">nj</span><span class="o">*</span><span class="n">k</span>
+</div>
+<div class="viewcode-block" id="HexMesh.ijk_to_cell_index"><a class="viewcode-back" href="../../../hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.ijk_to_cell_index">[docs]</a>    <span class="k">def</span> <span class="nf">ijk_to_cell_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns cell index number for an i, j, k numbering.</span>
+
+<span class="sd">        :param int i: index in x-direction.</span>
+<span class="sd">        :param int j: index in y-direction.</span>
+<span class="sd">        :param int k: index in z-direction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">i</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ni</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">j</span><span class="o">+</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ni</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nj</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">k</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize hexmesh.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">Mesh</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_x</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_y</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ni</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nj</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nk</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_to_ijk</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="HexMesh.build_mesh"><a class="viewcode-back" href="../../../hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.build_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">build_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ni</span><span class="p">,</span> <span class="n">nj</span><span class="p">,</span> <span class="n">nk</span><span class="p">,</span>
+                   <span class="n">dim_x</span><span class="p">,</span> <span class="n">dim_y</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> 
+                   <span class="n">modification_function</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructs a structured hexahedral mesh.</span>
+
+<span class="sd">        :param int ni: Number of cells in the x-direction.</span>
+<span class="sd">        :param int nj: Number of cells in the y-direction.</span>
+<span class="sd">        :param int nk: Number of cells in the z-direction.</span>
+<span class="sd">        :param function K: Permeability map function.</span>
+<span class="sd">             K(point, i, j, k ) -&gt; 3x3 Matrix.</span>
+<span class="sd">        :param float dim_x: Size of domain in the x-direction.</span>
+<span class="sd">        :param float dim_y: Size of domain in the y-direction.</span>
+<span class="sd">        :param float dim_z: Size of domain in the z-direction.</span>
+<span class="sd">        :param function  modification_function: Alteration function for shifting</span>
+<span class="sd">              points of the cells. modification_function(p) -&gt; 3 array.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Needs to be moved to an __init__ function.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_x</span> <span class="o">=</span> <span class="n">dim_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_y</span> <span class="o">=</span> <span class="n">dim_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="o">=</span> <span class="n">dim_z</span>
+
+        <span class="n">ni</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nj</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nk</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ni</span> <span class="o">=</span> <span class="n">ni</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nj</span> <span class="o">=</span> <span class="n">nj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nk</span> <span class="o">=</span> <span class="n">nk</span>
+
+        <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_x</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">ni</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_y</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">nj</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">nk</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_boundary_markers</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+                                  <span class="p">[</span><span class="s">&#39;BottomX&#39;</span><span class="p">,</span> <span class="s">&#39;TopX&#39;</span><span class="p">,</span>
+                                   <span class="s">&#39;BottomY&#39;</span><span class="p">,</span> <span class="s">&#39;TopY&#39;</span><span class="p">,</span>
+                                   <span class="s">&quot;BottomZ,&quot;</span><span class="p">,</span> <span class="s">&quot;TopZ&quot;</span><span class="p">,])</span>
+
+        <span class="c">## adding points:</span>
+        <span class="k">if</span> <span class="n">modification_function</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nj</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ni</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">add_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="p">,</span>
+                                                 <span class="nb">float</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="n">dy</span><span class="p">,</span>
+                                                 <span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">dz</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nj</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ni</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">add_point</span><span class="p">(</span><span class="n">modification_function</span><span class="p">(</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="p">,</span>
+                                          <span class="nb">float</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="n">dy</span><span class="p">,</span>
+                                          <span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">dz</span><span class="p">]),</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+
+        <span class="n">polygon_ijka_to_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_faces</span><span class="p">(</span><span class="n">ni</span><span class="p">,</span> <span class="n">nj</span><span class="p">,</span> <span class="n">nk</span><span class="p">)</span>
+
+	<span class="c">### adding cells:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nk</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nj</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ni</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">new_cell</span> <span class="o">=</span> <span class="p">[</span><span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
+                                <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+                                <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span>
+                                <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span>
+                                <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+                                <span class="n">polygon_ijka_to_index</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]]</span>
+
+                    <span class="n">cell_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_cell</span><span class="p">(</span><span class="n">new_cell</span><span class="p">,</span>
+                                               <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cell_to_ijk</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">find_volume_centroid_all</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">cell_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()):</span>
+            <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_to_ijk</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span>
+            <span class="p">[</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_real_centroid</span><span class="p">(</span><span class="n">cell_index</span><span class="p">)</span>
+            <span class="n">k_e</span> <span class="o">=</span> <span class="n">K</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">,</span> <span class="n">cz</span><span class="p">]),</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_cell_k</span><span class="p">(</span><span class="n">cell_index</span><span class="p">,</span> <span class="n">k_e</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

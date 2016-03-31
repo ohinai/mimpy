@@ -1,0 +1,509 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>TwoPhase &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="index.html"/>
+        <link rel="up" title="models" href="modelmodule.html"/>
+        <link rel="prev" title="Transport" href="transportclass.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="singlephasesection.html">Single-Phase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="singlephase.html">Single-Phase Derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="singlephaseexample.html">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Credits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Mimpy Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="meshmodule.html">mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfdmodule.html">mfd</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">Mimpy Modules</a> &raquo;</li>
+      
+          <li><a href="modelmodule.html">models</a> &raquo;</li>
+      
+    <li>TwoPhase</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/twophaseclass.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="twophase">
+<h1>TwoPhase<a class="headerlink" href="#twophase" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mimpy.models.twophase.TwoPhase">
+<em class="property">class </em><code class="descclassname">mimpy.models.twophase.</code><code class="descname">TwoPhase</code><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model class for solving two-phase, immiscible,
+slightly compressible flow problem based on the
+Mimetic Finite Difference method.</p>
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.add_pressure_well">
+<code class="descname">add_pressure_well</code><span class="sig-paren">(</span><em>bhp</em>, <em>PI</em>, <em>cell_index</em>, <em>well_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.add_pressure_well"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.add_pressure_well" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds rate specified point source at the center
+of cell_index. Returns the index of the new rate well.
+Injection rate is in m^3/second</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.add_rate_well">
+<code class="descname">add_rate_well</code><span class="sig-paren">(</span><em>injection_rate_water</em>, <em>injection_rate_oil</em>, <em>cell_index</em>, <em>well_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.add_rate_well"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.add_rate_well" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds rate specified point source at the center
+of cell_index. Returns the index of the new rate well.
+Injection rate is in m^3/second</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.apply_flux_boundary_from_function">
+<code class="descname">apply_flux_boundary_from_function</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>f_function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.apply_flux_boundary_from_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.apply_flux_boundary_from_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies static flux (neumann) boundary
+conditions from function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.apply_pressure_boundary_from_function">
+<code class="descname">apply_pressure_boundary_from_function</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>p_function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.apply_pressure_boundary_from_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.apply_pressure_boundary_from_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies static pressure (dirichlet) boundary
+conditions from function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.find_upwinding_direction">
+<code class="descname">find_upwinding_direction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.find_upwinding_direction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.find_upwinding_direction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the upwinding direction
+for each face in the mesh.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.get_well_rate_oil">
+<code class="descname">get_well_rate_oil</code><span class="sig-paren">(</span><em>well_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.get_well_rate_oil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.get_well_rate_oil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the oil production rate
+for well_index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.get_well_rate_water">
+<code class="descname">get_well_rate_water</code><span class="sig-paren">(</span><em>well_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.get_well_rate_water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.get_well_rate_water" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the water production rate
+for well_index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.initialize_system">
+<code class="descname">initialize_system</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.initialize_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.initialize_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the initial matrices
+used to construct the saddle-point
+problem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.oil_mobility">
+<code class="descname">oil_mobility</code><span class="sig-paren">(</span><em>water_saturation</em>, <em>oil_pressure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.oil_mobility"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.oil_mobility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns oil mobility.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.reset_wells">
+<code class="descname">reset_wells</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.reset_wells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.reset_wells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all wells.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.sefromsw">
+<code class="descname">sefromsw</code><span class="sig-paren">(</span><em>water_saturation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.sefromsw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.sefromsw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes scaled saturation value
+se =&gt; [0, 1] from physical water saturation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_cell_porosity">
+<code class="descname">set_cell_porosity</code><span class="sig-paren">(</span><em>cell_index</em>, <em>porosity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_cell_porosity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_cell_porosity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets porosity for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_cell_s_w">
+<code class="descname">set_cell_s_w</code><span class="sig-paren">(</span><em>cell_index</em>, <em>s_w</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_cell_s_w"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_cell_s_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets water saturation for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_compressibility_oil">
+<code class="descname">set_compressibility_oil</code><span class="sig-paren">(</span><em>compressibility_oil</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_compressibility_oil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_compressibility_oil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets oil compressilibity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_compressibility_water">
+<code class="descname">set_compressibility_water</code><span class="sig-paren">(</span><em>compressibility_water</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_compressibility_water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_compressibility_water" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets water compressilibity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_corey_relperm">
+<code class="descname">set_corey_relperm</code><span class="sig-paren">(</span><em>n_o</em>, <em>n_w</em>, <em>k_rw_o=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_corey_relperm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_corey_relperm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a Corey-type relative permeability function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_initial_p_o">
+<code class="descname">set_initial_p_o</code><span class="sig-paren">(</span><em>p_o</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_initial_p_o"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_initial_p_o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the pressure distributionat
+time 0.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_initial_s_w">
+<code class="descname">set_initial_s_w</code><span class="sig-paren">(</span><em>s_w</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_initial_s_w"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_initial_s_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets initial water saturation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_initial_u_t">
+<code class="descname">set_initial_u_t</code><span class="sig-paren">(</span><em>u_t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_initial_u_t"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_initial_u_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets initial total velocity
+for system.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_kro">
+<code class="descname">set_kro</code><span class="sig-paren">(</span><em>kro</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_kro"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_kro" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set oil relative permeability function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_krw">
+<code class="descname">set_krw</code><span class="sig-paren">(</span><em>krw</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_krw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_krw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set water relative permeability function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_mesh">
+<code class="descname">set_mesh</code><span class="sig-paren">(</span><em>mesh</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the computational mesh
+to be used.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_model_name">
+<code class="descname">set_model_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_model_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_model_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets model name used for output.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_number_of_time_steps">
+<code class="descname">set_number_of_time_steps</code><span class="sig-paren">(</span><em>number_of_time_steps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_number_of_time_steps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_number_of_time_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set number of time steps taken.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_output_frequency">
+<code class="descname">set_output_frequency</code><span class="sig-paren">(</span><em>frequency</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_output_frequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_output_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets how often to output the solution
+by iteration number. x</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_porosities">
+<code class="descname">set_porosities</code><span class="sig-paren">(</span><em>porosities</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_porosities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_porosities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets cell porosities.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_ref_density_oil">
+<code class="descname">set_ref_density_oil</code><span class="sig-paren">(</span><em>ref_density_oil</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_ref_density_oil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_ref_density_oil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets reference density of oil at reference pressure.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_ref_density_water">
+<code class="descname">set_ref_density_water</code><span class="sig-paren">(</span><em>ref_density_water</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_ref_density_water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_ref_density_water" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets reference density of water at reference presssure.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_ref_pressure_oil">
+<code class="descname">set_ref_pressure_oil</code><span class="sig-paren">(</span><em>ref_pressure_oil</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_ref_pressure_oil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_ref_pressure_oil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set reference pressure for oil.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_ref_pressure_water">
+<code class="descname">set_ref_pressure_water</code><span class="sig-paren">(</span><em>ref_pressure_water</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_ref_pressure_water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_ref_pressure_water" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set reference pressure for water.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_residual_saturation_oil">
+<code class="descname">set_residual_saturation_oil</code><span class="sig-paren">(</span><em>residual_saturation_oil</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_residual_saturation_oil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_residual_saturation_oil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets oil residual saturation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_residual_saturation_water">
+<code class="descname">set_residual_saturation_water</code><span class="sig-paren">(</span><em>residual_saturation_water</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_residual_saturation_water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_residual_saturation_water" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets water residual saturation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_saturation_boundaries">
+<code class="descname">set_saturation_boundaries</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>saturation_function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_saturation_boundaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_saturation_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the saturation boundaries for pressure
+specified (Dirichlet) boundaries.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_saturation_substeps">
+<code class="descname">set_saturation_substeps</code><span class="sig-paren">(</span><em>number_of_saturation_substeps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_saturation_substeps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_saturation_substeps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the number of saturation steps to take between
+regular pressure time step intervals. The default is 1, meaning
+take one saturation step for each pressure step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_solver">
+<code class="descname">set_solver</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_solver"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the solution method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tag</strong> (<em>str</em>) &#8211; Indicates which solver to use:
+- &#8220;default&#8221; =&gt; uses spsolve from scipy.
+- &#8220;PETSc&#8221; =&gt; uses the petsc4py library</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_time_step_size">
+<code class="descname">set_time_step_size</code><span class="sig-paren">(</span><em>delta_t</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_time_step_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_time_step_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets time step size.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_viscosity_oil">
+<code class="descname">set_viscosity_oil</code><span class="sig-paren">(</span><em>viscosity_oil</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_viscosity_oil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_viscosity_oil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set oil viscosity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.set_viscosity_water">
+<code class="descname">set_viscosity_water</code><span class="sig-paren">(</span><em>viscosity_water</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.set_viscosity_water"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.set_viscosity_water" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set water viscosity.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.start_solving">
+<code class="descname">start_solving</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.start_solving"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.start_solving" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts solving the problem.
+The two-phase system solves for p_o and s_w. Using IMPES,
+we start by solving the pressure system using the <a href="#id1"><span class="problematic" id="id2">update_</span></a>
+pressure routine. After that, the saturations are updated
+explicitly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.time_step_output">
+<code class="descname">time_step_output</code><span class="sig-paren">(</span><em>current_time</em>, <em>time_step</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.time_step_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.time_step_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be defined by user
+that will be run at each output interval
+during time-stepping. The function
+is intended for complex output.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.update_pressure">
+<code class="descname">update_pressure</code><span class="sig-paren">(</span><em>time_step</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.update_pressure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.update_pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the pressure system for p_o. self.current_p_o and
+self.current_u_t are considered the pressure and velocity
+at time n, and routine computes these quantities for time
+n+1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.update_saturation">
+<code class="descname">update_saturation</code><span class="sig-paren">(</span><em>time_step</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.update_saturation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.update_saturation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates water satuation based on the current p_o and u_t.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.models.twophase.TwoPhase.water_mobility">
+<code class="descname">water_mobility</code><span class="sig-paren">(</span><em>water_saturation</em>, <em>water_pressure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/models/twophase.html#TwoPhase.water_mobility"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.models.twophase.TwoPhase.water_mobility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns water mobility</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="transportclass.html" class="btn btn-neutral" title="Transport"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
