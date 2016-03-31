@@ -1,0 +1,1423 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Mesh (Base) &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="index.html"/>
+        <link rel="up" title="mesh" href="meshmodule.html"/>
+        <link rel="next" title="HexMesh Class" href="hexmeshclass.html"/>
+        <link rel="prev" title="mesh" href="meshmodule.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="singlephasesection.html">Single-Phase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="singlephase.html">Single-Phase Derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="singlephaseexample.html">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Credits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Mimpy Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="meshmodule.html">mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfdmodule.html">mfd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">Mimpy Modules</a> &raquo;</li>
+      
+          <li><a href="meshmodule.html">mesh</a> &raquo;</li>
+      
+    <li>Mesh (Base)</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/meshclass.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="mesh-base">
+<span id="meshclass"></span><h1>Mesh (Base)<a class="headerlink" href="#mesh-base" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mimpy.mesh.mesh.Mesh">
+<em class="property">class </em><code class="descclassname">mimpy.mesh.mesh.</code><code class="descname">Mesh</code><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <strong>Mesh</strong> class is a common representation of polygonal
+meshes in Mimpy. In addition to the mesh data structure,
+it provides commonly used mesh functions as such
+calculating volumes and centroids as well as basic visualization.
+The <strong>Mesh</strong> class serves as base implementation,
+with the specific mesh types (such as hexahedra,
+tetrahedra and Voronoi) inherting from it.</p>
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.add_boundary_face">
+<code class="descname">add_boundary_face</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>face_index</em>, <em>face_orientation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.add_boundary_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.add_boundary_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign face_index to a certain boundary_marker grouping.
+the face_orientation indicates whether the normal of that
+face points in (-1) or out (1) of the cell the face
+belongs to.</p>
+<p>A face should never be associated with more than one marker.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>boundary_marker</strong> (<em>int</em>) &#8211; Boundary marker index.</li>
+<li><strong>face_index</strong> (<em>int</em>) &#8211; Index of face.</li>
+<li><strong>face_orientation</strong> (<em>int</em>) &#8211; Orientation of face normal             relative to the domain. (1) if pointing out, (-1) if             if pointing in.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.add_boundary_marker">
+<code class="descname">add_boundary_marker</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>boundary_description</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.add_boundary_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.add_boundary_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new boundary marker.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>boundary_marker</strong> (<em>int</em>) &#8211; New boundary marker index.</li>
+<li><strong>boundary_description</strong> (<em>str</em>) &#8211; Text describing
+the boundary marker.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.add_cell">
+<code class="descname">add_cell</code><span class="sig-paren">(</span><em>list_of_faces</em>, <em>list_of_orientations</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.add_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.add_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a new cell to the mesh. A cell is represented
+by a list of face indices. The function also
+takes in a list of orientations of the same length
+as the list_of_faces. These represent the direction
+of the face normals relative to the cell: (1) points in,
+(-1) points out.
+Returns the index of the new cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>list_of_faces</strong> (<em>list</em>) &#8211; List of face indices making up new cell.</li>
+<li><strong>list_of_orientations</strong> (<em>list</em>) &#8211; List consisting of 1s and -1s            indicating whether normals are pointing out (1) or in (-1) of cell.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">New cell index.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.add_face">
+<code class="descname">add_face</code><span class="sig-paren">(</span><em>list_of_points</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.add_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.add_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of point indices, and
+appends them to the list of faces
+in the mesh. The point indices must
+be oriented in a clockwise direction
+relative to the face normal. In 2D, a
+face is represnted by two points.
+Returns the index of the new face.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>list_of_points</strong> (<em>list</em>) &#8211; List of point indices             making up the new face.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Index of new face.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.add_internal_no_flow">
+<code class="descname">add_internal_no_flow</code><span class="sig-paren">(</span><em>face_index</em>, <em>face_orientation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.add_internal_no_flow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.add_internal_no_flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets face as interior no flow boundary condition.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>face_index</strong> (<em>int</em>) &#8211; Face index to be set as internal no-flow.</li>
+<li><strong>face_orientation</strong> (<em>int</em>) &#8211; Orientation of face relative to the        domain, (1) for pointing out, (-1) for pointing in.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.add_point">
+<code class="descname">add_point</code><span class="sig-paren">(</span><em>new_point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.add_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.add_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a Numpy array
+representing the cartesian point coodrinates,
+and appends the point to the end of the point list.
+Returns the index of the new point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_point</strong> (<em>ndarray</em>) &#8211; New point to be added to mesh.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Index of new point.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.add_to_face_to_cell">
+<code class="descname">add_to_face_to_cell</code><span class="sig-paren">(</span><em>face_index</em>, <em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.add_to_face_to_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.add_to_face_to_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds cell_index to face_to_cell map
+at face_index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>face_index</strong> (<em>int</em>) &#8211; The face index.</li>
+<li><strong>cell_index</strong> (<em>int</em>) &#8211; The cell index that will be associated        with the face.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.build_frac_from_faces">
+<code class="descname">build_frac_from_faces</code><span class="sig-paren">(</span><em>faces</em>, <em>width=0.0001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.build_frac_from_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.build_frac_from_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of face indices, and
+extrudes them into cells.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.build_mesh">
+<code class="descname">build_mesh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.build_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.build_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class function for constructing the mesh.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.compute_polygon_area">
+<code class="descname">compute_polygon_area</code><span class="sig-paren">(</span><em>polygon, dims=[0, 1]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.compute_polygon_area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.compute_polygon_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the area of a polygon. A polygon is
+represented by a list of Numpy array coordinates
+going around the polygon. The optional parameter
+<em>dims</em> represents which two coordinates to use
+when the polygon is in 3D space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.construct_polygon_from_segs">
+<code class="descname">construct_polygon_from_segs</code><span class="sig-paren">(</span><em>segments</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.construct_polygon_from_segs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.construct_polygon_from_segs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes point pairs and constructs a single polygon
+from joining all the ends. The pairs are identified
+by directly comparing the point locations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.create_new_boundary_marker">
+<code class="descname">create_new_boundary_marker</code><span class="sig-paren">(</span><em>boundary_description</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.create_new_boundary_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.create_new_boundary_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates new boundary marker and assures
+that the index is unique. Returns the
+index of the new boundary marker.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.divide_cell_by_plane">
+<code class="descname">divide_cell_by_plane</code><span class="sig-paren">(</span><em>cell_index</em>, <em>point_on_plane</em>, <em>plane_normal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.divide_cell_by_plane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.divide_cell_by_plane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divides given cell into two cells
+based on a plane specified by a point on the plane
+and the plane normal.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.duplicate_face">
+<code class="descname">duplicate_face</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.duplicate_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.duplicate_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates new face with all the properties
+of the face_index, and adds the face to the
+bottom of the face list. The function
+returns the new face index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>face_index</strong> (<em>int</em>) &#8211; Face index to be duplicated.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Face index of new duplicated face.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_basis_for_face">
+<code class="descname">find_basis_for_face</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_basis_for_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_basis_for_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds two non collinear vectors
+in face to serve as basis for plane.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_boundary_marker">
+<code class="descname">find_boundary_marker</code><span class="sig-paren">(</span><em>face_index</em>, <em>markers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_boundary_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_boundary_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the boundary marker containing
+face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_cell_near_point">
+<code class="descname">find_cell_near_point</code><span class="sig-paren">(</span><em>point</em>, <em>condition=&lt;function &lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_cell_near_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_cell_near_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns cell whose centroid is closest
+to a given point. Condition is an optional function
+to avoid cells with certain conditions (e.g. too small).
+Condition takes in cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_centroid_for_coordinates">
+<code class="descname">find_centroid_for_coordinates</code><span class="sig-paren">(</span><em>face_index</em>, <em>coordinates</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_centroid_for_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_centroid_for_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes centroid calculation for a 3D polygon based on
+two coordinates of the polygon.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_domain_faces">
+<code class="descname">find_domain_faces</code><span class="sig-paren">(</span><em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_domain_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_domain_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies the faces on the boundary
+of the domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_face_centroid">
+<code class="descname">find_face_centroid</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_face_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_face_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns centroid coordinates for face_index.
+This function assumes planarity of the face.
+and is currently intended for use with three dimensional
+meshes.
+The function returns the area of the face, as well
+as the x, y, z coordinates of its center.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_face_normal">
+<code class="descname">find_face_normal</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_face_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_face_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the face normal based on
+rotation around the face boundary.
+Assumes the face is planar.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_volume_centroid">
+<code class="descname">find_volume_centroid</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_volume_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_volume_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the volume and centroid for a 3D cell_index.
+Based on code and paper by Brian Mirtich.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_volume_centroid_all">
+<code class="descname">find_volume_centroid_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_volume_centroid_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_volume_centroid_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the cell centroids and volumes
+for all the cells in the mesh.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.find_volume_from_faces">
+<code class="descname">find_volume_from_faces</code><span class="sig-paren">(</span><em>face_list</em>, <em>orientation_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.find_volume_from_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.find_volume_from_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates volume and centroid of cell
+based on list of faces and face orientations relative
+to the cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_all_cell_real_centroids">
+<code class="descname">get_all_cell_real_centroids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_all_cell_real_centroids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_all_cell_real_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of all cell centroids.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of all the cell centroids.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_all_cell_shifted_centroids">
+<code class="descname">get_all_cell_shifted_centroids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_all_cell_shifted_centroids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_all_cell_shifted_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of all cell centroids.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of all shifted cell centroid.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_all_face_to_lagrange_pointers">
+<code class="descname">get_all_face_to_lagrange_pointers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_all_face_to_lagrange_pointers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_all_face_to_lagrange_pointers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all face indices that are
+pointing to a lagrange multiplier.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_all_k">
+<code class="descname">get_all_k</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_all_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_all_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all cell
+permeability tensors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_all_k_entry">
+<code class="descname">get_all_k_entry</code><span class="sig-paren">(</span><em>i</em>, <em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_all_k_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_all_k_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all K[i, j].</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_all_lagrange_to_face_pointers">
+<code class="descname">get_all_lagrange_to_face_pointers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_all_lagrange_to_face_pointers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_all_lagrange_to_face_pointers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all lagrange face indices that
+point to fluxes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_alpha_by_cell">
+<code class="descname">get_alpha_by_cell</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_alpha_by_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_alpha_by_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns alpha (float) for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_boundary_description">
+<code class="descname">get_boundary_description</code><span class="sig-paren">(</span><em>boundary_marker</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_boundary_description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_boundary_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the boundary description for
+boundary_marker.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_boundary_faces_by_marker">
+<code class="descname">get_boundary_faces_by_marker</code><span class="sig-paren">(</span><em>boundary_marker</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_boundary_faces_by_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_boundary_faces_by_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all the faces associated with a boundary_marker.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>boundary_marker</strong> (<em>int</em>) &#8211; Boundary marker index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of tupes [face_index, orientation] associated with             boundary_marker.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_boundary_markers">
+<code class="descname">get_boundary_markers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_boundary_markers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_boundary_markers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all boundary markers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell">
+<code class="descname">get_cell</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a cell_index, it returns the list of faces
+that make up that cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_index</strong> (<em>int</em>) &#8211; Cell index of interest.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of faces making up cell.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell_domain">
+<code class="descname">get_cell_domain</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell_domain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell_domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns cell domain identifier
+for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell_domain_all">
+<code class="descname">get_cell_domain_all</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell_domain_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell_domain_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list containing
+all cell_domain tags.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell_k">
+<code class="descname">get_cell_k</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return permeability tensor k
+(Numpy matrix) for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell_normal_orientation">
+<code class="descname">get_cell_normal_orientation</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell_normal_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell_normal_orientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a cell index, returns a list of face
+orientations for that cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_index</strong> (<em>int</em>) &#8211; Index of cell.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of faces orientations in cell. The        list is made up of 1s and -1s, 1 if the corresponding        face normal is pointing out of the cell, and -1 if the        corresponding face normal is pointing into the cell.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell_real_centroid">
+<code class="descname">get_cell_real_centroid</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell_real_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell_real_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns array of the cell centroid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell_shifted_centroid">
+<code class="descname">get_cell_shifted_centroid</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the shifted cell centroid for cell_index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_index</strong> (<em>int</em>) &#8211; Index of cell.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Cell shifted point.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cell_volume">
+<code class="descname">get_cell_volume</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cell_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cell_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns cell volume for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_cells_in_domain">
+<code class="descname">get_cells_in_domain</code><span class="sig-paren">(</span><em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_cells_in_domain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_cells_in_domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all cells with domain tag.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_dirichlet_pointer">
+<code class="descname">get_dirichlet_pointer</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_dirichlet_pointer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_dirichlet_pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cell_index for
+which the Dirichlet boundary will be set
+implicitly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_dirichlet_pointer_faces">
+<code class="descname">get_dirichlet_pointer_faces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_dirichlet_pointer_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_dirichlet_pointer_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all the faces with Dirichlet
+values set by pointing to a cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_domain_tags">
+<code class="descname">get_domain_tags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_domain_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_domain_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of all domain tags.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_face">
+<code class="descname">get_face</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a face index, returns the
+list of point indices that make
+up the face.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>face_index</strong> (<em>int</em>) &#8211; Face index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of points making up face.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray(&#8216;i&#8217;)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_face_area">
+<code class="descname">get_face_area</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_face_area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_face_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return area of face.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_face_normal">
+<code class="descname">get_face_normal</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_face_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_face_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return face normal for face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_face_real_centroid">
+<code class="descname">get_face_real_centroid</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_face_real_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_face_real_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns face centroid.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_face_shifted_centroid">
+<code class="descname">get_face_shifted_centroid</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_face_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_face_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return face shifted centroid coordinates.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_face_to_cell">
+<code class="descname">get_face_to_cell</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_face_to_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_face_to_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of cells connected with
+face_index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>face_index</strong> (<em>int</em>) &#8211; Face index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">List of cell indices connected to the face.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_face_to_lagrange_pointer">
+<code class="descname">get_face_to_lagrange_pointer</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_face_to_lagrange_pointer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_face_to_lagrange_pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the lagrange multiplier index
+and the face normal orientation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_forcing_pointer_cells">
+<code class="descname">get_forcing_pointer_cells</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_forcing_pointer_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_forcing_pointer_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns cell indices with forcing function
+pointers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_forcing_pointers_for_cell">
+<code class="descname">get_forcing_pointers_for_cell</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_forcing_pointers_for_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_forcing_pointers_for_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of pointers (face_indices)
+for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_gravity_acceleration">
+<code class="descname">get_gravity_acceleration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_gravity_acceleration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_gravity_acceleration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the gravity acceleration constant.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_gravity_vector">
+<code class="descname">get_gravity_vector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_gravity_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_gravity_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns gravity vector (down direction)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_internal_no_flow">
+<code class="descname">get_internal_no_flow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_internal_no_flow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_internal_no_flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of faces set as
+internal no flow condition.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_lagrange_to_face_pointers">
+<code class="descname">get_lagrange_to_face_pointers</code><span class="sig-paren">(</span><em>lagrange_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_lagrange_to_face_pointers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_lagrange_to_face_pointers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the faces the lagrange_index face
+points too.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_number_of_boundary_faces">
+<code class="descname">get_number_of_boundary_faces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_number_of_boundary_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_number_of_boundary_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of faces on the boundary
+of the domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_number_of_cell_faces">
+<code class="descname">get_number_of_cell_faces</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_number_of_cell_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_number_of_cell_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of faces for cell_index</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_index</strong> (<em>int</em>) &#8211; Cell index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Number of faces in cell.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_number_of_cells">
+<code class="descname">get_number_of_cells</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_number_of_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_number_of_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns total number of cells in mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of cells in mesh.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_number_of_face_points">
+<code class="descname">get_number_of_face_points</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_number_of_face_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_number_of_face_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of points that make
+up a given face.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>face_index</strong> (<em>int</em>) &#8211; Face index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Number of point making up the face.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_number_of_faces">
+<code class="descname">get_number_of_faces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_number_of_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_number_of_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total number of faces
+in the mesh. This corresponds to the
+number of velocity degrees of freedom.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Total number of faces in the mesh.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_number_of_points">
+<code class="descname">get_number_of_points</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_number_of_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_number_of_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total number of points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Total number of points in mesh.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.get_point">
+<code class="descname">get_point</code><span class="sig-paren">(</span><em>point_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.get_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.get_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a point index and returns
+a Numpy array of point coodrinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point_index</strong> (<em>int</em>) &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The the point coordinates.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.has_boundary_marker">
+<code class="descname">has_boundary_marker</code><span class="sig-paren">(</span><em>boundary_marker</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.has_boundary_marker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.has_boundary_marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if boundary_marker exists.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.initialize_cells">
+<code class="descname">initialize_cells</code><span class="sig-paren">(</span><em>number_of_cells</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.initialize_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.initialize_cells" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize cell data structure
+for known number of cells.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.is_boundary_face">
+<code class="descname">is_boundary_face</code><span class="sig-paren">(</span><em>face_index</em>, <em>markers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.is_boundary_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.is_boundary_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if face_index belongs to
+any of the markers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.is_line_seg_intersect_face">
+<code class="descname">is_line_seg_intersect_face</code><span class="sig-paren">(</span><em>face_index</em>, <em>p1</em>, <em>p2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.is_line_seg_intersect_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.is_line_seg_intersect_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the line segment
+intersects with a face.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>face_index</strong> (<em>int</em>) &#8211; Face index.</li>
+<li><strong>p1</strong> (<em>ndarray</em>) &#8211; Coorindates of first point.</li>
+<li><strong>p2</strong> (<em>ndarray</em>) &#8211; Coorindates of second point.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if line segments intersects face.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.is_using_cell_shifted_centroid">
+<code class="descname">is_using_cell_shifted_centroid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.is_using_cell_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.is_using_cell_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns if shifted face centroids are used
+and set in mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether cell shifted centroids are set</td>
+</tr>
+</tbody>
+</table>
+<p>and used.
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.is_using_face_shifted_centroid">
+<code class="descname">is_using_face_shifted_centroid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.is_using_face_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.is_using_face_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns if shifted face centroids are used
+and set in mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Whether face shifted centroids are set</td>
+</tr>
+</tbody>
+</table>
+<p>and used.
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.load_mesh">
+<code class="descname">load_mesh</code><span class="sig-paren">(</span><em>input_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.load_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.load_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads mesh from mms file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>intput_file</strong> (<em>file</em>) &#8211; Mesh file (mms).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.output_cell_normals">
+<code class="descname">output_cell_normals</code><span class="sig-paren">(</span><em>file_name</em>, <em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.output_cell_normals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.output_cell_normals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the normals over the cell in the outward direction.
+The function is intended for checking the correct orientation of cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.output_vector_field">
+<code class="descname">output_vector_field</code><span class="sig-paren">(</span><em>file_name</em>, <em>vector_magnitudes=[]</em>, <em>vector_labels=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.output_vector_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.output_vector_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs vector data in the vtk format. The vector
+field can be processed using the glyph filter in
+Paraview. The function takes a list of vector
+magnitudes that are associated with each face
+normal.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.output_vtk_faces">
+<code class="descname">output_vtk_faces</code><span class="sig-paren">(</span><em>file_name</em>, <em>face_indices</em>, <em>face_values=[]</em>, <em>face_value_labels=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.output_vtk_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.output_vtk_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs in vtk format the faces in face_indices.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.output_vtk_mesh">
+<code class="descname">output_vtk_mesh</code><span class="sig-paren">(</span><em>file_name</em>, <em>cell_values=[]</em>, <em>cell_value_labels=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.output_vtk_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.output_vtk_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base implementation for producing
+vtk files for general polyhedral meshes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.remove_from_face_to_cell">
+<code class="descname">remove_from_face_to_cell</code><span class="sig-paren">(</span><em>face_index</em>, <em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.remove_from_face_to_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.remove_from_face_to_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the cell_index from face_to_cell map
+at for face_index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>face_index</strong> (<em>int</em>) &#8211; Face index.</li>
+<li><strong>cell_index</strong> (<em>int</em>) &#8211; Cell index.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.save_cell">
+<code class="descname">save_cell</code><span class="sig-paren">(</span><em>cell_index</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.save_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.save_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves individual cell in mms format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell_index</strong> (<em>int</em>) &#8211; Cell index.</li>
+<li><strong>output_file</strong> (<em>file</em>) &#8211; File to output cell to.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.save_mesh">
+<code class="descname">save_mesh</code><span class="sig-paren">(</span><em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.save_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.save_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves mesh file in mms format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output_file</strong> (<em>file</em>) &#8211; File to save mesh to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_alpha_by_cell">
+<code class="descname">set_alpha_by_cell</code><span class="sig-paren">(</span><em>alpha</em>, <em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_alpha_by_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_alpha_by_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set alpha (float) for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_boundary_face_orientation">
+<code class="descname">set_boundary_face_orientation</code><span class="sig-paren">(</span><em>face_index</em>, <em>new_orientation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_boundary_face_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_boundary_face_orientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set orientation for face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_boundary_faces">
+<code class="descname">set_boundary_faces</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>face_orientation_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_boundary_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_boundary_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a boundary_marker index, and sets the entire list
+of tuples for that boundary marker.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>boundary_marker</strong> (<em>int</em>) &#8211; Boundary marker to be set.</li>
+<li><strong>face_orienation_list</strong> (<em>list</em>) &#8211; A list of tuples of the form             [face_index, orientation] to be associated with the             indicated boundary marker.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_boundary_markers">
+<code class="descname">set_boundary_markers</code><span class="sig-paren">(</span><em>boundary_markers</em>, <em>boundary_descriptions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_boundary_markers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_boundary_markers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the mesh boundary labeling. Each marker
+can represent a single boundary face or a group
+of faces.</p>
+<p>boundary_markers: List of integers.
+boundary_descriptions: List of strings describing
+the face groups.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_cell_domain">
+<code class="descname">set_cell_domain</code><span class="sig-paren">(</span><em>cell_index</em>, <em>domain</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_cell_domain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_cell_domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets cell domain identifier
+for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_cell_faces">
+<code class="descname">set_cell_faces</code><span class="sig-paren">(</span><em>cell_index</em>, <em>faces</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_cell_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_cell_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the cell faces.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell_index</strong> (<em>int</em>) &#8211; Cell index.</li>
+<li><strong>faces</strong> (<em>list</em>) &#8211; Faces making up cell.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_cell_k">
+<code class="descname">set_cell_k</code><span class="sig-paren">(</span><em>cell_index</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_cell_k"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_cell_k" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set cell permeability tensor K
+(Numpy matrix) for cell_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_cell_orientation">
+<code class="descname">set_cell_orientation</code><span class="sig-paren">(</span><em>cell_index</em>, <em>orientation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_cell_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_cell_orientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the cell orientation of faces.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cell_index</strong> (<em>int</em>) &#8211; Cell index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Paramt list orientation:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">List of new cell face orientations.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_cell_real_centroid">
+<code class="descname">set_cell_real_centroid</code><span class="sig-paren">(</span><em>cell_index</em>, <em>centroid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_cell_real_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_cell_real_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the array of the cell centroid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell_index</strong> (<em>int</em>) &#8211; Index of cell.</li>
+<li><strong>centroid</strong> (<em>ndarray</em>) &#8211; New cell centroid.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_cell_shifted_centroid">
+<code class="descname">set_cell_shifted_centroid</code><span class="sig-paren">(</span><em>cell_index</em>, <em>centroid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_cell_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_cell_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the shifted centroid for cell_index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell_index</strong> (<em>int</em>) &#8211; Index of cell.</li>
+<li><strong>centroid</strong> (<em>ndarray</em>) &#8211; Shifted centroid point.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_cell_volume">
+<code class="descname">set_cell_volume</code><span class="sig-paren">(</span><em>cell_index</em>, <em>volume</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_cell_volume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_cell_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets cell volume for cell_index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cell_index</strong> (<em>int</em>) &#8211; Index of cell.</li>
+<li><strong>volume</strong> (<em>float</em>) &#8211; New volume to be set for cell.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_dirichlet_face_pointer">
+<code class="descname">set_dirichlet_face_pointer</code><span class="sig-paren">(</span><em>face_index</em>, <em>face_orientation</em>, <em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_dirichlet_face_pointer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_dirichlet_face_pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the value of a Dirichlet boundary to
+value of cell pressure for cell_index.
+This approach is used for coupling fractures
+with a reservoir.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_face">
+<code class="descname">set_face</code><span class="sig-paren">(</span><em>face_index</em>, <em>points</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a new set of points for a given face_index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>face_index</strong> (<em>int</em>) &#8211; Face index of face to be set.</li>
+<li><strong>points</strong> (<em>list</em>) &#8211; New list of points making up face.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_face_area">
+<code class="descname">set_face_area</code><span class="sig-paren">(</span><em>face_index</em>, <em>area</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_face_area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_face_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets face area (float) for face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_face_normal">
+<code class="descname">set_face_normal</code><span class="sig-paren">(</span><em>face_index</em>, <em>normal</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_face_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_face_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set face normal (array) to face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_face_real_centroid">
+<code class="descname">set_face_real_centroid</code><span class="sig-paren">(</span><em>face_index</em>, <em>centroid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_face_real_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_face_real_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets face centroid for face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_face_shifted_centroid">
+<code class="descname">set_face_shifted_centroid</code><span class="sig-paren">(</span><em>face_index</em>, <em>centroid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_face_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_face_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets face shifted centroid.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_face_to_lagrange_pointer">
+<code class="descname">set_face_to_lagrange_pointer</code><span class="sig-paren">(</span><em>face_index</em>, <em>face_orientation</em>, <em>lagrange_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_face_to_lagrange_pointer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_face_to_lagrange_pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets face to dirichlet type boundary pointing to
+lagrange multiplier.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_forcing_pointer">
+<code class="descname">set_forcing_pointer</code><span class="sig-paren">(</span><em>cell_index</em>, <em>face_indices</em>, <em>face_orientations</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_forcing_pointer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_forcing_pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the value of the forcing function
+implicity as the sum of the fluxes from list
+of faces. This approach is used for coupling
+fractures with a reservoir.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_gravity_vector">
+<code class="descname">set_gravity_vector</code><span class="sig-paren">(</span><em>gravity_vector</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_gravity_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_gravity_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set vector indicating gravity acceleration direction.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_lagrange_to_face_pointers">
+<code class="descname">set_lagrange_to_face_pointers</code><span class="sig-paren">(</span><em>lagrange_index</em>, <em>face_index</em>, <em>orientation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_lagrange_to_face_pointers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_lagrange_to_face_pointers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the lagrange multiplier to the source faces
+in order to impose zero flux across the boundary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.set_periodic_boundary">
+<code class="descname">set_periodic_boundary</code><span class="sig-paren">(</span><em>face_index_1</em>, <em>face_orientation_1</em>, <em>face_index_2</em>, <em>face_orientation_2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.set_periodic_boundary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.set_periodic_boundary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a periodic boundary condition, connecting
+face 1 with face 2. This ammounts to creating a single
+lagrange multiplier shared by the faces. The MFD class would
+impose continuity of both the pressure and the flux
+for the periodic conditions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.subdivide_by_domain">
+<code class="descname">subdivide_by_domain</code><span class="sig-paren">(</span><em>cells</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.subdivide_by_domain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.subdivide_by_domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a collection of cells, and
+seperates them from the rest of the domain
+using lagrange multipliers at the sub-domain
+boundary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.use_alpha">
+<code class="descname">use_alpha</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.use_alpha"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.use_alpha" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activates the ability to set the
+alpha parameter for each cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.use_cell_shifted_centroid">
+<code class="descname">use_cell_shifted_centroid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.use_cell_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.use_cell_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether a shifted cell centroid will be used
+for mesh.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.mesh.Mesh.use_face_shifted_centroid">
+<code class="descname">use_face_shifted_centroid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/mesh.html#Mesh.use_face_shifted_centroid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.mesh.Mesh.use_face_shifted_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets whether a shifted face centroid will be used
+for mesh.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="hexmeshclass.html" class="btn btn-neutral float-right" title="HexMesh Class">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="meshmodule.html" class="btn btn-neutral" title="mesh"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

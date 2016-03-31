@@ -1,0 +1,564 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>mimpy.models.singlephase &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="../../../index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../singlephasesection.html">Single-Phase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../singlephase.html">Single-Phase Derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../singlephaseexample.html">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Mimpy Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../meshmodule.html">mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mfdmodule.html">mfd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../../index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      
+    <li>mimpy.models.singlephase</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <h1>Source code for mimpy.models.singlephase</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="n">integrate</span><span class="p">,</span> <span class="n">special</span> 
+<span class="kn">import</span> <span class="nn">math</span> <span class="kn">as</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse.linalg.dsolve</span> <span class="kn">as</span> <span class="nn">dsolve</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">import</span> <span class="nn">mimpy.mfd.mfd</span> <span class="kn">as</span> <span class="nn">mfd</span>
+<span class="kn">from</span> <span class="nn">six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+
+<div class="viewcode-block" id="SinglePhase"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase">[docs]</a><span class="k">class</span> <span class="nc">SinglePhase</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; The class relies on the Mesh and MFD libraries</span>
+<span class="sd">    to solve time dependent slighly-compressible</span>
+<span class="sd">    flow problems (heat equation).</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">        \\phi \\frac{\\partial \\rho}{\\partial t}  =</span>
+<span class="sd">        -\\nabla \\cdot \\left( \\frac{\\rho}{\\mu} K (\\nabla p)\\right) + q</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_pressure</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Reservoir properties:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">porosities</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Fluid properties:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_pressure</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_density</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compressibility</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Matrix M in coo format </span>
+        <span class="c"># without density or viscosity </span>
+        <span class="c"># data. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_e_locations</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_length</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_start</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Problem LHS in coo format. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># RHS from MFD class. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhs_mfd</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Current RHS. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhs_current</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># Time step size. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_time_steps</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c"># Sets how often to output </span>
+        <span class="c"># solution by time step number. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_frequency</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c"># Rate wells cell location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells_rate</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells_name</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># Model Name </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="s">&quot;model&quot;</span>
+        
+<div class="viewcode-block" id="SinglePhase.set_model_name"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_model_name">[docs]</a>    <span class="k">def</span> <span class="nf">set_model_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets model name used for output. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">=</span> <span class="n">name</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.set_output_frequency"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_output_frequency">[docs]</a>    <span class="k">def</span> <span class="nf">set_output_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequency</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets how often to output the solution </span>
+<span class="sd">        by iteration number. x</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_frequency</span> <span class="o">=</span> <span class="n">frequency</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.set_mesh"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">set_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets the computational mesh </span>
+<span class="sd">        to be used. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span> <span class="o">=</span> <span class="n">mfd</span><span class="o">.</span><span class="n">MFD</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">set_mesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">set_m_e_construction_method</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">check_m_e</span> <span class="o">=</span> <span class="bp">True</span>
+        </div>
+<div class="viewcode-block" id="SinglePhase.set_compressibility"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_compressibility">[docs]</a>    <span class="k">def</span> <span class="nf">set_compressibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compressibility</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets fluid compressilibity. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compressibility</span> <span class="o">=</span> <span class="n">compressibility</span>
+    </div>
+<div class="viewcode-block" id="SinglePhase.set_ref_density"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_ref_density">[docs]</a>    <span class="k">def</span> <span class="nf">set_ref_density</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_density</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets reference density of fluid at p0. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_density</span> <span class="o">=</span> <span class="n">ref_density</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.set_ref_pressure"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_ref_pressure">[docs]</a>    <span class="k">def</span> <span class="nf">set_ref_pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_pressure</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set reference pressure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_pressure</span> <span class="o">=</span> <span class="n">ref_pressure</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.set_viscosity"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_viscosity">[docs]</a>    <span class="k">def</span> <span class="nf">set_viscosity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">viscosity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set fluid viscosity. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span> <span class="o">=</span> <span class="n">viscosity</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.set_initial_pressure"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_initial_pressure">[docs]</a>    <span class="k">def</span> <span class="nf">set_initial_pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pressures</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets the pressure distributionat </span>
+<span class="sd">        time 0. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_pressure</span> <span class="o">=</span> <span class="n">pressures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span> <span class="o">=</span> <span class="n">pressures</span>
+        <span class="c"># Assuming zero initial velocity for now. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="SinglePhase.set_porosities"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_porosities">[docs]</a>    <span class="k">def</span> <span class="nf">set_porosities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">porosities</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets cell porosities.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">porosities</span> <span class="o">=</span> <span class="n">porosities</span>
+    </div>
+<div class="viewcode-block" id="SinglePhase.set_porosity_by_cell"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_porosity_by_cell">[docs]</a>    <span class="k">def</span> <span class="nf">set_porosity_by_cell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">,</span> <span class="n">porosity</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets porosity for cell_index. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">porosities</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">porosity</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.add_rate_well"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.add_rate_well">[docs]</a>    <span class="k">def</span> <span class="nf">add_rate_well</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">injection_rate</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">,</span> <span class="n">well_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Adds rate specified well at the center of cell_index.</span>
+<span class="sd">        Returns the index of the new rate well. </span>
+<span class="sd">        The units of rate are kg/s. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;add_rate_well not yet implemented&quot;</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="SinglePhase.add_point_rate_well"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.add_point_rate_well">[docs]</a>    <span class="k">def</span> <span class="nf">add_point_rate_well</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">injection_rate</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">,</span> <span class="n">well_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Adds rate specified point source at the center of cell_index.</span>
+<span class="sd">        Returns the index of the new rate well. </span>
+<span class="sd">        The units of rate are kg/s. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells_rate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">injection_rate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">well_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_wells</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.set_time_step_size"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_time_step_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_time_step_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta_t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets time step size. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span> <span class="o">=</span> <span class="n">delta_t</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.set_number_of_time_steps"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.set_number_of_time_steps">[docs]</a>    <span class="k">def</span> <span class="nf">set_number_of_time_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_time_steps</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set number of time steps taken. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_time_steps</span> <span class="o">=</span> <span class="n">number_of_time_steps</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.apply_pressure_boundary_from_function"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function">[docs]</a>    <span class="k">def</span> <span class="nf">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                                              <span class="n">boundary_marker</span><span class="p">,</span> 
+                                              <span class="n">p_function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Applies static pressure (dirichlet) boundary </span>
+<span class="sd">        conditions from function. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">apply_dirichlet_from_function</span><span class="p">(</span><span class="n">boundary_marker</span><span class="p">,</span> 
+                                               <span class="n">p_function</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.apply_flux_boundary_from_function"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.apply_flux_boundary_from_function">[docs]</a>    <span class="k">def</span> <span class="nf">apply_flux_boundary_from_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                              <span class="n">boundary_marker</span><span class="p">,</span> 
+                                              <span class="n">f_function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Applies static flux (neumann) boundary </span>
+<span class="sd">        conditions from function. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">apply_neumann_from_function</span><span class="p">(</span><span class="n">boundary_marker</span><span class="p">,</span>
+                                             <span class="n">f_function</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="SinglePhase.initialize_system"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.initialize_system">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Constructs the initial matrices </span>
+<span class="sd">        used to construct the saddle-point </span>
+<span class="sd">        problem. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">set_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
+        <span class="p">[[</span><span class="n">div_data</span><span class="p">,</span> <span class="n">div_row</span><span class="p">,</span> <span class="n">div_col</span><span class="p">],</span> 
+         <span class="p">[</span><span class="n">div_t_data</span><span class="p">,</span> <span class="n">div_t_row</span><span class="p">,</span> <span class="n">div_t_col</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">build_div</span><span class="p">()</span>
+        <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_data</span><span class="p">,</span> 
+         <span class="n">m_x_coo_row</span><span class="p">,</span> 
+         <span class="n">m_x_coo_col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">build_m</span><span class="p">(</span><span class="n">save_update_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_data</span><span class="p">)</span>
+        
+        <span class="c"># The data for the bottom right should be zeros. </span>
+        <span class="p">[</span><span class="n">c_data</span><span class="p">,</span> <span class="n">c_row</span><span class="p">,</span> <span class="n">c_col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">build_bottom_right</span><span class="p">()</span>
+        
+        <span class="p">[</span><span class="n">coupling_data</span><span class="p">,</span> <span class="n">coupling_row</span><span class="p">,</span> <span class="n">coupling_col</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">build_coupling_terms</span><span class="p">()</span>
+
+        <span class="n">lhs_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_data</span>
+        <span class="n">lhs_row</span> <span class="o">=</span> <span class="n">m_x_coo_row</span>
+        <span class="n">lhs_col</span> <span class="o">=</span> <span class="n">m_x_coo_col</span>
+        
+        <span class="n">lhs_data</span> <span class="o">+=</span> <span class="n">div_data</span>
+        <span class="n">lhs_row</span> <span class="o">+=</span> <span class="n">div_row</span>
+        <span class="n">lhs_col</span> <span class="o">+=</span> <span class="n">div_col</span>
+
+        <span class="n">lhs_data</span> <span class="o">+=</span> <span class="n">div_t_data</span>
+        <span class="n">lhs_row</span> <span class="o">+=</span> <span class="n">div_t_row</span>
+        <span class="n">lhs_col</span> <span class="o">+=</span> <span class="n">div_t_col</span>        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lhs_data</span><span class="p">)</span>
+        
+        <span class="n">lhs_data</span> <span class="o">+=</span> <span class="n">c_data</span>
+        <span class="n">lhs_row</span> <span class="o">+=</span> <span class="n">c_row</span>
+        <span class="n">lhs_col</span> <span class="o">+=</span> <span class="n">c_col</span> 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_end</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c_data</span><span class="p">)</span>
+
+        <span class="n">lhs_data</span> <span class="o">+=</span> <span class="n">coupling_data</span>
+        <span class="n">lhs_row</span> <span class="o">+=</span> <span class="n">coupling_row</span>
+        <span class="n">lhs_col</span> <span class="o">+=</span> <span class="n">coupling_col</span>
+
+        <span class="c"># Convert m_x_coo_data to numpy array. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_data</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">coo_matrix</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lhs_data</span><span class="p">),</span> 
+                                          <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lhs_row</span><span class="p">),</span> 
+                                           <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lhs_col</span><span class="p">))))</span>
+
+        <span class="c"># RHS construction is for Neumann and Dirichlet </span>
+        <span class="c"># boundaries specified by the mesh. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhs_mfd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">build_rhs</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.time_step_output"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.time_step_output">[docs]</a>    <span class="k">def</span> <span class="nf">time_step_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_time</span><span class="p">,</span> <span class="n">time_step</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Function to be defined by user </span>
+<span class="sd">        that will be run at each output interval</span>
+<span class="sd">        during time-stepping. The function </span>
+<span class="sd">        is intended for complex output. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="SinglePhase.start_solving"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.start_solving">[docs]</a>    <span class="k">def</span> <span class="nf">start_solving</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts solving the problem. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">output_vtk_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">+</span> <span class="s">&quot;0&quot;</span><span class="p">,</span> 
+                                  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">,</span> 
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_cell_domain_all</span><span class="p">()],</span> 
+                                  <span class="p">[</span><span class="s">&quot;pressure&quot;</span><span class="p">,</span> <span class="s">&quot;domain&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_step_output</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">m_multipliers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">time_step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_time_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">rhs_current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">get_number_of_dof</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">))</span>
+            <span class="n">rhs_current</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs_mfd</span>
+            
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">time_step</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">cell_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()):</span>
+                <span class="n">density</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_pressure</span>
+                <span class="n">density</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span>
+                <span class="n">density</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibility</span>
+                <span class="n">density</span> <span class="o">+=</span> <span class="mf">1.</span>
+                <span class="n">density</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_density</span>
+
+                <span class="c"># We multiply by the inverse of \frac{\rho}{\mu}</span>
+                <span class="n">m_multipliers</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span><span class="o">/</span><span class="n">density</span>
+
+                <span class="n">c_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibility</span>
+                <span class="n">c_entry</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">porosities</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span>
+                <span class="n">c_entry</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
+                <span class="n">c_entry</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_cell_volume</span><span class="p">(</span><span class="n">cell_index</span><span class="p">)</span>
+
+                <span class="n">rhs_current</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="o">+</span>
+                            <span class="n">cell_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">c_entry</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">c_start</span><span class="o">+</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_entry</span>
+
+            <span class="k">for</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_wells</span><span class="p">):</span>
+                <span class="n">rhs_current</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="o">+</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">+=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells_rate</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                    
+            <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">update_m</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_length</span><span class="p">],</span> <span class="n">m_multipliers</span><span class="p">)</span>
+
+            <span class="n">solution</span> <span class="o">=</span> <span class="n">dsolve</span><span class="o">.</span><span class="n">spsolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span><span class="o">.</span><span class="n">tocsr</span><span class="p">(),</span> <span class="n">rhs_current</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span> <span class="o">=</span> <span class="n">solution</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_velocity</span> <span class="o">=</span> <span class="n">solution</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">time_step</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">output_frequency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">output_vtk_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">time_step</span><span class="p">),</span> 
+                                          <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">,</span> 
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_cell_domain_all</span><span class="p">()],</span>
+                                          <span class="p">[</span><span class="s">&quot;pressure&quot;</span><span class="p">,</span> <span class="s">&quot;domain&quot;</span><span class="p">])</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">time_step_output</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">time_step</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="SinglePhase.start_solving_newton"><a class="viewcode-back" href="../../../singlephaseclass.html#mimpy.models.singlephase.SinglePhase.start_solving_newton">[docs]</a>    <span class="k">def</span> <span class="nf">start_solving_newton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Starts solving the problem. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">output_vtk_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span> <span class="o">+</span> <span class="s">&quot;0&quot;</span><span class="p">,</span> 
+                                  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">,</span> 
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_cell_domain_all</span><span class="p">()],</span> 
+                                  <span class="p">[</span><span class="s">&quot;pressure&quot;</span><span class="p">,</span> <span class="s">&quot;domain&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_step_output</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">m_multipliers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">time_step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_time_steps</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">time_step</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+                <span class="n">rhs_current</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">get_number_of_dof</span><span class="p">(),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s">&#39;d&#39;</span><span class="p">))</span>
+                <span class="n">rhs_current</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhs_mfd</span>
+                <span class="k">for</span> <span class="n">cell_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()):</span>
+                    <span class="n">density</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_pressure</span>
+                    <span class="n">density</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span>
+                    <span class="n">density</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibility</span>
+                    <span class="n">density</span> <span class="o">+=</span> <span class="mf">1.</span>
+                    <span class="n">density</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_density</span>
+
+                    <span class="c"># We multiply by the inverse of \frac{\rho}{\mu}</span>
+                    <span class="n">m_multipliers</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viscosity</span><span class="o">/</span><span class="n">density</span>
+
+                    <span class="n">c_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compressibility</span>
+                    <span class="n">c_entry</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">porosities</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span>
+                    <span class="n">c_entry</span> <span class="o">/=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta_t</span>
+                    <span class="n">c_entry</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_cell_volume</span><span class="p">(</span><span class="n">cell_index</span><span class="p">)</span>
+
+                    <span class="n">rhs_current</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="o">+</span>
+                                <span class="n">cell_index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">c_entry</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">[</span><span class="n">cell_index</span><span class="p">]</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">c_start</span><span class="o">+</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_entry</span>
+
+                <span class="k">for</span> <span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="n">cell_index</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rate_wells</span><span class="p">):</span>
+                    <span class="n">rhs_current</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="o">+</span><span class="n">cell_index</span><span class="p">]</span> <span class="o">+=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">rate_wells_rate</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">update_m</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">m_x_coo_length</span><span class="p">],</span> <span class="n">m_multipliers</span><span class="p">)</span>
+
+                <span class="n">solution</span> <span class="o">=</span> <span class="n">dsolve</span><span class="o">.</span><span class="n">spsolve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lhs_coo</span><span class="o">.</span><span class="n">tocsr</span><span class="p">(),</span> <span class="n">rhs_current</span><span class="p">)</span>
+                <span class="k">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="o">-</span><span class="n">solution</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="p">:]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span> <span class="o">=</span> <span class="n">solution</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="p">:]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">current_velocity</span> <span class="o">=</span> <span class="n">solution</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">mfd</span><span class="o">.</span><span class="n">flux_dof</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">time_step</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">output_frequency</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">output_vtk_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">time_step</span><span class="p">),</span> 
+                                          <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pressure</span><span class="p">,</span> 
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_cell_domain_all</span><span class="p">()],</span>
+                                          <span class="p">[</span><span class="s">&quot;pressure&quot;</span><span class="p">,</span> <span class="s">&quot;domain&quot;</span><span class="p">])</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">time_step_output</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">time_step</span><span class="p">)</span>
+
+             
+            
+                
+
+                
+            
+                
+                
+                
+
+
+            
+            
+    
+                
+
+    
+    </div></div>
+</pre></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

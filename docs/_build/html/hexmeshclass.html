@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>HexMesh Class &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="index.html"/>
+        <link rel="up" title="mesh" href="meshmodule.html"/>
+        <link rel="next" title="mfd" href="mfdmodule.html"/>
+        <link rel="prev" title="Mesh (Base)" href="meshclass.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="singlephasesection.html">Single-Phase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="singlephase.html">Single-Phase Derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="singlephaseexample.html">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Credits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Mimpy Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="meshmodule.html">mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfdmodule.html">mfd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">Mimpy Modules</a> &raquo;</li>
+      
+          <li><a href="meshmodule.html">mesh</a> &raquo;</li>
+      
+    <li>HexMesh Class</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/hexmeshclass.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="hexmesh-class">
+<h1>HexMesh Class<a class="headerlink" href="#hexmesh-class" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mimpy.mesh.hexmesh.HexMesh">
+<em class="property">class </em><code class="descclassname">mimpy.mesh.hexmesh.</code><code class="descname">HexMesh</code><a class="reference internal" href="_modules/mimpy/mesh/hexmesh.html#HexMesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.hexmesh.HexMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for constructing structured hexahedral meshes.</p>
+<dl class="method">
+<dt id="mimpy.mesh.hexmesh.HexMesh.build_mesh">
+<code class="descname">build_mesh</code><span class="sig-paren">(</span><em>ni</em>, <em>nj</em>, <em>nk</em>, <em>dim_x</em>, <em>dim_y</em>, <em>dim_z</em>, <em>K</em>, <em>modification_function=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/hexmesh.html#HexMesh.build_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.hexmesh.HexMesh.build_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a structured hexahedral mesh.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ni</strong> (<em>int</em>) &#8211; Number of cells in the x-direction.</li>
+<li><strong>nj</strong> (<em>int</em>) &#8211; Number of cells in the y-direction.</li>
+<li><strong>nk</strong> (<em>int</em>) &#8211; Number of cells in the z-direction.</li>
+<li><strong>K</strong> (<em>function</em>) &#8211; Permeability map function.
+K(point, i, j, k ) -&gt; 3x3 Matrix.</li>
+<li><strong>dim_x</strong> (<em>float</em>) &#8211; Size of domain in the x-direction.</li>
+<li><strong>dim_y</strong> (<em>float</em>) &#8211; Size of domain in the y-direction.</li>
+<li><strong>dim_z</strong> (<em>float</em>) &#8211; Size of domain in the z-direction.</li>
+<li><strong>modification_function</strong> (<em>function</em>) &#8211; Alteration function for shifting
+points of the cells. modification_function(p) -&gt; 3 array.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.hexmesh.HexMesh.get_dim_x">
+<code class="descname">get_dim_x</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/hexmesh.html#HexMesh.get_dim_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.hexmesh.HexMesh.get_dim_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the dimension of the domain
+in the X direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Domain x dimension.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.hexmesh.HexMesh.get_dim_y">
+<code class="descname">get_dim_y</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/hexmesh.html#HexMesh.get_dim_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.hexmesh.HexMesh.get_dim_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the dimension of the domain
+in the Y direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Domain y dimension.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.hexmesh.HexMesh.get_dim_z">
+<code class="descname">get_dim_z</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/hexmesh.html#HexMesh.get_dim_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.hexmesh.HexMesh.get_dim_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the dimension of the domain
+in the Z direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Domain z dimension.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.hexmesh.HexMesh.ijk_to_cell_index">
+<code class="descname">ijk_to_cell_index</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/hexmesh.html#HexMesh.ijk_to_cell_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.hexmesh.HexMesh.ijk_to_cell_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns cell index number for an i, j, k numbering.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>i</strong> (<em>int</em>) &#8211; index in x-direction.</li>
+<li><strong>j</strong> (<em>int</em>) &#8211; index in y-direction.</li>
+<li><strong>k</strong> (<em>int</em>) &#8211; index in z-direction.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mesh.hexmesh.HexMesh.ijk_to_index">
+<code class="descname">ijk_to_index</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>k</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mesh/hexmesh.html#HexMesh.ijk_to_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mesh.hexmesh.HexMesh.ijk_to_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns point index number for an i, j, k numbering.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>i</strong> (<em>int</em>) &#8211; index in x-direction.</li>
+<li><strong>j</strong> (<em>int</em>) &#8211; index in y-direction.</li>
+<li><strong>k</strong> (<em>int</em>) &#8211; index in z-direction.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="mfdmodule.html" class="btn btn-neutral float-right" title="mfd">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="meshclass.html" class="btn btn-neutral" title="Mesh (Base)"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

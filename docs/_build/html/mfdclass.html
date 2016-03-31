@@ -1,0 +1,736 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>MFD (Base) &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="index.html"/>
+        <link rel="up" title="mfd" href="mfdmodule.html"/>
+        <link rel="next" title="models" href="modelmodule.html"/>
+        <link rel="prev" title="mfd" href="mfdmodule.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="singlephasesection.html">Single-Phase</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="singlephase.html">Single-Phase Derivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="singlephaseexample.html">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Credits</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Mimpy Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="meshmodule.html">mesh</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="mfdmodule.html">mfd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">Mimpy Modules</a> &raquo;</li>
+      
+          <li><a href="mfdmodule.html">mfd</a> &raquo;</li>
+      
+    <li>MFD (Base)</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/mfdclass.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="mfd-base">
+<span id="mfdclass"></span><h1>MFD (Base)<a class="headerlink" href="#mfd-base" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="mimpy.mfd.mfd.MFD">
+<em class="property">class </em><code class="descclassname">mimpy.mfd.mfd.</code><code class="descname">MFD</code><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD" title="Permalink to this definition">¶</a></dt>
+<dd><p>The MFD class provides functionality for
+constructing mimetic discretization matrices
+for sovling elliptic PDE. An instance of MFD
+constructs the matrices based on the information
+it finds in an instance of the Mesh class.</p>
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.add_gravity">
+<code class="descname">add_gravity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.add_gravity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.add_gravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds gravity effects to right hand side of problem
+based on density, acceleration and gravity vector
+set in Mesh class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.apply_dirichlet_from_function">
+<code class="descname">apply_dirichlet_from_function</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>p_function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.apply_dirichlet_from_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.apply_dirichlet_from_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Dirichlet boundary values for the
+for the faces assigned to boundary_marker based on
+a functional representation p_function. All
+boundary faces associated with
+boundary_marker will be set as Dirichlet.
+The p_function takes a Numpy array
+representing a point coordinate on the
+face and returns the scalar value of
+the Dirichlet condition at that point.
+The face centoid is used as a quadrature point.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.apply_forcing_from_function">
+<code class="descname">apply_forcing_from_function</code><span class="sig-paren">(</span><em>forcing_function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.apply_forcing_from_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.apply_forcing_from_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets forcing function for entire problem based on
+a functional representation forcing_function.
+The forcing_function takes a Numpy array
+representing a point coordinate and returns
+the value of the forcing function at that point.
+The cell centroid is used as a quadrature point.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.apply_forcing_from_grad">
+<code class="descname">apply_forcing_from_grad</code><span class="sig-paren">(</span><em>grad_p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.apply_forcing_from_grad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.apply_forcing_from_grad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the source term for a cell from the
+exact representation of the gradient integrated over the
+boundaries of the cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.apply_neumann_from_function">
+<code class="descname">apply_neumann_from_function</code><span class="sig-paren">(</span><em>boundary_marker</em>, <em>grad_u</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.apply_neumann_from_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.apply_neumann_from_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Neumann boundary values for the
+faces assigned to boundary_marker based on a
+a functional representation grad_u. All
+boundary faces associated with
+boundary_marker will be set as Neumann
+The function grad_u takes a Numpy array
+representing a point coordinate on the
+face and returns
+the vector of the Neumann condition at that point.
+The face centroid is used as a quadrature point.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_advection">
+<code class="descname">build_advection</code><span class="sig-paren">(</span><em>beta</em>, <em>k_unity=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_advection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_advection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the advection matrix based on building
+the local matrices m_e and a provided local advection
+vector beta.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_bottom_right">
+<code class="descname">build_bottom_right</code><span class="sig-paren">(</span><em>alpha=0.0</em>, <em>shift=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_bottom_right"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_bottom_right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the matrix C in the global
+saddle point problem (bottom right
+side of the matrix). Returns
+data, row and col data for coo matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_c_e">
+<code class="descname">build_c_e</code><span class="sig-paren">(</span><em>n_e</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_c_e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_c_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct matrix C_E. The matrix
+must satisfy N_E^T C_E = 0.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_coupling_terms">
+<code class="descname">build_coupling_terms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_coupling_terms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_coupling_terms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds matrices L and L^T that
+couple the fracture domains
+with the reservoir as well as
+different reservoir domains.
+Used information found in the
+boundary and forcing function
+pointers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_d_e">
+<code class="descname">build_d_e</code><span class="sig-paren">(</span><em>n_e</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_d_e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_d_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct matrix D_E. The matrix
+must satisfy R_E^T D_E = 0.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_div">
+<code class="descname">build_div</code><span class="sig-paren">(</span><em>shift=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_div"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_div" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the div and -div^T matrices and returns
+arrays for constructing a coo sparse matrix
+representation. The lists returned are:</p>
+<p>[[div_data, div_row, div_col],
+[div_t_data, div_t_row, div_t_col]]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_div_full">
+<code class="descname">build_div_full</code><span class="sig-paren">(</span><em>shift=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_div_full"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_div_full" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the div and -div^T matrices and returns
+arrays for constructing a coo sparse matrix
+representation. The lists returned are:</p>
+<p>[[div_data, div_row, div_col],
+[div_t_data, div_t_row, div_t_col]]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_lhs">
+<code class="descname">build_lhs</code><span class="sig-paren">(</span><em>alpha=0</em>, <em>beta=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_lhs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_lhs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the entire saddle point problem,
+|  M    DIV^T |
+|             |
+| DIV     C   |
+Returns the system in coo matrix format.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_lhs_divided">
+<code class="descname">build_lhs_divided</code><span class="sig-paren">(</span><em>alpha=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_lhs_divided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_lhs_divided" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the saddle point problem,
+|  M    DIV^T |
+|             |
+| DIV     C   |
+divided into the separate components.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_lhs_petsc">
+<code class="descname">build_lhs_petsc</code><span class="sig-paren">(</span><em>alpha=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_lhs_petsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_lhs_petsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Builds the entire saddle point problem,
+|  M    DIV^T |
+|             |
+| DIV     C   |
+Returns the system in coo matrix format.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_m">
+<code class="descname">build_m</code><span class="sig-paren">(</span><em>save_update_info=False</em>, <em>k_unity=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_m"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the global matrix M_x. This is
+done by first constructing local matrices
+M_E and constructing a coo matrix for
+the global matrix. This function avoids adding
+the neumann boundaries to the matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_m_e">
+<code class="descname">build_m_e</code><span class="sig-paren">(</span><em>cell_index</em>, <em>k_unity=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_m_e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_m_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the local stiffness matrix M_E.
+The construction is based on the relation:
+M_E = R_E (R_E^T N_E)^-1 R_E^T + C_E U C_E^T
+Matrix U is a parameter that can be chosen
+during construction. The options for setting
+parameter U are set using function
+set_m_e_construction_method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_m_full">
+<code class="descname">build_m_full</code><span class="sig-paren">(</span><em>save_update_info=False</em>, <em>k_unity=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_m_full"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_m_full" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the global matrix M_x. This is
+done by first constructing local matrices
+M_E and constructing a coo matrix for
+the global matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_m_parallel">
+<code class="descname">build_m_parallel</code><span class="sig-paren">(</span><em>save_update_info=False</em>, <em>k_unity=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_m_parallel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_m_parallel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the global matrix M_x. This is
+done by first constructing local matrices
+M_E and constructing a coo matrix for
+the global matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_n_e">
+<code class="descname">build_n_e</code><span class="sig-paren">(</span><em>cell_index</em>, <em>k_unity=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_n_e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_n_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build matrix N_E using the standard
+definition for the mimetic method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_r_e">
+<code class="descname">build_r_e</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_r_e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_r_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build matrix R_E for construction of
+local stiffness matrix M_E.
+The function defaults to using the
+real centroids of the cells and faces
+unless otherwise specified by functions
+is_using_face_shifted_centroid and
+is_using_cell_shifted_centroid.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_rhs">
+<code class="descname">build_rhs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_rhs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_rhs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build RHS for the saddle-point problem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_rhs_dirichlet">
+<code class="descname">build_rhs_dirichlet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_rhs_dirichlet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_rhs_dirichlet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the entries for the Dirichlet boundaries
+in the RHS.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_rhs_forcing">
+<code class="descname">build_rhs_forcing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_rhs_forcing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_rhs_forcing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the entries for the forcing
+function in the RHS.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_rhs_neumann">
+<code class="descname">build_rhs_neumann</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_rhs_neumann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_rhs_neumann" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the entries for the Neumann boundaries
+in the RHS.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.build_w_e">
+<code class="descname">build_w_e</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.build_w_e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.build_w_e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct matrix W_E from Brezzi et al.
+paper.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.cg_inner">
+<code class="descname">cg_inner</code><span class="sig-paren">(</span><em>apply_lhs</em>, <em>b</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.cg_inner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.cg_inner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Local implementation of CG algorithm.
+Code from example in wikipedia page on CG methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.compute_l2_error_pressure">
+<code class="descname">compute_l2_error_pressure</code><span class="sig-paren">(</span><em>p_function</em>, <em>quadrature_method=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.compute_l2_error_pressure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.compute_l2_error_pressure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the L2 error against a analytical solution p_function.
+The option quadrature_method specifies the way integral is
+approximated:
+0 =&gt; use the real cell centroid.
+1 =&gt; use the shifted cell centroid.
+2 =&gt; use quadrature points specified in mesh.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.compute_l2_error_velocity">
+<code class="descname">compute_l2_error_velocity</code><span class="sig-paren">(</span><em>grad_p</em>, <em>quadrature_method=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.compute_l2_error_velocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.compute_l2_error_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the L2 velocity error of the final
+solution relative to an analytical solution
+grad_p.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.compute_x_error_velocity">
+<code class="descname">compute_x_error_velocity</code><span class="sig-paren">(</span><em>grad_p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.compute_x_error_velocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.compute_x_error_velocity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the velocity error in the X norm
+||| grad_p^I - v_h |||_X</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_analytical_pressure_solution">
+<code class="descname">get_analytical_pressure_solution</code><span class="sig-paren">(</span><em>p_function</em>, <em>quadrature_method=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_analytical_pressure_solution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_analytical_pressure_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the average pressure over each cell computed
+by using the real centroid of the cell as quadrature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_analytical_velocity_solution">
+<code class="descname">get_analytical_velocity_solution</code><span class="sig-paren">(</span><em>grad_p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_analytical_velocity_solution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_analytical_velocity_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the average flux over each face computed
+by using the real centroid of the face as quadrature.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_cell_faces_neumann">
+<code class="descname">get_cell_faces_neumann</code><span class="sig-paren">(</span><em>cell_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_cell_faces_neumann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_cell_faces_neumann" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all the faces in cell_index that
+are also neumann faces.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_diagonality">
+<code class="descname">get_diagonality</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_diagonality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_diagonality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of cell diagonality indices.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_dirichlet_boundary_values">
+<code class="descname">get_dirichlet_boundary_values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_dirichlet_boundary_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_dirichlet_boundary_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all faces designated as
+Dirichlet boundaries and their values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_dirichlet_value">
+<code class="descname">get_dirichlet_value</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_dirichlet_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_dirichlet_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return pressure value at face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_flux_dof">
+<code class="descname">get_flux_dof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_flux_dof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_flux_dof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of flux
+degrees of freedom.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_neumann_boundary_values">
+<code class="descname">get_neumann_boundary_values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_neumann_boundary_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_neumann_boundary_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all faces designated as
+Neumann boundaries and their values.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_number_of_dirichlet_faces">
+<code class="descname">get_number_of_dirichlet_faces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_number_of_dirichlet_faces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_number_of_dirichlet_faces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of Dirichlet boundary faces.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_number_of_dof">
+<code class="descname">get_number_of_dof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_number_of_dof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_number_of_dof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns total number of degrees
+of freedom for the saddle-point system.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_pressure_dof">
+<code class="descname">get_pressure_dof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_pressure_dof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_pressure_dof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of pressure
+degrees of freedom.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_pressure_solution">
+<code class="descname">get_pressure_solution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_pressure_solution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_pressure_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the pressure solution for the problem. The
+pressures are indexed in the same order as the
+corresponding cell indices.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_total_dof">
+<code class="descname">get_total_dof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_total_dof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_total_dof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns number of total
+degrees of freedom.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_velocity_solution">
+<code class="descname">get_velocity_solution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_velocity_solution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_velocity_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the velocity solution for the problem. The
+fluxes are indexed in the same order as the
+corresponding face indices.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.get_velocity_solution_by_index">
+<code class="descname">get_velocity_solution_by_index</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.get_velocity_solution_by_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.get_velocity_solution_by_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the flux for face index by face_index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.is_neumann_face">
+<code class="descname">is_neumann_face</code><span class="sig-paren">(</span><em>face_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.is_neumann_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.is_neumann_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if face is a Neumann
+boundary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.l2_error_velocity_per_cell">
+<code class="descname">l2_error_velocity_per_cell</code><span class="sig-paren">(</span><em>grad_p</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.l2_error_velocity_per_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.l2_error_velocity_per_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a vector of length number of cells
+with the relative error of the velocity
+for each cell.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.lhs_rank">
+<code class="descname">lhs_rank</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.lhs_rank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.lhs_rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the rank of the saddle-point problem
+using the SVD.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.lhs_svd">
+<code class="descname">lhs_svd</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.lhs_svd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.lhs_svd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the singular values
+of the lhs matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.print_lhs_to_file">
+<code class="descname">print_lhs_to_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.print_lhs_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.print_lhs_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output entire LHS to file (dense format).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.print_lhs_to_ppm">
+<code class="descname">print_lhs_to_ppm</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.print_lhs_to_ppm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.print_lhs_to_ppm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output LHS to ppm image file type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.process_internal_boundaries">
+<code class="descname">process_internal_boundaries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.process_internal_boundaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.process_internal_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conducts appropriate processing needed
+to correctly incorporate internal boundary conditions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.proj_vector">
+<code class="descname">proj_vector</code><span class="sig-paren">(</span><em>vector_f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.proj_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.proj_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Projects vector onto face degrees of freedom
+that can be indexed locally from the cells.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.renumber_for_neumann">
+<code class="descname">renumber_for_neumann</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.renumber_for_neumann"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.renumber_for_neumann" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renumbers the neumann faces
+in order to remove them as degrees
+of freedom in final matrix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.reset_dirichlet_boundaries">
+<code class="descname">reset_dirichlet_boundaries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.reset_dirichlet_boundaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.reset_dirichlet_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets all Dirichlet bounday data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.reset_neumann_boundaries">
+<code class="descname">reset_neumann_boundaries</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.reset_neumann_boundaries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.reset_neumann_boundaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets all Neumann bounday data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.set_compute_diagonality">
+<code class="descname">set_compute_diagonality</code><span class="sig-paren">(</span><em>setting</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.set_compute_diagonality"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.set_compute_diagonality" title="Permalink to this definition">¶</a></dt>
+<dd><p>During matrix M_x construction, compute how
+diagonal the local stiffness matrices
+m_e. The equation is:</p>
+<p>||M_E - diag(diag(M_E)||_2/||M_E||_2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.set_m_e_construction_method">
+<code class="descname">set_m_e_construction_method</code><span class="sig-paren">(</span><em>method_index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.set_m_e_construction_method"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.set_m_e_construction_method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set construction method for the local matrices
+m_e. Method indices correspond to:</p>
+<p>0 =&gt; U = R^TR(R^TN)^-1</p>
+<p>1 =&gt; U = trace(k^(-1))|E|</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.set_mesh">
+<code class="descname">set_mesh</code><span class="sig-paren">(</span><em>mesh</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.set_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.set_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Links the MFD object to an instance of a Mesh class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.set_neumann_by_face">
+<code class="descname">set_neumann_by_face</code><span class="sig-paren">(</span><em>face_index</em>, <em>face_orientation</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.set_neumann_by_face"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.set_neumann_by_face" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directly sets Neumann value to face_index.
+The input <em>value</em> corresponding to the
+integral of the pressure over the face.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>initial_guess=0.0</em>, <em>solver='spsolve'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solves the full saddle points system after construction
+of the LHS and RHS of the problem. Returns the full
+solution vector.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.solve_divided">
+<code class="descname">solve_divided</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.solve_divided"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.solve_divided" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the divided system of equations using
+a Schur compliment method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.solve_petsc">
+<code class="descname">solve_petsc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.solve_petsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.solve_petsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solving using PETSc, this requires the
+use of build_lhs_petsc.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mimpy.mfd.mfd.MFD.update_m">
+<code class="descname">update_m</code><span class="sig-paren">(</span><em>m_coo</em>, <em>multipliers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mimpy/mfd/mfd.html#MFD.update_m"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mimpy.mfd.mfd.MFD.update_m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates matrix Mx using a list of constants
+that represent values multiplied by K.
+For this function to work, the
+save_update_info would have to be set
+to True while running build_m function.
+The MFD instance saves the original m_e
+matrices used to construct the full Mx
+matrix in coo format.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modelmodule.html" class="btn btn-neutral float-right" title="models">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="mfdmodule.html" class="btn btn-neutral" title="mfd"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

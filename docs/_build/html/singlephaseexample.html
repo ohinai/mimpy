@@ -1,0 +1,311 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Single-Phase Example Walk Through &mdash; mimpy 0.1.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic|Roboto+Slab:400,700|Inconsolata:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="mimpy 0.1.0 documentation" href="index.html"/>
+        <link rel="up" title="Single-Phase" href="singlephasesection.html"/>
+        <link rel="next" title="Code Overview" href="codeoverview.html"/>
+        <link rel="prev" title="Single-Phase Derivation" href="singlephase.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+          <a href="index.html" class="fa fa-home"> mimpy</a>
+        
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="singlephasesection.html">Single-Phase</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="singlephase.html">Single-Phase Derivation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Single-Phase Example Walk Through</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codeoverview.html">Code Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examplegallery.html">Model Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample1.html">Buckley-Leverett</a></li>
+<li class="toctree-l2"><a class="reference internal" href="twophaseexample2.html">SPE 10 Layer 85</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#types-of-contributions">Types of Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#get-started">Get Started!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#pull-request-guidelines">Pull Request Guidelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#tips">Tips</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Credits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Mimpy Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="meshmodule.html">mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mfdmodule.html">mfd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelmodule.html">models</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">mimpy</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="singlephasesection.html">Single-Phase</a> &raquo;</li>
+      
+    <li>Single-Phase Example Walk Through</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/singlephaseexample.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="single-phase-example-walk-through">
+<h1>Single-Phase Example Walk Through<a class="headerlink" href="#single-phase-example-walk-through" title="Permalink to this headline">¶</a></h1>
+<p>We&#8217;ll now take a walk-through example for solving the single-phase flow problem:</p>
+<div class="math">
+\[\begin{align}
+\phi \frac{\partial \rho}{\partial t} = \nabla \cdot \frac{\rho}{\mu}K \nabla p + f
+\end{align}\]</div>
+<p>We&#8217;ll first need a few import statements, starting
+with NumPy:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Next, we&#8217;ll need the following from Mimpy:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">mimpy.mesh.hexmesh</span> <span class="kn">as</span> <span class="nn">hexmesh</span>
+<span class="kn">import</span> <span class="nn">mimpy.models.singlephase.singlephase</span> <span class="kn">as</span> <span class="nn">singlephase</span>
+</pre></div>
+</div>
+<p>We just imported the <code class="xref py py-mod docutils literal"><span class="pre">mimpy.mesh.hexmesh</span></code> module so we can build a hexahedral mesh, and
+the <code class="xref py py-mod docutils literal"><span class="pre">mimpy.models.singlephase</span></code> module so that we can solve the single-phase flow problem.</p>
+<p>The first thing we&#8217;ll need to do is construct the mesh. We start by initiating
+a mesh object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_mesh</span> <span class="o">=</span> <span class="n">hexmesh</span><span class="o">.</span><span class="n">HexMesh</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This initiates an empty hexahderal mesh. Actual construction is done with the
+<em>build_mesh</em> routine. In this case,
+<a class="reference internal" href="hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.build_mesh" title="mimpy.mesh.hexmesh.HexMesh.build_mesh"><code class="xref py py-meth docutils literal"><span class="pre">mimpy.mesh.hexmesh.HexMesh.build_mesh()</span></code></a> takes 7 required parameters.
+The first three are the number of cells in each dimension (x, y, z).
+We want our mesh to be 10 x 10 x 10 cells. The next three entries are the dimensions of the domain
+(size of the domain) in (x, y, z). Note that Mimpy assumes SI units for all
+parameters. We&#8217;ll set our problem to 100m x 100m x 100m.
+The last parameter is <strong>K</strong>,  which is a function mapping location to a permeability
+tensor. We set a  constant permeability of 1.e-12m <span class="math">\(^2\)</span> by defining <strong>K</strong> as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">K</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">1.e-12</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>K</strong> takes in <em>p</em>, which is an ndarray coordinate, as well as an <em>(i, j, k)</em> cell index. It returns
+a 3 x 3 ndarray representing the permeability tensor.</p>
+<p>The build_mesh command looks like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_mesh</span><span class="o">.</span><span class="n">build_mesh</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We now have a rectangular 3D mesh we can use!</p>
+<p>We now start working on the model. First, we initate a
+single-phase object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span> <span class="o">=</span> <span class="n">singlephase</span><span class="o">.</span><span class="n">SinglePhase</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We next pass our mesh object to it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_mesh</span><span class="p">(</span><span class="n">res_mesh</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We now want to set parameters and boundary conditions for our model. The single-phase
+model allows for two kinds of boundary condition, flux and pressure boundaries.
+For this example we set zero
+pressure boundaries. In order to simplify boundary assigments, collections faces on the
+boundary of the mesh are identified by boundary markers. The HexMesh class assigns six boundary
+markers, and are associated with the six sides of the domain:</p>
+<div align="center" class="align-center"><img src="_images/hexboundary.svg" /></div>
+<p>For this example, we&#8217;ll set all six to a pressure of zero using the
+<a class="reference internal" href="singlephaseclass.html#mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function" title="mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function"><code class="xref py py-meth docutils literal"><span class="pre">mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function()</span></code></a> routine:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We next set standard parameters for single-phase flow. These include
+initial pressure, porosity, reference density, reference pressure,
+compressibility and viscosity:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_initial_pressure</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">res_mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()))</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_porosities</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">res_mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()))</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_ref_density</span><span class="p">(</span><span class="mf">1.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_ref_pressure</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_compressibility</span><span class="p">(</span><span class="mf">1.e-8</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_viscosity</span><span class="p">(</span><span class="mf">8.90e-4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Since we&#8217;ve set the boundaries and initial conditions to zero, running the simulator would
+be very boring. In order to get things moving around, we&#8217;re going to add two wells to the model.
+Wells are assigned to cells, and there are a few different ways of finding cell numbers.
+For this example, we use the <code class="xref py py-meth docutils literal"><span class="pre">mimpy.mesh.Mesh.find_cell_near_point()</span></code> routine in order to
+give us the cell index of the cell closest to a given coordinate:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">well_location1</span> <span class="o">=</span> <span class="n">res_mesh</span><span class="o">.</span><span class="n">find_cell_near_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">50.</span><span class="p">,</span> <span class="mf">75.</span><span class="p">,</span> <span class="mf">50.</span><span class="p">]))</span>
+<span class="n">well_location2</span> <span class="o">=</span> <span class="n">res_mesh</span><span class="o">.</span><span class="n">find_cell_near_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">50.</span><span class="p">,</span> <span class="mf">25.</span><span class="p">,</span> <span class="mf">50.</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>Using these cell indices, we can now set a rate specified well:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">add_point_rate_well</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">well_location1</span><span class="p">,</span> <span class="s">&quot;WELL1&quot;</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">add_point_rate_well</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="n">well_location2</span><span class="p">,</span> <span class="s">&quot;WELL2&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now all our model parameters have been set. The last part is to assign a time-step
+information:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_time_step_size</span><span class="p">(</span><span class="mf">100.</span><span class="p">)</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_number_of_time_steps</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>as well as output frequency:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">set_output_frequency</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, we tell it to initalize the system and start running:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">initialize_system</span><span class="p">()</span>
+<span class="n">res_singlephase</span><span class="o">.</span><span class="n">start_solving</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="codeoverview.html" class="btn btn-neutral float-right" title="Code Overview">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="singlephase.html" class="btn btn-neutral" title="Single-Phase Derivation"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, Omar Al-Hinai.
+    </p>
+  </div>
+
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

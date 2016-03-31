@@ -1,0 +1,68 @@
+Metadata-Version: 1.1
+Name: mimpy
+Version: 0.1.1
+Summary: Python implementation of the Mimetic Finite Difference method.
+Home-page: https://github.com/ohinai/mimpy
+Author: Omar Al-Hinai
+Author-email: ohinai@gmail.com
+License: BSD
+Description: =====
+        mimpy
+        =====
+        
+        .. image:: https://api.travis-ci.org/ohinai/mimpy.png?branch=master
+            :target: https://travis-ci.org/ohinai/mimpy
+        
+        Mimpy is a Python based library for solving
+        the diffusion equation. Mimpy uses the Mimetic Finite Difference 
+        method, which as the advantage of solving using general polyhedral elements. 
+        
+        Because diffusion is a "kernel" for many physical phenomena, 
+        mimpy can also solve problems like the heat equation and multi-phase flow
+        through porous media. 
+        
+        A simple example can be found in hexmesh_example_1.py_.
+        Run:
+        
+            .. code-block:: bash
+            
+                $ python hexmesh_example_1.py 
+        
+        Code requirements: 
+        
+        * NumPy 
+        * SciPy
+        * Cython (if you want to update the c code). 
+        
+        
+        
+        
+        
+        
+        History
+        -------
+        
+        0.1.1 (2016-3-31)
+        ---------------------
+        
+        * Updated README to better fit pypi page. 
+        * Added spe10 example
+        
+        
+        0.1.0 (2016-3-29)
+        ---------------------
+        
+        * Test release of code. 
+        
+Keywords: mimpy
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
