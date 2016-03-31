@@ -141,15 +141,99 @@ is the 85th layer of the SPE10 benchmark problem.</p>
 <tbody valign="top">
 <tr class="row-odd"><td><blockquote class="first">
 <div>Saturation</div></blockquote>
-<a class="last reference internal image-reference" href="../examples/twophase/SPE10_layer_85/saturation.png"><img alt="../examples/twophase/SPE10_layer_85/saturation.png" class="align-center" src="../examples/twophase/SPE10_layer_85/saturation.png" style="width: 300px;" /></a>
+<a class="last reference internal image-reference" href="_images/saturation.png"><img alt="_images/saturation.png" class="align-center" src="_images/saturation.png" style="width: 300px;" /></a>
 </td>
 <td><blockquote class="first">
 <div>Permeability</div></blockquote>
-<a class="last reference internal image-reference" href="../examples/twophase/SPE10_layer_85/permeability.png"><img alt="../examples/twophase/SPE10_layer_85/permeability.png" class="align-center" src="../examples/twophase/SPE10_layer_85/permeability.png" style="width: 300px;" /></a>
+<a class="last reference internal image-reference" href="_images/permeability.png"><img alt="_images/permeability.png" class="align-center" src="_images/permeability.png" style="width: 300px;" /></a>
 </td>
 </tr>
 </tbody>
 </table>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">mimpy.mesh.hexmesh</span> <span class="kn">as</span> <span class="nn">hexmesh</span>
+<span class="kn">import</span> <span class="nn">mimpy.models.twophase</span> <span class="kn">as</span> <span class="nn">twophase</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">res_k</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">res_mesh</span> <span class="o">=</span>  <span class="n">hexmesh</span><span class="o">.</span><span class="n">HexMesh</span><span class="p">()</span>
+
+<span class="n">permfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;spe_perm_layer85.dat&quot;</span><span class="p">)</span>
+
+<span class="n">res_mesh</span><span class="o">.</span><span class="n">build_mesh</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mf">670.</span><span class="p">,</span> <span class="o">.</span><span class="mi">6</span><span class="p">,</span> <span class="mf">365.</span><span class="p">,</span> <span class="n">res_k</span><span class="p">)</span>
+
+<span class="n">Kx</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">Ky</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">Kz</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">cell_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">res_mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()):</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">permfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+    <span class="n">Kx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">Ky</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Kz</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">current_k</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> 
+    <span class="n">current_k</span> <span class="o">*=</span> <span class="mf">1.e-12</span>
+    <span class="n">res_mesh</span><span class="o">.</span><span class="n">set_cell_k</span><span class="p">((</span><span class="n">cell_index</span><span class="o">%</span><span class="mi">60</span><span class="p">)</span><span class="o">*</span><span class="mi">50</span><span class="o">+</span><span class="n">cell_index</span><span class="o">/</span><span class="mi">60</span><span class="p">,</span> <span class="n">current_k</span><span class="p">)</span>
+
+<span class="n">res_mesh</span><span class="o">.</span><span class="n">output_vtk_mesh</span><span class="p">(</span><span class="s">&quot;spe_10_mesh&quot;</span><span class="p">,</span> 
+                         <span class="p">[</span><span class="n">res_mesh</span><span class="o">.</span><span class="n">get_all_k_entry</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
+                          <span class="n">res_mesh</span><span class="o">.</span><span class="n">get_all_k_entry</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> 
+                         <span class="p">[</span><span class="s">&quot;Kx&quot;</span><span class="p">,</span> <span class="s">&quot;Ky&quot;</span><span class="p">])</span>
+
+<span class="n">res_twophase</span> <span class="o">=</span> <span class="n">twophase</span><span class="o">.</span><span class="n">TwoPhase</span><span class="p">()</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_mesh</span><span class="p">(</span><span class="n">res_mesh</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">apply_flux_boundary_from_function</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]))</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">apply_flux_boundary_from_function</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]))</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">apply_flux_boundary_from_function</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]))</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">apply_flux_boundary_from_function</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]))</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">apply_flux_boundary_from_function</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]))</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">apply_flux_boundary_from_function</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="mf">0.</span><span class="p">]))</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_model_name</span><span class="p">(</span><span class="s">&quot;spe_10_&quot;</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_initial_p_o</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span><span class="o">*</span><span class="n">res_mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()))</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_initial_s_w</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span><span class="o">*</span><span class="n">res_mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()))</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_porosities</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">.</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">res_mesh</span><span class="o">.</span><span class="n">get_number_of_cells</span><span class="p">()))</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_viscosity_water</span><span class="p">(</span><span class="mf">8.90e-4</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_viscosity_oil</span><span class="p">(</span><span class="mf">8.90e-4</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_compressibility_water</span><span class="p">(</span><span class="mf">1.e-9</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_compressibility_oil</span><span class="p">(</span><span class="mf">1.e-9</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_ref_density_water</span><span class="p">(</span><span class="mf">1000.</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_ref_density_oil</span><span class="p">(</span><span class="mf">1000.</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_ref_pressure_oil</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_ref_pressure_water</span><span class="p">(</span><span class="mf">0.</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_residual_saturation_water</span><span class="p">(</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_residual_saturation_oil</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_corey_relperm</span><span class="p">(</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)</span>
+
+<span class="n">well_location1</span> <span class="o">=</span> <span class="n">res_mesh</span><span class="o">.</span><span class="n">find_cell_near_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">365.</span><span class="p">]))</span>
+<span class="n">well_location2</span> <span class="o">=</span> <span class="n">res_mesh</span><span class="o">.</span><span class="n">find_cell_near_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">670.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]))</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">add_rate_well</span><span class="p">(</span><span class="mf">1.e-1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">well_location1</span><span class="p">,</span> <span class="s">&quot;WELL1&quot;</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">add_pressure_well</span><span class="p">(</span><span class="mf">3000.</span><span class="p">,</span>  <span class="mf">1.e-13</span><span class="p">,</span> <span class="n">well_location2</span><span class="p">,</span> <span class="s">&quot;WELL2&quot;</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">initialize_system</span><span class="p">()</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_time_step_size</span><span class="p">(</span><span class="mf">3.e5</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_output_frequency</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_number_of_time_steps</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">set_saturation_substeps</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">res_twophase</span><span class="o">.</span><span class="n">start_solving</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 
 

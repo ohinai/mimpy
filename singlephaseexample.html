@@ -155,7 +155,7 @@ a mesh object:</p>
 </div>
 <p>This initiates an empty hexahderal mesh. Actual construction is done with the
 <em>build_mesh</em> routine. In this case,
-<code class="xref py py-meth docutils literal"><span class="pre">mimpy.mesh.hexmesh.HexMesh.build_mesh()</span></code> takes 7 required parameters.
+<a class="reference internal" href="hexmeshclass.html#mimpy.mesh.hexmesh.HexMesh.build_mesh" title="mimpy.mesh.hexmesh.HexMesh.build_mesh"><code class="xref py py-meth docutils literal"><span class="pre">mimpy.mesh.hexmesh.HexMesh.build_mesh()</span></code></a> takes 7 required parameters.
 The first three are the number of cells in each dimension (x, y, z).
 We want our mesh to be 10 x 10 x 10 cells. The next three entries are the dimensions of the domain
 (size of the domain) in (x, y, z). Note that Mimpy assumes SI units for all
@@ -190,7 +190,7 @@ boundary of the mesh are identified by boundary markers. The HexMesh class assig
 markers, and are associated with the six sides of the domain:</p>
 <div align="center" class="align-center"><img src="_images/hexboundary.svg" /></div>
 <p>For this example, we&#8217;ll set all six to a pressure of zero using the
-<code class="xref py py-meth docutils literal"><span class="pre">mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function()</span></code> routine:</p>
+<a class="reference internal" href="singlephaseclass.html#mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function" title="mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function"><code class="xref py py-meth docutils literal"><span class="pre">mimpy.models.singlephase.SinglePhase.apply_pressure_boundary_from_function()</span></code></a> routine:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
 <span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>
 <span class="n">res_singlephase</span><span class="o">.</span><span class="n">apply_pressure_boundary_from_function</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="mf">0.</span><span class="p">)</span>

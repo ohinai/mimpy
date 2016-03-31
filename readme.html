@@ -128,28 +128,24 @@
 <h1>mimpy<a class="headerlink" href="#mimpy" title="Permalink to this headline">¶</a></h1>
 <a class="reference external image-reference" href="https://travis-ci.org/ohinai/mimpy"><img alt="https://api.travis-ci.org/ohinai/mimpy.png?branch=master" src="https://api.travis-ci.org/ohinai/mimpy.png?branch=master" /></a>
 <p>Mimpy is a Python based library for solving
-the diffusion equation.</p>
-<img alt="diff_eq.gif" src="diff_eq.gif" />
+the diffusion equation. Mimpy uses the Mimetic Finite Difference
+method, which as the advantage of solving using general polyhedral elements.</p>
 <p>Because diffusion is a &#8220;kernel&#8221; for many physical phenomena,
 mimpy can also solve problems like the heat equation and multi-phase flow
 through porous media.</p>
-<p>The best way to get the code right now is to clone the git repo and run the setup utility:</p>
-<blockquote>
-<div><div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>git clone https://github.com/ohinai/mimpy.git
-<span class="nv">$ </span>python setup.py install
-</pre></div>
-</div>
-</div></blockquote>
-<p>A simple example can be found in <a class="reference external" href="https://github.com/ohinai/mimpy/blob/master/examples/hexmesh/example1/hexmesh_example_1.py">hexmesh_example_1.py</a>.
+<p>A simple example can be found in <a href="#id1"><span class="problematic" id="id2">hexmesh_example_1.py_</span></a>.
 Run:</p>
 <blockquote>
 <div><div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>python hexmesh_example_1.py
 </pre></div>
 </div>
 </div></blockquote>
-<p>If all goes well, you should get a file named (hexmesh_example_1.vtk). Open the file using
-Paraview and plot &#8220;MFDPressure.&#8221; You should see something like this:</p>
-<img alt="hexmesh_solution.png" src="hexmesh_solution.png" />
+<p>Code requirements:</p>
+<ul class="simple">
+<li>NumPy</li>
+<li>SciPy</li>
+<li>Cython (if you want to update the c code).</li>
+</ul>
 </div>
 
 
