@@ -502,6 +502,30 @@ class Mesh:
         f_to_c = [x for x in f_to_c if x >= 0]
         return f_to_c
 
+
+    # Sets the face shifted centroid to the intersection
+    # of the line joining the two face centroids and the
+    # face between them. Used for forcing a TPFA type
+    # method to the matrix.
+    def set_face_shifted_to_tpfa_all(self):
+        for face_index in range(len(self.faces)):
+            cells = self.get_face_to_cell(face_index)
+            if (len(cells)==2):
+                cent1 = self.get_cell_real_centroid(cells[0])
+                cent2 = self.get_cell_real_centroid(cells[1])
+                vector = cent2 - cent1
+                vector /= np.linalg.norm(vector)
+                
+                d = np.dot((self.get_face_real_centroid(face_index) - cent1),
+                           self.get_face_normal(face_index))
+                denom = np.dot(vector, self.get_face_normal(face_index))
+                d /= denom
+                intersection_point = d*vector+cent1
+                self.set_face_shifted_centroid(face_index, intersection_point)
+            else:
+                self.set_face_shifted_centroid(face_index,
+                                               self.get_face_real_centroid(face_index))
+            
     def is_line_seg_intersect_face(self, face_index, p1, p2):
         """ Returns True if the line segment
         intersects with a face.

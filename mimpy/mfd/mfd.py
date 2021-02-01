@@ -454,7 +454,21 @@ class MFD():
 
             diagonal = np.diag(diagonal)
             m_e += diagonal.dot(c_e.dot(c_e.T))
+        
+        ## Forces a diagonal for comparison with
+        ## TPFA type methods
+        elif self.m_e_construction_method == 7:
 
+            m_e = np.zeros((self.mesh.get_number_of_cell_faces(cell_index),
+                            self.mesh.get_number_of_cell_faces(cell_index)),
+                            dtype=np.dtype('d'))
+            count = 0
+            for face_index in self.mesh.get_cell(cell_index):
+                m_e[count, count] = np.linalg.norm(r_e[count, :])*self.mesh.get_face_area(face_index)/current_k[0, 0]
+                count+=1
+                
+            
+            
         if self.check_m_e:
             if np.linalg.norm(np.dot(m_e, n_e)-r_e) > 1.e-6:
                 print("M_E N ne R", np.linalg.norm(np.dot(m_e, n_e)-r_e))
