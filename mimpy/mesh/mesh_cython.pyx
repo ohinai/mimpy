@@ -1,3 +1,5 @@
+#!python
+#cython: language_level=3
 
 import numpy as np
 cimport cython 
@@ -162,7 +164,7 @@ def all_cell_volumes_centroids(int[:,:] cell_pointer,
                     local_index = index
 
             if local_index == -1:
-                print "error: Did not find local index during volume calculation"
+                print("error: Did not find local index during volume calculation")
             
             orientation = current_cell_orientation[local_index]
             if A==0:
@@ -188,7 +190,7 @@ def all_cell_volumes_centroids(int[:,:] cell_pointer,
                 if current_cell[index] == face_index:
                     local_index = index
             if local_index == -1:
-                print "error: Did not find local index during volume calculation"
+                print("error: Did not find local index during volume calculation")
             orientation = current_cell_orientation[local_index]
             if A==0:
                 cell_volume[cell_index_2] += current_normal[0]*Fa*orientation
