@@ -1,8 +1,7 @@
 import mimpy.mfd.mfd as mfd
 import numpy as np
-import scipy.sparse.linalg as linalg
 import scipy.sparse.linalg.dsolve as dsolve
-from scipy import diag, interpolate, sparse
+from scipy import sparse
 
 try:
     import sys

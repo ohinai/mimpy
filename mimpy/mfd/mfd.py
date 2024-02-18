@@ -1,14 +1,10 @@
 import array
-import copy
 import sys
-from multiprocessing import Pool
 
 import mimpy.mfd.mfd_cython as mfd_cython
 import numpy as np
 import scipy.sparse.linalg as linalg
-import scipy.sparse.linalg.dsolve as dsolve
-import six
-from scipy import diag, sparse
+from scipy import sparse
 
 try:
     import petsc4py

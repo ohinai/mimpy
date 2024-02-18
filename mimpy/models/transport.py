@@ -1,11 +1,6 @@
-import itertools
-import math as math
-import os
-from multiprocessing import Pool
-
 import numpy as np
 import scipy.sparse.linalg.dsolve as dsolve
-from scipy import diag, integrate, sparse, special
+from scipy import sparse
 
 
 class Transport:

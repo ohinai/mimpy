@@ -1,5 +1,4 @@
 import array
-import math
 
 import numpy as np
 from shapely.geometry import LineString, MultiPolygon, Polygon
