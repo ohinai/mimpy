@@ -1,15 +1,13 @@
-from __future__ import absolute_import
-
-import numpy as np
-import mimpy.mesh.mesh as mesh
 import mimpy.mesh.hexmesh_cython as hexmesh_cython
-from six.moves import range
+import mimpy.mesh.mesh as mesh
+import numpy as np
+
 
 class HexMesh(mesh.Mesh):
-    """ Class for constructing structured hexahedral meshes.
-    """
+    """Class for constructing structured hexahedral meshes."""
+
     def _nonplanar_face_normal(self, face_index):
-        """ Calculates an approximate normal for a
+        """Calculates an approximate normal for a
         face that might not planar.
 
         :param int face_index: index of face.
@@ -21,10 +19,10 @@ class HexMesh(mesh.Mesh):
         v2 = self.get_point(face[0]) - self.get_point(face[-1])
         normal = np.cross(v2, v1)
 
-        return normal/np.linalg.norm(normal)
+        return normal / np.linalg.norm(normal)
 
     def _nonplanar_face_centroid(self, face_index):
-        """ Calculates an approximate centroid for a
+        """Calculates an approximate centroid for a
         face that might not planar.
 
         :param int face_index: index of face.
@@ -37,36 +35,38 @@ class HexMesh(mesh.Mesh):
         p3 = self.get_point(face[2])
         p4 = self.get_point(face[3])
 
-        center_point = .25 * (p1 + p2 + p3 + p4)
+        center_point = 0.25 * (p1 + p2 + p3 + p4)
 
         return center_point
 
     def _nonplanar_cell_centroid(self, cell_index):
-        """ Calculates an approximate centroid for a
+        """Calculates an approximate centroid for a
         cell that may have nonplanar faces.
         """
         centroid = np.zeros(3)
-        count = 0.
+        count = 0.0
         for face in self.get_cell(cell_index):
             for point in self.get_face(face):
-                count += 1.
+                count += 1.0
                 centroid += self.get_point(point)
 
-        centroid = centroid/count
+        centroid = centroid / count
         return centroid
 
     def _populate_face_areas(self):
-        """ Finds all the faces areas and
+        """Finds all the faces areas and
         stores them the area array.
         """
-        hexmesh_cython.all_face_areas(self.faces.pointers,
-                                      len(self.faces),
-                                      self.faces.data,
-                                      self.points,
-                                      self.face_areas)
+        hexmesh_cython.all_face_areas(
+            self.faces.pointers,
+            len(self.faces),
+            self.faces.data,
+            self.points,
+            self.face_areas,
+        )
 
     def _populate_face_centroids(self):
-        """ Finds all the faces centroids and
+        """Finds all the faces centroids and
         stores them the area array.
         """
         for face_index in range(self.get_number_of_faces()):
@@ -74,17 +74,19 @@ class HexMesh(mesh.Mesh):
             self.set_face_real_centroid(face_index, current_centroid)
 
     def _populate_face_normals(self):
-        """ Finds all the faces normals and
+        """Finds all the faces normals and
         stores them the normals array.
         """
-        hexmesh_cython.all_face_normals(self.faces.pointers,
-                                        len(self.faces),
-                                        self.faces.data,
-                                        self.points,
-                                        self.face_normals)
+        hexmesh_cython.all_face_normals(
+            self.faces.pointers,
+            len(self.faces),
+            self.faces.data,
+            self.points,
+            self.face_normals,
+        )
 
     def _nonplanar_face_area(self, face_index):
-        """ Calculates an approximate area for a
+        """Calculates an approximate area for a
         face that might not planar.
 
         :param int face_index: index of face.
@@ -93,46 +95,46 @@ class HexMesh(mesh.Mesh):
         :rtype: float
         """
         face = self.get_face(face_index)
-        area = 0.
+        area = 0.0
         p1 = self.points[face[0]]
         p2 = self.points[face[1]]
         p3 = self.points[face[2]]
         p4 = self.points[face[3]]
 
-        center_point = .25 * (p1 + p2 + p3 + p4)
+        center_point = 0.25 * (p1 + p2 + p3 + p4)
 
-        a = np.linalg.norm(p1-p2)
-        b = np.linalg.norm(p2-center_point)
+        a = np.linalg.norm(p1 - p2)
+        b = np.linalg.norm(p2 - center_point)
         c = np.linalg.norm(center_point - p1)
-        s = (a + b + c)/2.
+        s = (a + b + c) / 2.0
 
-        area += np.sqrt(s*(s-a)*(s-b)*(s-c))
+        area += np.sqrt(s * (s - a) * (s - b) * (s - c))
 
-        a = np.linalg.norm(p2-p3)
-        b = np.linalg.norm(p3-center_point)
-        c = np.linalg.norm(center_point-p2)
-        s = (a + b + c)/2.
+        a = np.linalg.norm(p2 - p3)
+        b = np.linalg.norm(p3 - center_point)
+        c = np.linalg.norm(center_point - p2)
+        s = (a + b + c) / 2.0
 
-        area += np.sqrt(s*(s-a)*(s-b)*(s-c))
+        area += np.sqrt(s * (s - a) * (s - b) * (s - c))
 
-        a = np.linalg.norm(p3-p4)
-        b = np.linalg.norm(p4-center_point)
+        a = np.linalg.norm(p3 - p4)
+        b = np.linalg.norm(p4 - center_point)
         c = np.linalg.norm(center_point - p3)
-        s = (a + b + c)/2.
+        s = (a + b + c) / 2.0
 
-        area += np.sqrt(s*(s-a)*(s-b)*(s-c))
+        area += np.sqrt(s * (s - a) * (s - b) * (s - c))
 
-        a = np.linalg.norm(p4-p1)
-        b = np.linalg.norm(p1-center_point)
+        a = np.linalg.norm(p4 - p1)
+        b = np.linalg.norm(p1 - center_point)
         c = np.linalg.norm(center_point - p4)
-        s = (a + b + c)/2.
+        s = (a + b + c) / 2.0
 
-        area += np.sqrt(s*(s-a)*(s-b)*(s-c))
+        area += np.sqrt(s * (s - a) * (s - b) * (s - c))
 
         return area
 
     def get_dim_x(self):
-        """ Return the dimension of the domain
+        """Return the dimension of the domain
         in the X direction.
 
         :return: Domain x dimension.
@@ -141,7 +143,7 @@ class HexMesh(mesh.Mesh):
         return self.dim_x
 
     def get_dim_y(self):
-        """ Return the dimension of the domain
+        """Return the dimension of the domain
         in the Y direction.
 
         :return: Domain y dimension.
@@ -150,7 +152,7 @@ class HexMesh(mesh.Mesh):
         return self.dim_y
 
     def get_dim_z(self):
-        """ Return the dimension of the domain
+        """Return the dimension of the domain
         in the Z direction.
 
         :return: Domain z dimension.
@@ -159,7 +161,7 @@ class HexMesh(mesh.Mesh):
         return self.dim_z
 
     def _build_faces(self, ni, nj, nk):
-        """ Function to build the mesh faces.
+        """Function to build the mesh faces.
 
         :param int ni: Number of faces in the x-direction.
         :param int nj: Number of faces in the y-direction.
@@ -174,11 +176,13 @@ class HexMesh(mesh.Mesh):
         for k in range(nk):
             for j in range(nj):
                 for i in range(ni):
-                    if i < ni-1 and j < nj-1:
-                        new_face = [self.ijk_to_index(i, j, k),
-                                    self.ijk_to_index(i+1, j, k),
-                                    self.ijk_to_index(i+1, j+1, k),
-                                    self.ijk_to_index(i, j+1, k)]
+                    if i < ni - 1 and j < nj - 1:
+                        new_face = [
+                            self.ijk_to_index(i, j, k),
+                            self.ijk_to_index(i + 1, j, k),
+                            self.ijk_to_index(i + 1, j + 1, k),
+                            self.ijk_to_index(i, j + 1, k),
+                        ]
 
                         face_index = self.add_face(new_face)
 
@@ -186,16 +190,18 @@ class HexMesh(mesh.Mesh):
                         if k == 0:
                             self.add_boundary_face(4, face_index, -1)
 
-                        if k == nk-1:
+                        if k == nk - 1:
                             self.add_boundary_face(5, face_index, 1)
 
                         count += 1
 
-                    if k < nk-1 and i < ni-1:
-                        new_face = [self.ijk_to_index(i, j, k),
-                                    self.ijk_to_index(i, j, k+1),
-                                    self.ijk_to_index(i+1, j, k+1),
-                                    self.ijk_to_index(i+1, j, k)]
+                    if k < nk - 1 and i < ni - 1:
+                        new_face = [
+                            self.ijk_to_index(i, j, k),
+                            self.ijk_to_index(i, j, k + 1),
+                            self.ijk_to_index(i + 1, j, k + 1),
+                            self.ijk_to_index(i + 1, j, k),
+                        ]
 
                         face_index = self.add_face(new_face)
 
@@ -209,11 +215,13 @@ class HexMesh(mesh.Mesh):
 
                         count += 1
 
-                    if j < nj-1 and k < nk-1:
-                        new_face = [self.ijk_to_index(i, j, k),
-                                    self.ijk_to_index(i, j+1, k),
-                                    self.ijk_to_index(i, j+1, k+1),
-                                    self.ijk_to_index(i, j, k+1)]
+                    if j < nj - 1 and k < nk - 1:
+                        new_face = [
+                            self.ijk_to_index(i, j, k),
+                            self.ijk_to_index(i, j + 1, k),
+                            self.ijk_to_index(i, j + 1, k + 1),
+                            self.ijk_to_index(i, j, k + 1),
+                        ]
 
                         face_index = self.add_face(new_face)
 
@@ -234,27 +242,25 @@ class HexMesh(mesh.Mesh):
         return polygon_ijka_to_index
 
     def ijk_to_index(self, i, j, k):
-        """ Returns point index number for an i, j, k numbering.
+        """Returns point index number for an i, j, k numbering.
 
         :param int i: index in x-direction.
         :param int j: index in y-direction.
         :param int k: index in z-direction.
         """
-        return i+self.ni*j+self.ni*self.nj*k
+        return i + self.ni * j + self.ni * self.nj * k
 
     def ijk_to_cell_index(self, i, j, k):
-        """ Returns cell index number for an i, j, k numbering.
+        """Returns cell index number for an i, j, k numbering.
 
         :param int i: index in x-direction.
         :param int j: index in y-direction.
         :param int k: index in z-direction.
         """
-        return i+(self.ni-1)*j+(self.ni-1)*(self.nj-1)*k
-
+        return i + (self.ni - 1) * j + (self.ni - 1) * (self.nj - 1) * k
 
     def __init__(self):
-        """ Initialize hexmesh.
-        """
+        """Initialize hexmesh."""
         mesh.Mesh.__init__(self)
         self.dim_x = 0.0
         self.dim_y = 0.0
@@ -266,10 +272,10 @@ class HexMesh(mesh.Mesh):
 
         self.cell_to_ijk = {}
 
-    def build_mesh(self, ni, nj, nk,
-                   dim_x, dim_y, dim_z, K, 
-                   modification_function = None):
-        """ Constructs a structured hexahedral mesh.
+    def build_mesh(
+        self, ni, nj, nk, dim_x, dim_y, dim_z, K, modification_function=None
+    ):
+        """Constructs a structured hexahedral mesh.
 
         :param int ni: Number of cells in the x-direction.
         :param int nj: Number of cells in the y-direction.
@@ -297,47 +303,59 @@ class HexMesh(mesh.Mesh):
         self.nj = nj
         self.nk = nk
 
-        dx = self.dim_x/float(ni-1.)
-        dy = self.dim_y/float(nj-1.)
-        dz = self.dim_z/float(nk-1.)
+        dx = self.dim_x / float(ni - 1.0)
+        dy = self.dim_y / float(nj - 1.0)
+        dz = self.dim_z / float(nk - 1.0)
 
-        self.set_boundary_markers([0, 1, 2, 3, 4, 5],
-                                  ['BottomX', 'TopX',
-                                   'BottomY', 'TopY',
-                                   "BottomZ,", "TopZ",])
+        self.set_boundary_markers(
+            [0, 1, 2, 3, 4, 5],
+            [
+                "BottomX",
+                "TopX",
+                "BottomY",
+                "TopY",
+                "BottomZ,",
+                "TopZ",
+            ],
+        )
 
         ## adding points:
         if modification_function == None:
             for k in range(nk):
                 for j in range(nj):
                     for i in range(ni):
-                        self.add_point(np.array([float(i)*dx,
-                                                 float(j)*dy,
-                                                 float(k)*dz]))
+                        self.add_point(
+                            np.array([float(i) * dx, float(j) * dy, float(k) * dz])
+                        )
         else:
             for k in range(nk):
                 for j in range(nj):
                     for i in range(ni):
-                        self.add_point(modification_function(
-                                np.array([float(i)*dx,
-                                          float(j)*dy,
-                                          float(k)*dz]), i, j, k))
+                        self.add_point(
+                            modification_function(
+                                np.array([float(i) * dx, float(j) * dy, float(k) * dz]),
+                                i,
+                                j,
+                                k,
+                            )
+                        )
 
         polygon_ijka_to_index = self._build_faces(ni, nj, nk)
 
-	### adding cells:
-        for k in range(nk-1):
-            for j in range(nj-1):
-                for i in range(ni-1):
-                    new_cell = [polygon_ijka_to_index[(i, j, k, 0)],
-                                polygon_ijka_to_index[(i, j, k, 1)],
-                                polygon_ijka_to_index[(i, j, k, 2)],
-                                polygon_ijka_to_index[(i+1, j, k, 2)],
-                                polygon_ijka_to_index[(i, j+1, k, 1)],
-                                polygon_ijka_to_index[(i, j, k+1, 0)]]
+        ### adding cells:
+        for k in range(nk - 1):
+            for j in range(nj - 1):
+                for i in range(ni - 1):
+                    new_cell = [
+                        polygon_ijka_to_index[(i, j, k, 0)],
+                        polygon_ijka_to_index[(i, j, k, 1)],
+                        polygon_ijka_to_index[(i, j, k, 2)],
+                        polygon_ijka_to_index[(i + 1, j, k, 2)],
+                        polygon_ijka_to_index[(i, j + 1, k, 1)],
+                        polygon_ijka_to_index[(i, j, k + 1, 0)],
+                    ]
 
-                    cell_index = self.add_cell(new_cell,
-                                               [-1, -1, -1, 1, 1, 1])
+                    cell_index = self.add_cell(new_cell, [-1, -1, -1, 1, 1, 1])
 
                     self.cell_to_ijk[cell_index] = (i, j, k)
 
@@ -348,5 +366,3 @@ class HexMesh(mesh.Mesh):
             k_e = K(np.array([cx, cy, cz]), i, j, k)
 
             self.set_cell_k(cell_index, k_e)
-
-

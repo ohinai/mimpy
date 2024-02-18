@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 test_mimpy
@@ -7,7 +6,7 @@ test_mimpy
 
 Tests for `mimpy` module.
 """
-from __future__ import absolute_import
+
 
 import unittest
 
@@ -15,7 +14,6 @@ import mimpy
 
 
 class TestMimpy(unittest.TestCase):
-
     def setUp(self):
         pass
 
@@ -25,5 +23,6 @@ class TestMimpy(unittest.TestCase):
     def tearDown(self):
         pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
